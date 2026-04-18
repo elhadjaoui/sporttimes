@@ -1,0 +1,97 @@
+The Idea in One Paragraph
+A mobile-first app that replaces the chaos of WhatsApp groups, Discord channels, and "just show up" culture for amateur sports coordination. Instead of text threads where messages get buried, users see upcoming matches as interactive visual football fields — showing exactly who's playing, in what position, and how the lineup is filling up in real time. Everything happens inside Communities (called Squads in some screens): campus groups, city groups, workplace teams, friend groups. The product is built for Morocco first (Casablanca, campus-based launch), Gen-Z and millennial amateur athletes, with football as the anchor sport and basketball/handball as secondary.
+
+Core Concept: How It Works
+The user flow is three layers stacked on top of each other:
+Layer 1 — Communities (Squads): You join one or more communities. A community is a container. Examples: "The Campus," "Casablanca Sports," "Engineering School," a company's internal group. Communities are either Public (one-tap join) or Private (admin approval required, marked with a red "Private 🔒" badge).
+Layer 2 — Matches: Inside each community, members create matches. Matches come in two flavors: Team vs Team (two organized teams face off, shown with a yellow "VS" badge between two lineups) and Random Matches (pickup games where individual players fill slots on a single field).
+Layer 3 — The Visual Lineup: This is the hero feature. Every match displays as a football pitch in 3D perspective with player avatars positioned in formation (4-3-3, 4-4-2, etc.). You see who's in, who's pending, and which slots are empty — before committing. You tap "Join Match," the captain approves, your avatar appears on the field.
+Secondary features: tournaments, teams (persistent squads within a community), player profiles with feedback scores, invites, and notifications.
+
+Design System
+Colors:
+
+Background: Deep black (#000 / near-black) across every screen
+Primary accent: Neon yellow-green (approximately #D4FF3A / lime-yellow) — used for the main CTA buttons ("Publish," "Join Match," "Invite Members," "Create Community," "Accept" highlights), the active calendar day, the "+" floating action button, and the "VS" badge between teams
+Secondary accent: Subtle green-yellow on labels (Location, Time, Group, Match Format field headers)
+Text: White for primary, muted gray for secondary/inactive states
+Status colors: Red-tinted badge for "Private," green for "Public," green rating star (4.5 ★)
+Emoji reaction colors on feedback: green background bars with emoji icons (😍 Teamwork, 😁 Attitude, 😌 Attendance, 😠 Technical)
+
+Typography: Bold condensed display font for page titles in ALL CAPS ("DISCOVER MATCHES," "MY COMMUNITIES," "MATCH DETAILS," "NOTIFICATIONS") — gives a sports-broadcast, FIFA-adjacent feel. Body text is clean sans-serif.
+Component language: Rounded cards (≈16–20px radius) on dark gray fills, pill-shaped toggles and tabs, floating yellow circular "+" button in the bottom-right corner across most screens, bottom tab bar with Home / Community / Profile and the "+" hovering on the right.
+Lineup rendering: Football field drawn with white outlines (goals, penalty boxes, center circle), aerial 3D-perspective angle, circular player avatars with the player's first name underneath, empty positions shown as gray placeholder circles with a generic silhouette. A "19/22" counter in yellow shows how full the match is.
+
+Page-by-Page Breakdown
+1. Discover Matches (Home Feed) — Images 9, 18
+The landing screen. Top: sport filter pills (Football active, Basketball, Handball, more scrollable). Below: horizontal calendar strip showing 7 days with today highlighted in yellow (TUE 7). Two stacked sections: TEAM VS TEAM and RANDOM MATCHES, each horizontally scrollable. Each match card shows the match title ("Sunday match"), the community badge ("Stars United Group" in yellow), format (11/11), time (18:30), location (East Field), and a mini lineup preview on the right side of the card.
+2. Create Sheet (Bottom Modal) — Image 9 (bottom), 1
+Tapping the "+" button raises a bottom sheet offering two tiles: Create Match and Create Community. In image 1, a variant shows Random Match vs Team vs Team as the match-type chooser — two field thumbnails side by side, the Team vs Team version with the yellow "VS" badge.
+3. Create Random Match — Image 27
+Page title "RANDOM MATCH" with a yellow "Publish" button top-right. Fields: Community selector (dropdown pill with "m/" prefix), Match title, Match field location, Match time, Additional notes (large textarea), and Match format selector showing four visual field thumbnails (5v5, 7v7 selected in yellow outline, 9v9, 11v11).
+4. Create Team vs Team Match — Image 24
+Same pattern as Random Match but with extra fields: Select team dropdown in addition to community. Same match format selector at the bottom.
+5. Match Published Confirmation — Image 2
+Full-screen confirmation. Yellow "Congrats!" label, bold "MATCH PUBLISHED" heading, a stylized outline of a football pitch in the center, and a full-width yellow "Invite Members" button at the bottom.
+6. Match Details (Public View) — Image 23
+Title "MATCH DETAILS" with a Share button. Organizer card at top showing Arthur Migel's avatar, name, and credibility badge "24 Match Hosted." Below, a 2×2 grid of info cards (Location, Time, Group, Match Format) with yellow labels and white values. "Additional notes" paragraph. A white pill toggle between OPONENT and MY TEAM. The full lineup displayed on a 3D field. Bottom: full-width yellow "Join Match ➜" button.
+7. Match Details (Organizer View) — Image 26
+Same layout as the public view but with an extra "Requests" button with a red notification dot beside the "Players 19/22" counter. The field shows filled slots plus two gray empty placeholder avatars marked with "...".
+8. Match Requests (Full List) — Image 16
+Page title "MATCH REQUESTS" with "Players 19/22" counter top-right. List of pending player requests — each card shows avatar, name (Arthur Migel), "12 Match played ★4.5," and Decline/Accept buttons.
+9. Match Request (Detail Sheet) — Image 22
+Slide-up sheet showing the applying player's full profile: avatar, name, overall rating (4.5 ★ based on 34 reviews), stats grid (Organized Matches 28, Played Matches 34, Joined Community 05, Joined Teams 07), and four emoji-based feedback bars (Teamwork 90%, Attitude 80%, Attendance 75%, Technical 30%). Bottom: Decline (black) and Accept (white) buttons.
+10. Share Match Lineup — Image 7
+Full lineup rendered on the field (all 11 slots filled, avatars labeled "Thiago" as placeholder). Social share icons in a row (Instagram, TikTok, X, More). Full-width yellow "Save to gallery" button. This is the "Instagram-ready" moment the pitch relies on.
+11. Communities Overview (Discover) — Image 32
+Page split in two sections: MY COMMUNITIES (horizontal scroll of joined communities, each card showing name, location, and +34 member avatar pile) and DISCOVER MORE COMMUNITIES (horizontal scroll of joinable communities, private ones marked with a red "Private 🔒" badge, "Pending..." shown on private requests awaiting approval). Search bar + filter icon at the top.
+12. My Communities (Full List) — Image 15
+Dedicated page "MY COMMUNITIES" with a vertical list of all joined communities. Each card shows name (e.g., "THE CAMPUS GROUP"), location ("Casablanca, Av Hassan II"), member avatar pile with "+34" overflow indicator, and a status badge (Private/Public with Joined state in yellow).
+13. Communities with Map Filter — Image 19
+Variant of the community discovery page showing a Location field and Radius (25 Km) selector, with a live map preview of Casablanca/Tit Mellil area. Community cards below filtered by geographic proximity.
+14. Create Community — Image 3
+Page title "NEW COMMUNITY" with yellow "Create Community" button top-right. Fields: Community name, Description textarea, and a live preview card "Community Overview" showing how the community will appear to others (m/thecampuscommunity, "4 Visitors and 2 contributions per week").
+15. Community Settings (Step 2 / Team Type) — Image 6
+Title "CREATE TEAM" (note: typo "CRAETE" in the mockup). Community type selector with two radio-button cards: Public Group (globe icon, "Anyone can find and join") and Private Group (lock icon, "Users must request to join and be approved by admins"). Location picker and auto-suggestion toggle below. Yellow "Next" button top-right.
+16. Edit Community — Image 20
+Same structure as create but with existing values and an "Edit cover" button on the banner. All fields editable. Bottom: full-width yellow "Update" button.
+17. Community Created Confirmation — Image 5
+Full-screen success state. Yellow "Congrats!" label, "COMMUNITY CREATED" heading, a generic three-person group silhouette icon in the center, full-width yellow "Invite Members" button.
+18. Community Detail — Matches Tab — Image 14
+Header with community icon, name ("m/The Campus"), and a "Leave" button. Three-tab pill: MATCHES (active) / MEMBERS / ABOUT. Vertical list of match cards with the signature format + time + location + mini lineup thumbnail layout.
+19. Community Detail — Members Tab — Image 30, 35
+Tab pill with MEMBERS active. "Members (32)" header with yellow "Invite Members" button. List of member cards: avatar, name, role ("Match Organizer"), match count ("4 Matches"), admin badge if applicable, and a "⋮" menu. Image 35 shows a version with a REQUESTS tab with a red notification dot (admin view).
+20. Community Detail — Requests Tab — Image 28
+Admin-only tab. Title "Community join requests" above a list of applicants, each with Decline/Accept buttons. Same card pattern as match requests.
+21. Community Detail — About Tab — Image 21
+"About Community" header with the Private badge. Creation date ("Created Dec,02,24"). Description paragraph. Three info pills below: Members count (32/64), location (North Campus Field), Match Played. Collapsible "Community Rules" section.
+22. Invite / Share Panel — Image 34
+Appears as a slide-up sheet from the community page. Shows the members list with a "Sharing Match Link" section at the bottom containing a copyable URL (meetup.com/football-enthusiasts-...).
+23. My Teams — Image 25
+Title "MT TEAMS" (typo — should be "MY TEAMS") with a yellow "Create team" button. List of team cards. Each shows team name ("Lightning Strikers"), location, member pile (+34), and a role badge: Admin (yellow) with "Manage team" button, Captain (white) with "View team," or Player (white) with "View team."
+24. Team Detail — Image 17
+Team page with name ("Lightning Strikers"), stats (Played Matches 34, Team Players 14), and the full lineup on a 3D field with the team's 11 starters plus an empty slot with a "+" icon to add a player. Bottom: yellow "Invite Members" button.
+25. Create New Team — Image 31
+Title "CREATE NEW TEAM" with yellow "Publish" button. Fields: Team logo upload, Team name, Add players multi-select, Team format picker (5v5 / 7v7 selected / 9v9 / 11v11 with field thumbnails). Bottom: full-width yellow "Invite Members" button.
+26. Profile (Top) — Image 12
+User banner with subtle green glow behind avatar. Name (Arthur Migel), member-since date. Stats grid (Organized Matches 28, Played Matches 34, Joined Community 05, Joined Teams 07). Below, the start of activity sections.
+27. Profile (Scrolled) — Image 11
+Continuation showing Football Activity section (My Matches, My Communities, My Teams — each as a navigation row with chevron), Social & Participation (Feedbacks, Invites), and Account & Preferences (Settings).
+28. Feedbacks Page — Image 29
+Page title "FEEDBACKS" with Share button. User card with overall rating (4.5 ★ based on 34 reviews). Four emoji-topped bars: Teamwork 90%, Attitude 80%, Attendance 75%, Technical 30% — all on bright green backgrounds.
+29. Player Profile (Shareable) — Image 8
+Similar to Feedbacks but packaged for sharing: avatar banner, rating, stats grid, feedback bars, and social icons (Instagram, TikTok, X, More) with a yellow "Save to gallery" button.
+30. My Matches — Image 13
+Page title with two-tab toggle: COMING MATCHES (active, white pill) and PAST MATCHES. List of match cards using the standard format (title, community, 11/11, time, location, mini lineup).
+31. Invites — Image 33
+Three-tab pill: MATCHES (active) / COMMUNITIES / TEAMS. Each invite card shows the inviting community, format/time/location, and "Invited by David Chen" line, with Decline/Accept buttons.
+32. Notifications — Image 4
+Page title "NOTIFICATIONS" with X close button. Vertical list of notification cards covering match invites, join approvals, admin alerts (with inline Decline/Accept), feedback, cancellations, app updates, and player-joined events ("Karim joined your match (9/10 players)").
+33. Settings — Image 10
+Profile card at top with "Edit Profile" button. Rows for Email, Email Notifications (Manage), Privacy Policy (Manage), Exit account (Log out), and a red-tinted Delete Account row with a red "Delete" button.
+34. Bottom Navigation — persistent across most screens
+Three icons — Home, Community, Profile — with the bold yellow "+" circular FAB floating to the right. Active tab shown in white, inactive in muted gray.
+
+The Visual Lineup — The One Thing That Matters
+Almost every screen is a wrapper around the lineup. The core asset is:
+A dark football pitch rendered in slight 3D perspective, white field lines (goals top and bottom, center circle, penalty boxes), circular player avatars (real photos, not generic icons) placed in formation positions with the player's first name in white underneath. Empty slots are gray circles with a generic person silhouette. A counter in yellow — "19/22" — shows fill status. For Team vs Team, two half-fields stack vertically with a yellow "VS" badge between them. The lineup appears in miniature on cards in the feed and full-size on match detail, team detail, and share screens. It's the same asset at three sizes, which is smart — it's the product's visual DNA.

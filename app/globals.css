@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #050505;
+  --ink: #F5F5F0;
+  --muted: rgba(245, 245, 240, 0.6);
+  --lime: #D4FF3A;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  overflow-x: hidden;
+  font-family: var(--font-body), Inter, system-ui, sans-serif;
+}
+
+/* Lenis smooth scroll classes */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Display headline base */
+.headline-display {
+  font-family: var(--font-display), Anton, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+}
+
+/* Mono eyebrow base */
+.mono-eyebrow {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 11px;
+  color: var(--lime);
+}
+
+@media (min-width: 768px) {
+  .mono-eyebrow {
+    font-size: 12px;
+  }
+}
+
+/* Mask reveal helper — used for line-by-line GSAP reveals */
+.mask-line {
+  display: block;
+  overflow: hidden;
+  line-height: 0.9;
+}
+
+.mask-line > span {
+  display: block;
+  will-change: transform;
+}
+
+/* 12-column grid utility */
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 24px;
+  width: 100%;
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+@media (max-width: 767px) {
+  .grid-12 {
+    column-gap: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* Section wrapper */
+.section-pad {
+  padding-top: clamp(8rem, 14vh, 12rem);
+  padding-bottom: clamp(8rem, 14vh, 12rem);
+}
+
+/* Reduce motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
