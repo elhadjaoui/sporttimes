@@ -75,3 +75,41 @@ h1, h2, h3 {
   justify-content: center;
   padding: 40px;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section {
+    padding: 80px 20px;
+  }
+
+  .horizontal-panel {
+    padding: 60px 20px;
+  }
+
+  /* Simplify horizontal scroll on mobile - stack vertically */
+  .horizontal-scroll-container {
+    height: auto;
+  }
+
+  .horizontal-scroll-track {
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+  }
+
+  .horizontal-panel {
+    width: 100%;
+    height: auto;
+    min-height: 80vh;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+  }
+}
