@@ -12,9 +12,10 @@ Pre-launch landing page for SportTimes — a mobile-first app that replaces What
 
 ## Target Audience
 
-- Gen-Z and millennial amateur athletes in Morocco (Casablanca first)
-- Football players frustrated with WhatsApp group coordination
-- Campus sports communities
+- Gen-Z and millennial amateur athletes
+- Players of football, basketball, volleyball, and other team sports
+- Frustrated with WhatsApp group coordination
+- Campus and local sports communities
 
 ---
 
@@ -62,8 +63,9 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 **Elements:**
 - Logo: "SPORTTIMES" in bold condensed type, neon yellow-green
 - Headline: "STOP TEXTING. START PLAYING." (suggested copy — can be refined)
-- Subheadline: "See who's in before you commit. Visual lineups for amateur football." (suggested copy)
-- Hero Illustration: Animated 3D isometric pitch with glowing player orbs
+- Subheadline: "See who's in before you commit." (suggested copy)
+- Sport selector: Animated pills cycling through "Football" / "Basketball" / "Volleyball" / "..."
+- Hero Illustration: Animated 3D isometric field/court with glowing player orbs + animated ball for each sport
 - CTAs:
   - App Store "Coming Soon" badge
   - Play Store "Coming Soon" badge
@@ -71,7 +73,10 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 
 **Animations:**
 - Player orbs glow/pulse
-- Subtle floating motion on pitch
+- Subtle floating motion on field/court
+- Ball animation per sport (football bouncing, basketball spinning, volleyball rotating)
+- Sport selector auto-cycles with field/ball morphing between sports
+- Lineup positions shift to match each sport's formation
 - Scroll indicator bounces
 
 ---
@@ -86,7 +91,6 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 1. "The WhatsApp Chaos" — tangled message bubbles, notification overload
 2. "Who's Actually Playing?" — question marks, ghosted messages
 3. "Last-Minute Dropouts" — player silhouettes fading out
-4. "No One Knows the Plan" — scattered people, no formation
 
 **Visual style:**
 - Dark cards with red/orange accent tints (problem = negative energy)
@@ -106,13 +110,13 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 - Left/Top: Large 3D isometric pitch with glowing player positions
 - Right/Bottom:
   - "19/22" counter (animated)
-  - Formation display (4-3-3)
   - "Your spot is waiting" text
 
 **Animations:**
 - Players appear one by one
 - Orbs glow as they fill positions
 - Counter increments in sync
+- Ball animation (bouncing/spinning)
 
 ---
 
@@ -123,10 +127,10 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 **Scroll behavior:** Vertical scroll triggers horizontal movement
 
 **Steps:**
-1. "Join a Community" — glowing group icon, location pin (Casablanca/Campus)
-2. "Find a Match" — calendar with highlighted date, field icons
-3. "See Who's In" — 3D pitch filling with player orbs
-4. "Show Up & Play" — football in motion, energy lines
+1. "Join a Community" — glowing group icon, location pin
+2. "Create a Match" — sport selector (football, basketball, volleyball), calendar with date
+3. "See Who's In" — 3D field/court filling with player orbs + animated ball
+4. "Show Up & Play" — ball in motion, energy lines, players celebrating
 
 **Visual style:**
 - Number badges (01, 02, 03, 04) in neon yellow-green
@@ -140,11 +144,11 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 **Layout:** Full viewport, 2x3 grid (responsive: stacks on mobile)
 
 **Features:**
-1. **Visual Lineups** — See the formation in real-time
-2. **Communities** — Campus groups, city squads, friend circles
-3. **Match Types** — Team vs Team or pickup games
-4. **Player Profiles** — Stats, feedback, reputation
-5. **Notifications** — Never miss a match invite
+1. **Multi-Sport** — Football, basketball, volleyball, and more
+2. **Visual Lineups** — See who's in before you commit
+3. **Communities** — Campus groups, city squads, friend circles
+4. **Match Types** — Open (random players) or Versus (team vs team)
+5. **Player Feedback** — Rate teammates on teamwork, attitude, attendance, skill
 6. **Share to Social** — Instagram-ready lineup graphics
 
 **Visual style:**
@@ -159,8 +163,8 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 **Layout:** Full viewport, centered content
 
 **Elements:**
-- Headline: "COMING SOON TO MOROCCO"
-- Subheadline: "Casablanca first. Your city next."
+- Headline: "COMING SOON"
+- Subheadline: "Get ready to play."
 - App Store badge (outlined/greyed with "Coming Soon" overlay)
 - Play Store badge (outlined/greyed with "Coming Soon" overlay)
 - Social links:
@@ -180,12 +184,13 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 
 - Horizontal scroll sections (2 & 4) triggered by vertical scroll
 - Use scroll-snapping for section boundaries
-- Libraries to consider: GSAP ScrollTrigger, Locomotive Scroll, or native CSS scroll-snap
+- Libraries: **Framer Motion** + **GSAP ScrollTrigger** (use whichever suits each animation best)
 
 ### Animations
 
+- **Framer Motion** for React-based layout and component animations
+- **GSAP ScrollTrigger** for scroll-driven horizontal sections and complex timelines
 - CSS animations for simple effects (pulse, glow)
-- JavaScript/GSAP for scroll-triggered animations
 - Optimize for performance (will-change, GPU acceleration)
 
 ### Responsive Design
@@ -198,7 +203,9 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 
 - SVG illustrations for each section (or CSS/canvas-based)
 - Glowing orb/player components (reusable)
-- 3D isometric pitch illustration (SVG or CSS)
+- 3D isometric field/court illustrations for each sport (football pitch, basketball court, volleyball court)
+- Animated ball assets per sport (football, basketball, volleyball)
+- Sport selector pills/icons
 - App store badge assets
 - Social icons (Instagram, TikTok)
 
