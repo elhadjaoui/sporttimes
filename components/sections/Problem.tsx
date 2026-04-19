@@ -115,7 +115,9 @@ export default function Problem() {
     <section
       ref={rootRef}
       id="problem"
-      className="relative min-h-screen w-full overflow-hidden"
+      data-progress-section
+      data-progress-label="02 · The Problem"
+      className="relative min-h-[115vh] w-full overflow-hidden"
       style={{
         // Subtle warm-red wash over the whole section to shift the mood
         // from "neutral dark" (Hero) to "frustrated dark" (Problem) — still
@@ -124,8 +126,9 @@ export default function Problem() {
           'radial-gradient(ellipse at 25% 40%, rgba(255, 107, 107, 0.045) 0%, rgba(255, 107, 107, 0) 60%), #050505',
       }}
     >
-      {/* Chat-bubble chaos on the LEFT — reversed vs hero for rhythm */}
-      <div className="absolute inset-y-0 left-0 w-full md:w-[55%] z-0">
+      {/* Chat-bubble chaos on the LEFT — cleaner 50/50 split so the text
+          column isn't encroached on by the chat area. */}
+      <div className="absolute inset-y-0 left-0 w-full md:w-[50%] z-0">
         <ChatChaos />
       </div>
 
@@ -165,11 +168,11 @@ export default function Problem() {
         </div>
       </div>
 
-      {/* Foreground — text on the RIGHT */}
-      <div className="relative z-20 min-h-screen grid-12 pointer-events-none">
-        <div className="col-span-12 md:col-start-7 md:col-span-6 min-h-screen flex flex-col justify-center pt-24 pb-24 pointer-events-auto">
+      {/* Foreground — text on the RIGHT. Wider column + more pad */}
+      <div className="relative z-20 min-h-[115vh] grid-12 pointer-events-none">
+        <div className="col-span-12 md:col-start-7 md:col-span-6 min-h-[115vh] flex flex-col justify-center pt-36 pb-36 pointer-events-auto">
           <div
-            className="problem-fade mono-eyebrow mb-5 md:mb-7 group inline-flex items-center gap-3 cursor-default"
+            className="problem-fade mono-eyebrow mb-8 md:mb-10 group inline-flex items-center gap-3 cursor-default"
             data-cursor="hover"
           >
             <span className="font-mono text-lime">01</span>
@@ -179,7 +182,7 @@ export default function Problem() {
             </span>
           </div>
 
-          <h2 className="headline-display uppercase text-ink text-[clamp(2.25rem,5vw,4.5rem)] mb-7 md:mb-9">
+          <h2 className="headline-display uppercase text-ink text-[clamp(2.5rem,5.4vw,5rem)] mb-10 md:mb-14 leading-[0.95]">
             {HEADLINE.map((line, i) => (
               <span
                 key={i}
@@ -197,15 +200,15 @@ export default function Problem() {
             ))}
           </h2>
 
-          <p className="problem-fade font-body text-ink/65 text-base md:text-lg leading-snug max-w-[46ch] mb-7">
+          <p className="problem-fade font-body text-ink/70 text-base md:text-lg leading-relaxed max-w-[52ch] mb-12">
             Every week, the same chaos. Forty-seven unread messages,
             half-confirmed players, last-minute drops. Nobody knows who&apos;s
             actually showing up until everyone shows up. Sometimes half the
             team doesn&apos;t.
           </p>
 
-          {/* Meta strip — mimics the hero&apos;s live-preview data row */}
-          <div className="problem-fade flex flex-wrap items-center gap-x-8 gap-y-2 font-mono text-[10px] tracking-[0.25em] uppercase text-ink/45">
+          {/* Meta strip — larger type, wider gaps, own row rhythm */}
+          <div className="problem-fade flex flex-wrap items-center gap-x-10 gap-y-3 font-mono text-[11px] tracking-[0.25em] uppercase text-ink/50">
             <span>
               <span className="text-ink/30">Messages</span>{' '}
               <span className="text-ink">47 unread</span>

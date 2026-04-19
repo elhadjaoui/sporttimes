@@ -3,11 +3,13 @@
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import MagneticButton from '@/components/ui/MagneticButton';
 import ChapterMarker from '@/components/ui/ChapterMarker';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 import CornerBrackets from '@/components/ui/CornerBrackets';
 import { getLenis } from '@/hooks/useLenis';
+import { scrollState } from '@/lib/scrollState';
 
 const HeroScene = dynamic(() => import('@/components/three/HeroScene'), {
   ssr: false,
@@ -36,6 +38,7 @@ export default function Hero() {
 
   useEffect(() => {
     if (!rootRef.current) return;
+    gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.set('.hero-line .line-inner', { yPercent: 100 });
       gsap.set('.hero-fade', { opacity: 0, y: 16 });
@@ -46,18 +49,30 @@ export default function Hero() {
         duration: 0.9,
         ease: 'expo.out',
         stagger: 0.08,
-      })
-        .to(
-          '.hero-fade',
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.7,
-            ease: 'power3.out',
-            stagger: 0.08,
-          },
-          '-=0.5'
-        );
+      }).to(
+        '.hero-fade',
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: 'power3.out',
+          stagger: 0.08,
+        },
+        '-=0.5'
+      );
+
+      // Scroll-scrubbed camera dolly + FOV crunch + pitch level-out.
+      // As the hero scrolls off screen, the camera descends from aerial
+      // to player-eye level with a telephoto FOV compression.
+      ScrollTrigger.create({
+        trigger: rootRef.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1,
+        onUpdate: (self) => {
+          scrollState.heroProgress = self.progress;
+        },
+      });
     }, rootRef);
 
     return () => ctx.revert();
@@ -160,6 +175,8 @@ export default function Hero() {
     <section
       ref={rootRef}
       id="top"
+      data-progress-section
+      data-progress-label="01 · Welcome"
       className="relative h-screen w-full overflow-hidden"
     >
       {/* 3D scene contained to the right half — no full-bleed bleed-everywhere */}
@@ -195,7 +212,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className="headline-display uppercase text-ink text-[clamp(2.25rem,5vw,4.5rem)] mb-7 md:mb-9">
+          <h1 className="hero-headline headline-display uppercase text-ink text-[clamp(2.25rem,5vw,4.5rem)] mb-7 md:mb-9">
             {HEADLINE.map((line, i) => (
               <span
                 key={i}

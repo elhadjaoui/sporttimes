@@ -6,6 +6,7 @@ import LenisProvider from '@/components/ui/LenisProvider';
 import Preloader from '@/components/ui/Preloader';
 import Nav from '@/components/ui/Nav';
 import CustomCursor from '@/components/ui/CustomCursor';
+import ProgressScrubber from '@/components/ui/ProgressScrubber';
 
 const display = Inter({
   subsets: ['latin'],
@@ -52,6 +53,7 @@ export default function RootLayout({
         <LenisProvider>
           <Preloader />
           <Nav />
+          <ProgressScrubber />
           {children}
         </LenisProvider>
         <GrainOverlay />
