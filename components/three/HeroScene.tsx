@@ -1,8 +1,9 @@
 'use client';
 
 import { Canvas, useFrame, ThreeEvent } from '@react-three/fiber';
-import { Suspense, useMemo, useRef, useState } from 'react';
+import { Suspense, useMemo, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
+import PitchWireframe from './PitchWireframe';
 
 // 8v8 layout. 2-3-2 formation per side. GK + 2 DEF + 3 MID + 2 FWD = 8.
 // Pitch coords: x = -8..+8 (width), z = -12..+12 (depth).
@@ -22,102 +23,6 @@ const AWAY_FORMATION: Array<[number, number]> = [
   [4.8, 1.5], [0, 2], [-4.8, 1.5],       // MID
   [3.2, -5], [-3.2, -5],                 // FWD
 ];
-
-function PitchWireframe() {
-  const W = 8;
-  const D = 12;
-
-  const lines = useMemo(() => {
-    const arr: number[] = [];
-    const y = 0.001;
-    // Outer rectangle
-    arr.push(-W, y, -D, W, y, -D);
-    arr.push(W, y, -D, W, y, D);
-    arr.push(W, y, D, -W, y, D);
-    arr.push(-W, y, D, -W, y, -D);
-    // Halfway
-    arr.push(-W, y, 0, W, y, 0);
-    // Penalty boxes
-    arr.push(-3.8, y, -D, -3.8, y, -D + 3.5);
-    arr.push(3.8, y, -D, 3.8, y, -D + 3.5);
-    arr.push(-3.8, y, -D + 3.5, 3.8, y, -D + 3.5);
-    arr.push(-3.8, y, D, -3.8, y, D - 3.5);
-    arr.push(3.8, y, D, 3.8, y, D - 3.5);
-    arr.push(-3.8, y, D - 3.5, 3.8, y, D - 3.5);
-    // 6-yard
-    arr.push(-1.8, y, -D, -1.8, y, -D + 1.4);
-    arr.push(1.8, y, -D, 1.8, y, -D + 1.4);
-    arr.push(-1.8, y, -D + 1.4, 1.8, y, -D + 1.4);
-    arr.push(-1.8, y, D, -1.8, y, D - 1.4);
-    arr.push(1.8, y, D, 1.8, y, D - 1.4);
-    arr.push(-1.8, y, D - 1.4, 1.8, y, D - 1.4);
-    return new Float32Array(arr);
-  }, []);
-
-  return (
-    <group>
-      <lineSegments>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[lines, 3]}
-            count={lines.length / 3}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="#F5F5F0" transparent opacity={0.32} />
-      </lineSegments>
-
-      {/* Center circle */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
-        <ringGeometry args={[2.6, 2.66, 96]} />
-        <meshBasicMaterial color="#F5F5F0" transparent opacity={0.32} />
-      </mesh>
-
-      {/* Center spot */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.003, 0]}>
-        <circleGeometry args={[0.1, 16]} />
-        <meshBasicMaterial color="#F5F5F0" opacity={0.5} transparent />
-      </mesh>
-
-      {/* Penalty arcs (D) — half-circles with chord exactly on the penalty
-          box edge, bulging toward midfield. */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, -8.5]}>
-        {/* Home end: bulge toward +z */}
-        <ringGeometry args={[1.45, 1.5, 48, 1, Math.PI, Math.PI]} />
-        <meshBasicMaterial color="#F5F5F0" transparent opacity={0.32} side={THREE.DoubleSide} />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 8.5]}>
-        {/* Away end: bulge toward -z */}
-        <ringGeometry args={[1.45, 1.5, 48, 1, 0, Math.PI]} />
-        <meshBasicMaterial color="#F5F5F0" transparent opacity={0.32} side={THREE.DoubleSide} />
-      </mesh>
-
-      {/* Goals as small wire rectangles outside the ends */}
-      <lineSegments position={[0, 0.001, 0]}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[
-              new Float32Array([
-                -1.6, 0, -D, 1.6, 0, -D,
-                -1.6, 0, -D - 0.9, 1.6, 0, -D - 0.9,
-                -1.6, 0, -D, -1.6, 0, -D - 0.9,
-                1.6, 0, -D, 1.6, 0, -D - 0.9,
-                -1.6, 0, D, 1.6, 0, D,
-                -1.6, 0, D + 0.9, 1.6, 0, D + 0.9,
-                -1.6, 0, D, -1.6, 0, D + 0.9,
-                1.6, 0, D, 1.6, 0, D + 0.9,
-              ]),
-              3,
-            ]}
-            count={16}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="#F5F5F0" transparent opacity={0.4} />
-      </lineSegments>
-    </group>
-  );
-}
 
 function PlayerDot({
   pos,
@@ -284,25 +189,25 @@ function BackgroundGrid() {
   );
 }
 
-function CameraRig() {
-  const mx = useRef(0);
-  const my = useRef(0);
+function TiltScene({ children }: { children: ReactNode }) {
+  // Cursor-driven perspective tilt on the whole pitch/scene.
+  // Max ~5° on each axis, eased. Camera stays fixed.
+  const groupRef = useRef<THREE.Group>(null);
+  const rx = useRef(0);
+  const rz = useRef(0);
 
-  useFrame(({ camera, pointer }) => {
-    mx.current += (pointer.x - mx.current) * 0.18;
-    my.current += (pointer.y - my.current) * 0.18;
-
-    // Pulled back further so the pitch reads a bit smaller in the canvas.
-    const baseX = 0;
-    const baseY = 14.5;
-    const baseZ = 20;
-
-    camera.position.x = baseX + mx.current * 2;
-    camera.position.y = baseY + -my.current * 1;
-    camera.position.z = baseZ;
-    camera.lookAt(mx.current * 0.8, 0.5 + my.current * 0.4, 0);
+  useFrame(({ pointer }) => {
+    const targetX = -pointer.y * 0.09; // ~5° forward/back
+    const targetZ = -pointer.x * 0.09; // ~5° left/right
+    rx.current += (targetX - rx.current) * 0.08;
+    rz.current += (targetZ - rz.current) * 0.08;
+    if (groupRef.current) {
+      groupRef.current.rotation.x = rx.current;
+      groupRef.current.rotation.z = rz.current;
+    }
   });
-  return null;
+
+  return <group ref={groupRef}>{children}</group>;
 }
 
 
@@ -318,15 +223,15 @@ export default function HeroScene() {
       <fog attach="fog" args={['#050505', 22, 60]} />
 
       <Suspense fallback={null}>
-        <BackgroundGrid />
-        <PitchWireframe />
-        {/* Home team — 8 interactive dots, hover/click */}
-        {HOME_FORMATION.map((p, i) => (
-          <PlayerDot key={`home-${i}`} pos={p} index={i} />
-        ))}
+        <TiltScene>
+          <BackgroundGrid />
+          <PitchWireframe />
+          {/* Home team — 8 interactive dots, hover/click */}
+          {HOME_FORMATION.map((p, i) => (
+            <PlayerDot key={`home-${i}`} pos={p} index={i} />
+          ))}
+        </TiltScene>
       </Suspense>
-
-      <CameraRig />
     </Canvas>
   );
 }

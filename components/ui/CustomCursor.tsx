@@ -47,17 +47,26 @@ export default function CustomCursor() {
     };
     raf = requestAnimationFrame(tick);
 
-    // Hover state on interactive elements
+    // Hover state on interactive elements. [data-cursor="blend"] gets
+    // a stronger difference-blend spotlight (for display headlines).
     const onOver = (e: MouseEvent) => {
       const t = e.target as HTMLElement | null;
-      if (!t) return;
-      const interactive = t.closest('a, button, [data-cursor="hover"]');
-      if (interactive) {
-        ringRef.current?.classList.add('is-hover');
-        dotRef.current?.classList.add('is-hover');
-      } else {
-        ringRef.current?.classList.remove('is-hover');
-        dotRef.current?.classList.remove('is-hover');
+      const ring = ringRef.current;
+      const dot = dotRef.current;
+      if (!t || !ring || !dot) return;
+
+      const blend = t.closest('[data-cursor="blend"]');
+      const hover = t.closest('a, button, [data-cursor="hover"]');
+
+      ring.classList.remove('is-hover', 'is-blend');
+      dot.classList.remove('is-hover', 'is-blend');
+
+      if (blend) {
+        ring.classList.add('is-blend');
+        dot.classList.add('is-blend');
+      } else if (hover) {
+        ring.classList.add('is-hover');
+        dot.classList.add('is-hover');
       }
     };
 
@@ -92,6 +101,7 @@ export default function CustomCursor() {
         .has-custom-cursor * {
           cursor: none !important;
         }
+        /* Standard interactive hover — slim lime ring */
         .cursor-ring.is-hover,
         .cursor-3d-hover .cursor-ring {
           width: 56px;
@@ -101,6 +111,18 @@ export default function CustomCursor() {
         }
         .cursor-dot.is-hover,
         .cursor-3d-hover .cursor-dot {
+          opacity: 0;
+        }
+        /* Strong blend-difference spotlight — filled near-white disc that
+           inverts everything underneath it. Triggered via
+           data-cursor="blend" on targets (e.g. display headlines). */
+        .cursor-ring.is-blend {
+          width: 72px;
+          height: 72px;
+          border: 0;
+          background: rgba(245, 245, 240, 0.95);
+        }
+        .cursor-dot.is-blend {
           opacity: 0;
         }
       `}</style>

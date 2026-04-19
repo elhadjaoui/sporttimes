@@ -57,13 +57,11 @@ html.lenis body {
   line-height: 0.92;
 }
 
-/* Per-letter hover — only the specific letter under the cursor turns lime. */
+/* Headline letters — proximity hover is driven by JS (see Hero.tsx).
+   Only the initial display and transitions-on-leave live here. */
 .line-hover .letter {
   display: inline-block;
-  transition: color 0.18s ease-out;
-}
-.line-hover .letter:hover {
-  color: var(--lime);
+  will-change: color, transform;
 }
 
 /* Mono eyebrow base */

@@ -46,6 +46,8 @@ export default function Preloader() {
         setHidden(true);
         document.documentElement.style.overflow = '';
         getLenis()?.start();
+        // Notify the app that the curtain is open so scenes can fade in.
+        window.dispatchEvent(new CustomEvent('preloader-done'));
       },
     });
 
