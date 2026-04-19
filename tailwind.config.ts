@@ -20,7 +20,7 @@ const config: Config = {
         navy: '#050A1F',
       },
       fontFamily: {
-        display: ['var(--font-display)', 'Anton', 'sans-serif'],
+        display: ['var(--font-display)', 'Inter', 'system-ui', 'sans-serif'],
         body: ['var(--font-body)', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
       },

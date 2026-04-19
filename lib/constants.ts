@@ -16,13 +16,48 @@ export const COLORS = {
 } as const;
 
 export const CHAPTERS = [
-  { num: '01', name: 'THE PROBLEM', anchor: 'problem' },
-  { num: '02', name: 'HOW IT WORKS', anchor: 'how' },
-  { num: '03', name: 'FOOTBALL', anchor: 'football' },
-  { num: '04', name: 'BASKETBALL', anchor: 'basketball' },
-  { num: '05', name: 'HANDBALL', anchor: 'handball' },
-  { num: '06', name: "WHAT'S COMING", anchor: 'roadmap' },
-  { num: '07', name: 'DOWNLOAD', anchor: 'download' },
+  {
+    num: '01',
+    name: 'THE PROBLEM',
+    anchor: 'problem',
+    tagline: 'Group chats weren’t built for this.',
+  },
+  {
+    num: '02',
+    name: 'HOW IT WORKS',
+    anchor: 'how',
+    tagline: 'Three steps. No more guesswork.',
+  },
+  {
+    num: '03',
+    name: 'FOOTBALL',
+    anchor: 'football',
+    tagline: 'Eleven. Seven. Five. The beautiful game.',
+  },
+  {
+    num: '04',
+    name: 'BASKETBALL',
+    anchor: 'basketball',
+    tagline: 'Hold the court. Run it back.',
+  },
+  {
+    num: '05',
+    name: 'HANDBALL',
+    anchor: 'handball',
+    tagline: 'Seven a side. Fast. Physical. Organized.',
+  },
+  {
+    num: '06',
+    name: "WHAT'S COMING",
+    anchor: 'roadmap',
+    tagline: 'Tournaments. Rankings. Sponsored leagues.',
+  },
+  {
+    num: '07',
+    name: 'DOWNLOAD',
+    anchor: 'download',
+    tagline: 'iOS and Android. Pre-launch.',
+  },
 ] as const;
 
 export const SOCIAL = {

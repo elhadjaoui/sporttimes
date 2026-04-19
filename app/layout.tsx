@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
-import { Anton, Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import GrainOverlay from '@/components/ui/GrainOverlay';
 import LenisProvider from '@/components/ui/LenisProvider';
 import Preloader from '@/components/ui/Preloader';
 import Nav from '@/components/ui/Nav';
+import CustomCursor from '@/components/ui/CustomCursor';
 
-const display = Anton({
+const display = Inter({
   subsets: ['latin'],
-  weight: '400',
+  weight: ['800', '900'],
   variable: '--font-display',
   display: 'swap',
 });
@@ -54,6 +55,7 @@ export default function RootLayout({
           {children}
         </LenisProvider>
         <GrainOverlay />
+        <CustomCursor />
       </body>
     </html>
   );

@@ -49,13 +49,21 @@ html.lenis body {
   pointer-events: none;
 }
 
-/* Display headline base */
+/* Display headline base — Inter 900, modern geometric sans */
 .headline-display {
-  font-family: var(--font-display), Anton, sans-serif;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-  line-height: 0.9;
+  font-family: var(--font-display), 'Inter', system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+}
+
+/* Per-letter hover — only the specific letter under the cursor turns lime. */
+.line-hover .letter {
+  display: inline-block;
+  transition: color 0.18s ease-out;
+}
+.line-hover .letter:hover {
+  color: var(--lime);
 }
 
 /* Mono eyebrow base */
