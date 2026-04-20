@@ -259,10 +259,10 @@ export default function HeroScene() {
   return (
     <Canvas
       dpr={[1, 2]}
-      gl={{ antialias: true, alpha: false }}
+      gl={{ antialias: true, alpha: true }}
       camera={{ position: [0, 14.5, 20], fov: 38, near: 0.1, far: 200 }}
       className="!absolute inset-0"
-      style={{ background: '#050505' }}
+      style={{ background: 'transparent' }}
     >
       <fog attach="fog" args={['#050505', 22, 60]} />
 

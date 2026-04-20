@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import CornerBrackets from '@/components/ui/CornerBrackets';
-import AmbientBackground from '@/components/ui/AmbientBackground';
 
 // ===================================================================
 //  Data
@@ -300,16 +299,10 @@ function SportChapter({ sport, index }: { sport: Sport; index: number }) {
   return (
     <div
       ref={rootRef}
+      data-palette={sport.id}
       className="sport-chapter relative w-full"
-      style={{
-        minHeight: '92vh',
-        background: '#050505',
-      }}
+      style={{ minHeight: '92vh' }}
     >
-      {/* Per-sport ambient glow */}
-      <div className="absolute inset-0 z-[5] pointer-events-none">
-        <AmbientBackground tone={sport.tone} density={0.8} />
-      </div>
 
       <div className="relative z-[10] grid-12 h-[92vh] items-center">
         {/* TEXT column */}
@@ -481,10 +474,7 @@ export default function Sports() {
       className="relative w-full"
     >
       {/* Section header */}
-      <div
-        className="relative z-[5] grid-12 py-[18vh]"
-        style={{ background: '#050505' }}
-      >
+      <div className="relative z-[5] grid-12 py-[18vh]">
         <div className="col-span-12 md:col-start-2 md:col-span-10">
           <div className="mono-eyebrow mb-5">[ Chapter 03 · Three Sports ]</div>
           <h2

@@ -17,8 +17,8 @@ export default function Page() {
         id="roadmap"
         data-progress-section
         data-progress-label="05 · Roadmap"
+        data-palette="roadmap"
         className="relative min-h-screen w-full grid-12 section-pad"
-        style={{ background: '#050505' }}
       >
         <div className="col-span-12 md:col-start-2 md:col-span-10">
           <div className="mono-eyebrow mb-6">[ Next up · Section 05 ]</div>

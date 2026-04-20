@@ -7,6 +7,7 @@ import Preloader from '@/components/ui/Preloader';
 import Nav from '@/components/ui/Nav';
 import CustomCursor from '@/components/ui/CustomCursor';
 import ProgressScrubber from '@/components/ui/ProgressScrubber';
+import AmbientLayer from '@/components/ui/AmbientLayer';
 
 const display = Inter({
   subsets: ['latin'],
@@ -50,6 +51,7 @@ export default function RootLayout({
       className={`${display.variable} ${body.variable} ${mono.variable}`}
     >
       <body className="bg-bg text-ink antialiased">
+        <AmbientLayer />
         <LenisProvider>
           <Preloader />
           <Nav />

@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { gsap } from 'gsap';
-import AmbientBackground from '@/components/ui/AmbientBackground';
 
 // ===================================================================
 //  Data
@@ -1259,12 +1258,10 @@ export default function HowItWorks() {
       id="how"
       data-progress-section
       data-progress-label="03 · How It Works"
+      data-palette="how"
       className="relative w-full"
-      style={{ minHeight: '220vh', background: '#050505' }}
+      style={{ minHeight: '220vh' }}
     >
-      {/* Ambient lime drifting blobs behind everything */}
-      <AmbientBackground tone="lime" />
-
       <div className="grid-12 pt-[18vh] relative z-10">
         <div className="col-span-12 md:col-start-2 md:col-span-10">
           <div className="mono-eyebrow mb-5">

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import CornerBrackets from '@/components/ui/CornerBrackets';
-import AmbientBackground from '@/components/ui/AmbientBackground';
 
 // ===================================================================
 //  Data
@@ -442,18 +441,14 @@ export default function Problem() {
       id="problem"
       data-progress-section
       data-progress-label="02 · The Problem"
+      data-palette="problem"
       className="relative w-full"
       style={{ height: '350vh' }}
     >
       <div
         ref={pinRef}
         className="relative w-full h-screen overflow-hidden"
-        style={{ background: '#050505' }}
       >
-        {/* Ambient red cursor-follow */}
-        <div className="absolute inset-0 z-[15] pointer-events-none">
-          <AmbientBackground tone="red" />
-        </div>
 
         {/* Chat column — left side, dims across beats */}
         <div

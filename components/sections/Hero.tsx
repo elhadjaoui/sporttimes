@@ -8,7 +8,6 @@ import MagneticButton from '@/components/ui/MagneticButton';
 import ChapterMarker from '@/components/ui/ChapterMarker';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 import CornerBrackets from '@/components/ui/CornerBrackets';
-import AmbientBackground from '@/components/ui/AmbientBackground';
 import { getLenis } from '@/hooks/useLenis';
 import { scrollState } from '@/lib/scrollState';
 
@@ -178,6 +177,7 @@ export default function Hero() {
       id="top"
       data-progress-section
       data-progress-label="01 · Welcome"
+      data-palette="hero"
       className="relative h-screen w-full overflow-hidden"
     >
       {/* 3D scene — left edge softly masked so the pitch dissolves
@@ -204,12 +204,6 @@ export default function Hero() {
               'radial-gradient(ellipse at 50% 55%, rgba(5,5,5,0) 0%, rgba(5,5,5,0.25) 75%, rgba(5,5,5,0.6) 100%)',
           }}
         />
-      </div>
-
-      {/* Ambient cursor-follow glow — rendered ABOVE the canvas via
-          mix-blend-mode: screen so the lime tint lands on the pitch too. */}
-      <div className="absolute inset-0 z-[15] pointer-events-none">
-        <AmbientBackground tone="lime" />
       </div>
 
       {/* Foreground content — clean left stack, nothing on the right.
