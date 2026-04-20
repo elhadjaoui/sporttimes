@@ -8,7 +8,4 @@ export const scrollState = {
   heroProgress: 0,
   /** 0 → 1 for the whole page. */
   pageProgress: 0,
-  /** 0 → 1 across the pinned How-It-Works section's scroll distance.
-   *  Drives the single-pitch camera fly-through across 3 beats. */
-  howProgress: 0,
 };

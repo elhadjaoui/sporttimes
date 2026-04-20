@@ -8,6 +8,7 @@ import MagneticButton from '@/components/ui/MagneticButton';
 import ChapterMarker from '@/components/ui/ChapterMarker';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 import CornerBrackets from '@/components/ui/CornerBrackets';
+import AmbientBackground from '@/components/ui/AmbientBackground';
 import { getLenis } from '@/hooks/useLenis';
 import { scrollState } from '@/lib/scrollState';
 
@@ -179,22 +180,36 @@ export default function Hero() {
       data-progress-label="01 · Welcome"
       className="relative h-screen w-full overflow-hidden"
     >
-      {/* 3D scene contained to the right half — no full-bleed bleed-everywhere */}
+      {/* 3D scene — left edge softly masked so the pitch dissolves
+          into the section bg instead of meeting it at a hard boundary. */}
       <div
         ref={sceneRef}
         className="absolute inset-y-0 right-0 w-full md:w-[55%] z-0"
+        style={{
+          WebkitMaskImage:
+            'linear-gradient(to right, transparent 0%, black 14%, black 90%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%)',
+          maskImage:
+            'linear-gradient(to right, transparent 0%, black 14%, black 90%, transparent 100%), linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%)',
+          WebkitMaskComposite: 'source-in',
+          maskComposite: 'intersect',
+        }}
       >
         <HeroScene />
-        {/* Soft left edge-fade so the pitch dissolves into black where it
-            meets the text column */}
+        {/* Radial darken near the edges — no horizontal axis, no seam */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'linear-gradient(to right, #050505 0%, rgba(5,5,5,0.6) 12%, rgba(5,5,5,0) 30%), radial-gradient(ellipse at 50% 60%, rgba(5,5,5,0) 0%, rgba(5,5,5,0.3) 80%, rgba(5,5,5,0.7) 100%)',
+              'radial-gradient(ellipse at 50% 55%, rgba(5,5,5,0) 0%, rgba(5,5,5,0.25) 75%, rgba(5,5,5,0.6) 100%)',
           }}
         />
+      </div>
+
+      {/* Ambient cursor-follow glow — rendered ABOVE the canvas via
+          mix-blend-mode: screen so the lime tint lands on the pitch too. */}
+      <div className="absolute inset-0 z-[15] pointer-events-none">
+        <AmbientBackground tone="lime" />
       </div>
 
       {/* Foreground content — clean left stack, nothing on the right.
