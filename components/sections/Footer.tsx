@@ -1,7 +1,53 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+
+// ===================================================================
+//  Copyable email — click to copy, shows a brief "copied" confirmation
+// ===================================================================
+
+function CopyableEmail({ email }: { email: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(email);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = email;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      data-cursor="hover"
+      aria-label={`Copy ${email} to clipboard`}
+      title={copied ? 'Copied!' : 'Click to copy'}
+      style={{
+        background: 'transparent',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+        fontFamily: 'var(--font-mono), monospace',
+        fontSize: 11,
+        letterSpacing: '0.12em',
+        color: copied ? 'var(--lime, #d4ff3a)' : 'rgba(245,245,240,0.65)',
+        transition: 'color 220ms ease',
+      }}
+    >
+      {email}
+    </button>
+  );
+}
 
 // ===================================================================
 //  Proximity color interpolation — ink ↔ lime (matches Hero)
@@ -231,24 +277,58 @@ export default function Footer() {
         </div>
 
         <div className="col-span-12 md:col-span-3 md:col-start-10 flex items-center md:justify-end gap-4 mt-4 md:mt-0">
-          {(['Instagram', 'TikTok', 'YouTube'] as const).map((name) => (
-            <a
-              key={name}
-              href="#"
-              aria-label={name}
-              data-cursor="hover"
-              className="social-link"
-              style={{
-                color: 'rgba(245,245,240,0.6)',
-                display: 'inline-flex',
-                padding: 6,
-                transition:
-                  'color 250ms cubic-bezier(0.22, 1, 0.36, 1), transform 250ms cubic-bezier(0.22, 1, 0.36, 1)',
-              }}
-            >
-              <SocialIcon name={name} />
-            </a>
-          ))}
+          {([
+            {
+              name: 'Instagram',
+              href: 'https://www.instagram.com/sporttimesapp/',
+            },
+            {
+              name: 'TikTok',
+              href: 'https://www.tiktok.com/@sporttimesapp?lang=en-GB',
+            },
+            {
+              name: 'YouTube',
+              href: null,
+            },
+          ] as const).map((s) =>
+            s.href ? (
+              <a
+                key={s.name}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.name}
+                data-cursor="hover"
+                className="social-link"
+                style={{
+                  color: 'rgba(245,245,240,0.6)',
+                  display: 'inline-flex',
+                  padding: 6,
+                  transition:
+                    'color 250ms cubic-bezier(0.22, 1, 0.36, 1), transform 250ms cubic-bezier(0.22, 1, 0.36, 1)',
+                }}
+              >
+                <SocialIcon name={s.name} />
+              </a>
+            ) : (
+              <span
+                key={s.name}
+                aria-label={`${s.name} — coming soon`}
+                className="social-soon"
+                style={{
+                  color: 'rgba(245,245,240,0.35)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: 6,
+                  position: 'relative',
+                  cursor: 'help',
+                }}
+              >
+                <SocialIcon name={s.name} />
+                <span className="social-soon-label">soon</span>
+              </span>
+            )
+          )}
         </div>
       </div>
 
@@ -311,7 +391,6 @@ export default function Footer() {
               ))}
             </h3>
 
-            {/* Right-aligned accent column — fills the right half */}
             <div className="footer-play-accent">
               <div className="footer-play-eyebrow">
                 [ The match before the match · 2026 ]
@@ -363,28 +442,36 @@ export default function Footer() {
           © 2026 SportTimes · Made in Ben Guerir
         </div>
         <div
-          className="col-span-12 md:col-span-4 md:col-start-8 mt-2 md:mt-0 flex md:justify-end gap-5 flex-wrap"
-          style={{
-            fontFamily: 'var(--font-mono), monospace',
-            fontSize: 11,
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-          }}
+          className="col-span-12 md:col-span-4 md:col-start-8 mt-4 md:mt-0 flex flex-col md:items-end gap-3"
         >
-          {['Privacy', 'Terms', 'Contact'].map((l) => (
-            <a
-              key={l}
-              href="#"
-              data-cursor="hover"
-              className="footer-link"
-              style={{
-                color: 'rgba(245,245,240,0.55)',
-                transition: 'color 220ms ease',
-              }}
-            >
-              {l}
-            </a>
-          ))}
+          <div
+            className="flex gap-5 flex-wrap md:justify-end"
+            style={{
+              fontFamily: 'var(--font-mono), monospace',
+              fontSize: 11,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {[
+              { label: 'Privacy', href: '/privacy' },
+              { label: 'Terms', href: '/terms' },
+            ].map((l) => (
+              <a
+                key={l.label}
+                href={l.href}
+                data-cursor="hover"
+                className="footer-link"
+                style={{
+                  color: 'rgba(245,245,240,0.55)',
+                  transition: 'color 220ms ease',
+                }}
+              >
+                {l.label}
+              </a>
+            ))}
+          </div>
+          <CopyableEmail email="contact@sporttimes.app" />
         </div>
       </div>
 
@@ -393,11 +480,24 @@ export default function Footer() {
           color: var(--lime) !important;
           transform: scale(1.15);
         }
-        .footer-link:hover {
-          color: var(--lime) !important;
+        .social-soon {
+          opacity: 0.6;
         }
-        .footer-email:hover {
-          color: var(--lime) !important;
+        .social-soon-label {
+          position: absolute;
+          top: -8px;
+          right: -6px;
+          font-family: var(--font-mono), monospace;
+          font-size: 7.5px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--lime, #d4ff3a);
+          background: rgba(212, 255, 58, 0.12);
+          border: 1px solid rgba(212, 255, 58, 0.45);
+          padding: 1px 4px;
+          border-radius: 100px;
+          pointer-events: none;
+          line-height: 1;
         }
         .footer-play-wrap {
           display: flex;
@@ -484,6 +584,12 @@ export default function Footer() {
           .footer-play-stat {
             align-items: flex-start;
           }
+        }
+        .footer-link:hover {
+          color: var(--lime) !important;
+        }
+        .footer-email:hover {
+          color: var(--lime) !important;
         }
       `}</style>
     </footer>

@@ -28,7 +28,11 @@ export default function MenuOverlay({
   const handleJump = (anchor: string) => {
     const el = document.getElementById(anchor);
     onClose();
-    if (!el) return;
+    // If we're on a route that doesn't have this section, navigate home.
+    if (!el) {
+      window.location.href = `/#${anchor}`;
+      return;
+    }
     requestAnimationFrame(() => {
       const lenis = getLenis();
       if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.4 });
@@ -72,7 +76,7 @@ export default function MenuOverlay({
               </span>
               <span className="hidden md:inline-block w-8 h-px bg-lime/50" />
               <span className="hidden md:inline-block font-mono text-[10px] tracking-[0.25em] uppercase text-ink/50">
-                [ Navigation · 07 chapters ]
+                [ Navigation · {CHAPTERS.length.toString().padStart(2, '0')} chapters ]
               </span>
             </div>
             <button
@@ -159,7 +163,7 @@ export default function MenuOverlay({
               <div className="space-y-3">
                 <div className="h-px w-full bg-ink/10" />
                 <div className="flex items-baseline justify-between font-mono text-[10px] tracking-[0.2em] uppercase text-ink/45">
-                  <span>Made in Casablanca</span>
+                  <span>Made in Ben Guerir</span>
                   <span className="text-lime/70">v0.1 · Pre-launch</span>
                 </div>
               </div>
@@ -168,7 +172,10 @@ export default function MenuOverlay({
 
           {/* Footer hint */}
           <div className="absolute z-10 bottom-6 left-6 md:left-10 right-6 md:right-10 flex items-center justify-between font-mono text-[10px] tracking-[0.25em] uppercase text-ink/40">
-            <span>[ Chapters · 01 — 07 ]</span>
+            <span>
+              [ Chapters · 01 —{' '}
+              {CHAPTERS.length.toString().padStart(2, '0')} ]
+            </span>
             <span className="hidden md:inline">
               Press <span className="text-lime/80">Esc</span> to close
             </span>

@@ -78,29 +78,31 @@ function AppStoreBadge() {
 
 function PlayStoreBadge() {
   return (
-    <a
-      href="#"
-      data-cursor="hover"
-      className="store-badge"
-      aria-label="Get it on Google Play"
+    <span
+      aria-label="Google Play — coming soon"
+      className="store-badge store-badge-soon"
       style={{
         display: 'inline-flex',
         alignItems: 'center',
         gap: 10,
         padding: '10px 18px',
         background: '#0A0A0A',
-        border: '1px solid rgba(245,245,240,0.22)',
+        border: '1px solid rgba(245,245,240,0.12)',
         borderRadius: 10,
-        color: '#F5F5F0',
+        color: 'rgba(245,245,240,0.55)',
         textDecoration: 'none',
         fontFamily: 'var(--font-body), Inter, sans-serif',
         minWidth: 170,
-        transition:
-          'transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1), border-color 280ms ease',
-        willChange: 'transform',
+        position: 'relative',
+        cursor: 'help',
       }}
     >
-      <svg width="22" height="26" viewBox="0 0 512 512">
+      <svg
+        width="22"
+        height="26"
+        viewBox="0 0 512 512"
+        style={{ opacity: 0.55 }}
+      >
         <defs>
           <linearGradient id="p1" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#FFD400" />
@@ -138,7 +140,7 @@ function PlayStoreBadge() {
           style={{
             fontSize: 9,
             letterSpacing: '0.08em',
-            color: 'rgba(245,245,240,0.75)',
+            color: 'rgba(245,245,240,0.5)',
           }}
         >
           GET IT ON
@@ -154,7 +156,28 @@ function PlayStoreBadge() {
           Google&nbsp;Play
         </div>
       </div>
-    </a>
+      <span
+        className="store-badge-soon-pill"
+        style={{
+          position: 'absolute',
+          top: -8,
+          right: -6,
+          fontFamily: 'var(--font-mono), monospace',
+          fontSize: 8,
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          color: 'var(--lime, #d4ff3a)',
+          background: 'rgba(212, 255, 58, 0.12)',
+          border: '1px solid rgba(212, 255, 58, 0.45)',
+          padding: '2px 6px',
+          borderRadius: 100,
+          pointerEvents: 'none',
+          lineHeight: 1,
+        }}
+      >
+        Soon
+      </span>
+    </span>
   );
 }
 
@@ -948,7 +971,7 @@ export default function Download() {
         {/* LEFT — content */}
         <div
           ref={fadeRef}
-          className="col-span-12 md:col-start-2 md:col-span-6"
+          className="col-span-12 md:col-start-2 md:col-span-7"
         >
           <div className="mono-eyebrow mb-6 dl-fade">
             [ Chapter 06 · Download ]
@@ -959,10 +982,9 @@ export default function Download() {
             aria-label="Your next match is already happening."
             className="headline-display uppercase text-ink mb-8"
             style={{
-              fontSize: 'clamp(1.9rem, 4.2vw, 3.8rem)',
-              lineHeight: 1.0,
+              fontSize: 'clamp(1.5rem, 3.4vw, 3rem)',
+              lineHeight: 1.02,
               letterSpacing: '-0.025em',
-              maxWidth: '14ch',
             }}
           >
             {HEADLINE.map((line, i) => (
@@ -1033,29 +1055,13 @@ export default function Download() {
 
             <div className="flex items-center gap-3">
               <QRPlaceholder size={96} />
-              <div>
-                <div
-                  className="mono-eyebrow"
-                  style={{
-                    color: 'var(--lime, #d4ff3a)',
-                    marginBottom: 4,
-                  }}
-                >
-                  [ Or scan to download ]
-                </div>
-                <div
-                  style={{
-                    fontFamily: 'var(--font-mono), monospace',
-                    fontSize: 10,
-                    letterSpacing: '0.18em',
-                    color: 'rgba(245,245,240,0.5)',
-                    textTransform: 'uppercase',
-                    maxWidth: '20ch',
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Points to the App Store / Play listing for your region
-                </div>
+              <div
+                className="mono-eyebrow"
+                style={{
+                  color: 'var(--lime, #d4ff3a)',
+                }}
+              >
+                [ Or scan to download ]
               </div>
             </div>
           </div>
@@ -1063,7 +1069,7 @@ export default function Download() {
 
         {/* RIGHT — phone mockup */}
         <div
-          className="col-span-12 md:col-start-8 md:col-span-5 flex justify-center md:justify-end dl-fade"
+          className="col-span-12 md:col-start-9 md:col-span-4 flex justify-center md:justify-end dl-fade"
           style={{ paddingTop: '1rem' }}
         >
           <PhoneMockup />
@@ -1087,12 +1093,19 @@ export default function Download() {
       </div>
 
       <style jsx>{`
-        :global(.store-badge:hover) {
+        :global(a.store-badge:hover) {
           transform: translateY(-2px) scale(1.03);
           border-color: var(--lime, #d4ff3a) !important;
           box-shadow:
             0 8px 24px rgba(0, 0, 0, 0.5),
             0 0 24px rgba(212, 255, 58, 0.28);
+        }
+        :global(.store-badge-soon) {
+          opacity: 0.75;
+          transition: opacity 260ms ease;
+        }
+        :global(.store-badge-soon:hover) {
+          opacity: 0.9;
         }
       `}</style>
     </section>

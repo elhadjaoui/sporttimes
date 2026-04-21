@@ -1,6 +1,6 @@
 export const APP_NAME = 'SPORTTIMES';
 export const APP_NAME_DISPLAY = 'SportTimes';
-export const APP_LOCATION = 'CASABLANCA';
+export const APP_LOCATION = 'BEN GUERIR';
 export const APP_TIMEZONE = 'Africa/Casablanca';
 
 export const COLORS = {
@@ -30,33 +30,21 @@ export const CHAPTERS = [
   },
   {
     num: '03',
-    name: 'FOOTBALL',
-    anchor: 'football',
-    tagline: 'Eleven. Seven. Five. The beautiful game.',
+    name: 'THE SPORTS',
+    anchor: 'sports',
+    tagline: 'Football, basketball, handball — and more on the way.',
   },
   {
     num: '04',
-    name: 'BASKETBALL',
-    anchor: 'basketball',
-    tagline: 'Hold the court. Run it back.',
+    name: 'THE ROADMAP',
+    anchor: 'roadmap-features',
+    tagline: 'Seven features pinned to the coach’s board.',
   },
   {
     num: '05',
-    name: 'HANDBALL',
-    anchor: 'handball',
-    tagline: 'Seven a side. Fast. Physical. Organized.',
-  },
-  {
-    num: '06',
-    name: "WHAT'S COMING",
-    anchor: 'roadmap',
-    tagline: 'Tournaments. Rankings. Sponsored leagues.',
-  },
-  {
-    num: '07',
     name: 'DOWNLOAD',
     anchor: 'download',
-    tagline: 'iOS and Android. Pre-launch.',
+    tagline: 'iOS now. Android soon.',
   },
 ] as const;
 

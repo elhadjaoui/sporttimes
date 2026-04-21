@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { APP_NAME_DISPLAY, APP_LOCATION, APP_TIMEZONE } from '@/lib/constants';
 import MenuOverlay from './MenuOverlay';
 
@@ -28,17 +29,18 @@ export default function Nav() {
     <>
       <header className="fixed top-0 left-0 right-0 z-[70] pointer-events-none">
         <div className="flex items-center justify-between px-6 md:px-10 pt-6 pointer-events-auto">
-          {/* Logo */}
-          <a
-            href="#top"
+          {/* Logo — always returns home */}
+          <Link
+            href="/"
             className="font-display text-base md:text-lg tracking-tightest uppercase leading-none hover:text-lime transition-colors"
+            data-cursor="hover"
           >
             {APP_NAME_DISPLAY}
-          </a>
+          </Link>
 
           {/* Live timestamp */}
           <div className="hidden md:block font-mono text-[11px] tracking-[0.2em] uppercase text-ink/60">
-            {APP_LOCATION} · {now} GMT+1
+            {APP_LOCATION} · {now}
           </div>
 
           {/* Menu */}

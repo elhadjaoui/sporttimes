@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { getLenis } from '@/hooks/useLenis';
 
+const STORAGE_KEY = 'sporttimes-preloader-seen';
+
 export default function Preloader() {
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
@@ -12,8 +14,18 @@ export default function Preloader() {
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
 
-  // Lock scroll while preloader is up
+  // Check first-visit flag once on mount — outside render to avoid
+  // hydration mismatch. Uses localStorage so the preloader only ever
+  // shows on the very first visit to the site, not on every session.
   useEffect(() => {
+    if (localStorage.getItem(STORAGE_KEY) === '1') {
+      setHidden(true);
+    }
+  }, []);
+
+  // Lock scroll while preloader is up (skipped when already dismissed)
+  useEffect(() => {
+    if (hidden) return;
     const lenis = getLenis();
     document.documentElement.style.overflow = 'hidden';
     lenis?.stop();
@@ -22,28 +34,47 @@ export default function Preloader() {
       document.documentElement.style.overflow = '';
       lenis?.start();
     };
-  }, []);
+  }, [hidden]);
 
-  // Simulated 0 → 100 over ~2s
+  // Simulated 0 → 100 over ~2s using discrete setTimeout steps.
+  // Avoids RAF / ticker issues — each step is a browser-scheduled
+  // state update that React can't miss.
   useEffect(() => {
-    const start = performance.now();
-    const total = 2000;
-    let raf = 0;
-    const tick = (t: number) => {
-      const elapsed = t - start;
-      const p = Math.min(100, Math.round((elapsed / total) * 100));
-      setProgress(p);
-      if (p < 100) raf = requestAnimationFrame(tick);
-      else setReady(true);
+    if (hidden) return;
+    setProgress(0);
+    setReady(false);
+
+    const STEPS = 20;
+    const STEP_MS = 100;
+    const timers: number[] = [];
+    for (let i = 1; i <= STEPS; i++) {
+      const id = window.setTimeout(() => {
+        setProgress(i * (100 / STEPS));
+        if (i === STEPS) setReady(true);
+      }, i * STEP_MS);
+      timers.push(id);
+    }
+
+    return () => {
+      timers.forEach((id) => window.clearTimeout(id));
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [hidden]);
+
+  // If preloader was already dismissed this session, fire the done event
+  // once on mount so any listeners (hero fade-in, etc) still initialize.
+  useEffect(() => {
+    if (!hidden) return;
+    const t = window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('preloader-done'));
+    }, 60);
+    return () => window.clearTimeout(t);
+  }, [hidden]);
 
   const handleEnter = () => {
     const tl = gsap.timeline({
       onComplete: () => {
         setHidden(true);
+        localStorage.setItem(STORAGE_KEY, '1');
         document.documentElement.style.overflow = '';
         getLenis()?.start();
         // Notify the app that the curtain is open so scenes can fade in.
