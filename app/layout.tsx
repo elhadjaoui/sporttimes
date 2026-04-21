@@ -1,5 +1,11 @@
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import {
+  Inter,
+  JetBrains_Mono,
+  Caveat,
+  Permanent_Marker,
+  Kalam,
+} from 'next/font/google';
 import './globals.css';
 import GrainOverlay from '@/components/ui/GrainOverlay';
 import LenisProvider from '@/components/ui/LenisProvider';
@@ -28,6 +34,27 @@ const mono = JetBrains_Mono({
   display: 'swap',
 });
 
+const caveat = Caveat({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-caveat',
+  display: 'swap',
+});
+
+const marker = Permanent_Marker({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-marker',
+  display: 'swap',
+});
+
+const kalam = Kalam({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-kalam',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'SportTimes — See the lineup. Join the match.',
   description:
@@ -48,7 +75,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      className={`${display.variable} ${body.variable} ${mono.variable} ${caveat.variable} ${marker.variable} ${kalam.variable}`}
     >
       <body className="bg-bg text-ink antialiased">
         <AmbientLayer />

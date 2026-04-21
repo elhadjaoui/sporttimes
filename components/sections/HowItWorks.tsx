@@ -150,7 +150,7 @@ function IsoStage({
 // ===================================================================
 
 const COMMUNITY = {
-  badge: 'm/',
+  badge: 's/',
   name: 'THE CAMPUS',
   location: 'Casablanca · Av Hassan II',
   members: 132,
