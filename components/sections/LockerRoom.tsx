@@ -1253,6 +1253,190 @@ function LegendSticky() {
   );
 }
 
+// ===================================================================
+//  Phone-only roadmap — 7 vertically stacked feature cards with a
+//  thin red "thread" connector between each pair. All inline styles
+//  so nothing depends on styled-jsx scoping.
+// ===================================================================
+
+function MobileRoadmap() {
+  return (
+    <div
+      style={{
+        width: '100%',
+        maxWidth: 560,
+        margin: '0 auto',
+        padding: '8px 16px 24px',
+        boxSizing: 'border-box',
+      }}
+    >
+      {FEATURES.map((f, i) => {
+        const isLast = i === FEATURES.length - 1;
+        return (
+          <div key={f.id}>
+            <article
+              style={{
+                width: '100%',
+                background: 'rgba(15, 15, 20, 0.82)',
+                border: '1px solid rgba(245, 245, 240, 0.08)',
+                borderRadius: 16,
+                padding: '20px 20px 22px',
+                boxSizing: 'border-box',
+                position: 'relative',
+                boxShadow: '0 10px 24px rgba(0, 0, 0, 0.35)',
+              }}
+            >
+              {/* Seq + status row */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  marginBottom: 14,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: 10,
+                    letterSpacing: '0.3em',
+                    textTransform: 'uppercase',
+                    color: 'var(--lime, #D4FF3A)',
+                  }}
+                >
+                  [ {f.seq} / 07 ]
+                </span>
+                <StatusTag status={f.status} />
+              </div>
+
+              {/* Feature name */}
+              <h3
+                style={{
+                  fontFamily: 'var(--font-display), Inter, sans-serif',
+                  fontWeight: 900,
+                  fontSize: 'clamp(1.35rem, 5.2vw, 1.6rem)',
+                  lineHeight: 1,
+                  letterSpacing: '-0.025em',
+                  color: '#F5F5F0',
+                  textTransform: 'uppercase',
+                  margin: '0 0 12px',
+                }}
+              >
+                {f.name}.
+              </h3>
+
+              {/* Summary */}
+              <p
+                style={{
+                  fontFamily: 'var(--font-body), Inter, sans-serif',
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  color: 'rgba(245, 245, 240, 0.68)',
+                  margin: '0 0 14px',
+                }}
+              >
+                {f.summary}
+              </p>
+
+              {/* Bullets */}
+              <ul
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: '0 0 12px',
+                }}
+              >
+                {f.bullets.map((b) => (
+                  <li
+                    key={b}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      fontFamily: 'var(--font-body), Inter, sans-serif',
+                      fontSize: 13,
+                      lineHeight: 1.55,
+                      color: 'rgba(245, 245, 240, 0.8)',
+                      marginBottom: 4,
+                    }}
+                  >
+                    <span
+                      aria-hidden
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: '50%',
+                        background: 'var(--lime, #D4FF3A)',
+                        marginTop: 7,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Status note — handwritten footer */}
+              <div
+                style={{
+                  borderTop: '1px dashed rgba(245, 245, 240, 0.14)',
+                  paddingTop: 10,
+                  marginTop: 4,
+                  fontFamily: 'var(--font-caveat), cursive',
+                  fontSize: 14,
+                  color: 'rgba(245, 245, 240, 0.6)',
+                  lineHeight: 1.3,
+                }}
+              >
+                {f.statusNote}
+              </div>
+            </article>
+
+            {/* Thread connector — short red segment between cards */}
+            {!isLast && (
+              <div
+                aria-hidden
+                style={{
+                  width: 2,
+                  height: 32,
+                  background:
+                    'linear-gradient(to bottom, #8B2A2A 0%, rgba(139,42,42,0.55) 100%)',
+                  margin: '10px auto',
+                  borderRadius: 1,
+                }}
+              />
+            )}
+          </div>
+        );
+      })}
+
+      {/* End cap */}
+      <div
+        aria-hidden
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: 18,
+          padding: '10px 14px',
+          borderRadius: 100,
+          background: 'rgba(212, 255, 58, 0.08)',
+          border: '1px dashed rgba(212, 255, 58, 0.4)',
+          fontFamily: 'var(--font-mono), monospace',
+          fontSize: 9,
+          letterSpacing: '0.22em',
+          textTransform: 'uppercase',
+          color: 'rgba(212, 255, 58, 0.75)',
+        }}
+      >
+        End of roadmap · more on the way
+      </div>
+    </div>
+  );
+}
+
 function DustParticles() {
   const dusts = [
     { size: 3, left: '12%', top: '28%', dur: 26, delay: 0 },
@@ -1294,14 +1478,34 @@ function DustParticles() {
 
 export default function LockerRoom() {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [isPhone, setIsPhone] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const artifactRefs = useRef<Array<HTMLDivElement | null>>([]);
   const segRefs = useRef<Array<SVGPathElement | null>>([]);
   const segments = useMemo(() => buildSegments(), []);
 
+  // Sub-desktop detection — tablet + phone both get the mobile
+  // stacked-card roadmap. The cork-board only mounts at ≥1280px.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 1279px)');
+    setIsPhone(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsPhone(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   // Entry animation only — rope renders as a static SVG path.
   useEffect(() => {
     if (!sectionRef.current) return;
+    // Skip cork-board animations on anything below desktop (≥1280px);
+    // the MobileRoadmap replaces the constellation at those widths.
+    if (
+      typeof window !== 'undefined' &&
+      !window.matchMedia('(min-width: 1280px)').matches
+    ) {
+      return;
+    }
     gsap.registerPlugin(ScrollTrigger);
 
     // Set final rest path once — stays static from here on.
@@ -1413,6 +1617,11 @@ export default function LockerRoom() {
         </div>
       </div>
 
+      {/* Phone (≤767px) — stacked feature cards with red thread */}
+      {isPhone && <MobileRoadmap />}
+
+      {/* Tablet + desktop (≥768px) — cork-board constellation */}
+      {!isPhone && (
       <div className="locker-room-wrap">
         <div className="cork-board">
           <div className="cork-inner">
@@ -1541,6 +1750,7 @@ export default function LockerRoom() {
           />
         </div>
       </div>
+      )}
 
       <style jsx>{`
         .locker-room-wrap {
@@ -1621,13 +1831,10 @@ export default function LockerRoom() {
           transform-origin: top center;
         }
 
-        @media (max-width: 767px) {
-          .cork-board {
-            aspect-ratio: auto;
-            max-height: none;
-            min-height: 1180px;
-          }
-        }
+        /* Phone / desktop toggle now driven by JS state (isPhone).
+           The cork-board tree only mounts when !isPhone, and
+           MobileRoadmap only mounts when isPhone, so there's no
+           CSS-toggle gamble any more. */
       `}</style>
     </section>
   );

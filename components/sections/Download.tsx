@@ -813,7 +813,7 @@ function PhoneMockup() {
           .phone-float, .phone-tilt { animation: none; }
         }
 
-        @media (max-width: 767px) {
+        @media (max-width: 1279px) {
           .phone-outer {
             width: 240px;
             height: 500px;
@@ -971,7 +971,7 @@ export default function Download() {
         {/* LEFT — content */}
         <div
           ref={fadeRef}
-          className="col-span-12 md:col-start-2 md:col-span-7"
+          className="col-span-12 xl:col-start-2 xl:col-span-7"
         >
           <div className="mono-eyebrow mb-6 dl-fade">
             [ Chapter 06 · Download ]
@@ -1069,7 +1069,7 @@ export default function Download() {
 
         {/* RIGHT — phone mockup */}
         <div
-          className="col-span-12 md:col-start-9 md:col-span-4 flex justify-center md:justify-end dl-fade"
+          className="col-span-12 xl:col-start-9 xl:col-span-4 flex justify-center xl:justify-end dl-fade"
           style={{ paddingTop: '1rem' }}
         >
           <PhoneMockup />

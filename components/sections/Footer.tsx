@@ -245,7 +245,7 @@ export default function Footer() {
     >
       {/* Top row — logo + tagline (left), socials (right) */}
       <div className="grid-12 footer-row">
-        <div className="col-span-12 md:col-start-2 md:col-span-6 flex items-center gap-5 flex-wrap">
+        <div className="col-span-12 xl:col-start-2 xl:col-span-6 flex items-center gap-5 flex-wrap">
           <div
             style={{
               fontFamily: 'var(--font-display), Inter, sans-serif',
@@ -276,7 +276,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="col-span-12 md:col-span-3 md:col-start-10 flex items-center md:justify-end gap-4 mt-4 md:mt-0">
+        <div className="col-span-12 xl:col-span-3 xl:col-start-10 flex items-center xl:justify-end gap-4 mt-4 xl:mt-0">
           {([
             {
               name: 'Instagram',
@@ -341,7 +341,7 @@ export default function Footer() {
           marginBottom: 'clamp(2.5rem, 5vh, 4rem)',
         }}
       >
-        <div className="col-span-12 md:col-start-2 md:col-span-10">
+        <div className="col-span-12 xl:col-start-2 xl:col-span-10">
           <div className="footer-play-wrap">
             <h3
               aria-label="Play more."
@@ -430,7 +430,7 @@ export default function Footer() {
         }}
       >
         <div
-          className="col-span-12 md:col-start-2 md:col-span-6"
+          className="col-span-12 xl:col-start-2 xl:col-span-6"
           style={{
             fontFamily: 'var(--font-mono), monospace',
             fontSize: 11,
@@ -442,7 +442,7 @@ export default function Footer() {
           © 2026 SportTimes · Made in Ben Guerir
         </div>
         <div
-          className="col-span-12 md:col-span-4 md:col-start-8 mt-4 md:mt-0 flex flex-col md:items-end gap-3"
+          className="col-span-12 xl:col-span-4 xl:col-start-8 mt-4 xl:mt-0 flex flex-col xl:items-end gap-3"
         >
           <div
             className="flex gap-5 flex-wrap md:justify-end"
@@ -567,22 +567,32 @@ export default function Footer() {
           background: var(--lime, #d4ff3a);
           border-color: var(--lime, #d4ff3a);
         }
-        @media (max-width: 767px) {
+        @media (max-width: 1279px) {
           .footer-play-wrap {
             flex-direction: column;
             align-items: flex-start;
-            gap: 24px;
+            gap: 28px;
           }
           .footer-play-accent {
             align-items: flex-start;
+            width: 100%;
+            min-width: 0;
           }
-          .footer-play-eyebrow,
-          .footer-play-stats {
+          .footer-play-eyebrow {
             text-align: left;
-            justify-content: flex-start;
+          }
+          .footer-play-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px 16px;
+            width: 100%;
+            justify-content: stretch;
           }
           .footer-play-stat {
             align-items: flex-start;
+          }
+          .footer-play-stat-num {
+            font-size: 28px;
           }
         }
         .footer-link:hover {

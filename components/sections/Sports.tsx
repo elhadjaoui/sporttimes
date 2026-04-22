@@ -565,6 +565,23 @@ function PanelContent({
 }) {
   const [activePill, setActivePill] = useState(0);
   const activeFormat = panel.pills ? panel.pills[activePill] : '';
+  const [isPhone, setIsPhone] = useState(false);
+  const [tapped, setTapped] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    // Tablet + phone → mobile grid for the MORE panel.
+    const mq = window.matchMedia('(max-width: 1279px)');
+    setIsPhone(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsPhone(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  // Auto-dismiss tap-to-highlight after 2s
+  useEffect(() => {
+    if (!tapped) return;
+    const t = window.setTimeout(() => setTapped(null), 2000);
+    return () => window.clearTimeout(t);
+  }, [tapped]);
   return (
     <>
       <div
@@ -580,7 +597,7 @@ function PanelContent({
       </div>
 
       <div className="grid-12 items-center w-full">
-        <div className="col-span-12 md:col-start-2 md:col-span-5 md:pr-6">
+        <div className="col-span-12 xl:col-start-2 xl:col-span-5 xl:pr-6">
           <div
             className="mono-eyebrow mb-5 panel-enter"
             style={{ color: panel.accent }}
@@ -613,7 +630,7 @@ function PanelContent({
             {panel.body}
           </p>
           {panel.pills && (
-            <div className="panel-enter">
+            <div className="panel-enter mb-8 xl:mb-0">
               <PillRow
                 pills={panel.pills}
                 accent={panel.accent}
@@ -625,7 +642,7 @@ function PanelContent({
           )}
         </div>
 
-        <div className="col-span-12 md:col-start-8 md:col-span-4 flex items-center justify-center panel-enter">
+        <div className="col-span-12 xl:col-start-8 xl:col-span-4 flex items-center justify-center panel-enter mt-4 xl:mt-0">
           {panel.venueKind ? (
             <div
               style={{
@@ -679,6 +696,105 @@ function PanelContent({
                     }}
                   />
                 </div>
+              </div>
+            </div>
+          ) : isPhone ? (
+            <div className="w-full">
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                  gap: 12,
+                  padding: '0 16px',
+                }}
+              >
+                {MORE_LABELS.map((l) => {
+                  const isTapped = tapped === l.name;
+                  const anyTapped = tapped !== null;
+                  return (
+                    <button
+                      key={l.name}
+                      type="button"
+                      onClick={() =>
+                        setTapped(isTapped ? null : l.name)
+                      }
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 10,
+                        padding: '18px 10px 14px',
+                        background: 'rgba(20, 20, 25, 0.6)',
+                        border: isTapped
+                          ? '1px solid #D4FF3A'
+                          : '1px solid rgba(245, 245, 240, 0.1)',
+                        borderRadius: 12,
+                        color: '#F5F5F0',
+                        minHeight: 120,
+                        cursor: 'pointer',
+                        transform: isTapped ? 'scale(1.05)' : 'scale(1)',
+                        opacity:
+                          anyTapped && !isTapped ? 0.55 : 1,
+                        transition:
+                          'transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease, border-color 260ms ease',
+                        boxShadow: isTapped
+                          ? '0 0 20px rgba(212, 255, 58, 0.28)'
+                          : 'none',
+                      }}
+                    >
+                      <span style={{ opacity: 0.75 }}>
+                        <SportIcon
+                          name={l.name}
+                          color="#F5F5F0"
+                          size={36}
+                        />
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-display), Inter, sans-serif',
+                          fontWeight: 900,
+                          fontSize: 13,
+                          letterSpacing: '-0.01em',
+                          textTransform: 'uppercase',
+                          textAlign: 'center',
+                          lineHeight: 1.05,
+                          color: '#F5F5F0',
+                        }}
+                      >
+                        {l.name}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono), monospace',
+                          fontSize: 9,
+                          letterSpacing: '0.22em',
+                          textTransform: 'uppercase',
+                          color: isTapped
+                            ? 'var(--lime, #D4FF3A)'
+                            : 'rgba(212, 255, 58, 0.7)',
+                        }}
+                      >
+                        [ Coming ]
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div
+                style={{
+                  marginTop: 20,
+                  padding: '0 16px',
+                  textAlign: 'center',
+                  fontFamily: 'var(--font-mono), monospace',
+                  fontSize: 9,
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(245, 245, 240, 0.45)',
+                  lineHeight: 1.5,
+                }}
+              >
+                [ The roster keeps growing — vote for your sport in the app ]
               </div>
             </div>
           ) : (
@@ -798,7 +914,7 @@ export default function Sports() {
       const mm = gsap.matchMedia();
 
       // ============== DESKTOP ==============
-      mm.add('(min-width: 768px)', () => {
+      mm.add('(min-width: 1280px)', () => {
         const panels = panelRefs.current.filter(
           (p): p is HTMLDivElement => !!p
         );
@@ -922,7 +1038,7 @@ export default function Sports() {
       });
 
       // ============== MOBILE ==============
-      mm.add('(max-width: 767px)', () => {
+      mm.add('(max-width: 1279px)', () => {
         const panels = panelRefs.current.filter(
           (p): p is HTMLDivElement => !!p
         );
@@ -1110,7 +1226,7 @@ export default function Sports() {
           display: flex;
           align-items: center;
         }
-        @media (max-width: 767px) {
+        @media (max-width: 1279px) {
           .sports-section {
             height: auto;
           }
@@ -1126,7 +1242,16 @@ export default function Sports() {
           }
           .sport-panel {
             width: 100vw;
-            height: 100vh;
+            height: auto;
+            min-height: 100vh;
+            align-items: flex-start;
+            padding: 96px 0 56px;
+            box-sizing: border-box;
+          }
+          /* Shrink the isometric venue so the stacked headline + body
+             + pills don't get pushed off-screen. */
+          .sport-panel :global([style*="perspective"]) {
+            max-width: 240px !important;
           }
         }
       `}</style>

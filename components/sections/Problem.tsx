@@ -253,6 +253,490 @@ function ChatBubble({ msg }: { msg: Msg }) {
 }
 
 // ===================================================================
+//  MobileProblem — renders all 3 beats as stacked static sections
+//  on tablet + phone. No pin, no scrub. Same copy as desktop.
+// ===================================================================
+
+function MobileProblem() {
+  return (
+    <div style={{ width: '100%' }}>
+      {/* BEAT 1 — The Chaos */}
+      <div
+        style={{
+          minHeight: '100vh',
+          padding: 'clamp(5rem, 10vh, 7rem) 20px 3rem',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: 20,
+        }}
+      >
+        <div
+          className="mono-eyebrow"
+          style={{ color: '#ff6b6b', letterSpacing: '0.25em' }}
+        >
+          [ 01 / 03 · The Chaos ]
+        </div>
+        <h2
+          className="headline-display uppercase text-ink"
+          style={{
+            fontSize: 'clamp(2rem, 8vw, 3rem)',
+            lineHeight: 0.98,
+            letterSpacing: '-0.025em',
+            margin: 0,
+          }}
+        >
+          This is how most matches get organized.
+        </h2>
+        <blockquote
+          style={{
+            borderLeft: '2px solid #D4FF3A',
+            paddingLeft: 14,
+            margin: '6px 0',
+            fontFamily: 'var(--font-display), Inter, sans-serif',
+            fontStyle: 'italic',
+            fontSize: 16,
+            lineHeight: 1.35,
+            color: 'rgba(245,245,240,0.82)',
+          }}
+        >
+          <span style={{ color: '#D4FF3A' }}>“</span>I want to play
+          football today, but I don&apos;t know if there&apos;s a match.
+          <span style={{ color: '#D4FF3A' }}>”</span>
+        </blockquote>
+        <p
+          className="font-body"
+          style={{
+            color: 'rgba(245,245,240,0.62)',
+            fontSize: 15,
+            lineHeight: 1.55,
+            margin: 0,
+          }}
+        >
+          Every week, in every city. Students on campus. People new to
+          town. Anyone who just wants to play. The plan lives inside a
+          group chat nobody can actually read.
+        </p>
+
+        {/* Auto-scrolling chat chaos */}
+        <div
+          aria-hidden
+          style={{
+            marginTop: 10,
+            width: '100%',
+            height: 320,
+            position: 'relative',
+            overflow: 'hidden',
+            border: '1px solid rgba(245,245,240,0.08)',
+            borderRadius: 12,
+            background: 'rgba(15,10,10,0.6)',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              padding: '14px 12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              animation: 'mp-chat-scroll 18s linear infinite',
+            }}
+          >
+            {[...MESSAGE_POOL, ...MESSAGE_POOL].slice(0, 14).map(
+              (m, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: '8px 12px',
+                    background: 'rgba(245,245,240,0.06)',
+                    borderRadius: 10,
+                    fontFamily: 'var(--font-body), Inter, sans-serif',
+                    fontSize: 12,
+                    lineHeight: 1.3,
+                    color: 'rgba(245,245,240,0.85)',
+                    maxWidth: '82%',
+                    alignSelf:
+                      i % 3 === 1 ? 'flex-end' : 'flex-start',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-mono), monospace',
+                      fontSize: 9,
+                      letterSpacing: '0.18em',
+                      color: 'rgba(255,107,107,0.85)',
+                      textTransform: 'uppercase',
+                      marginBottom: 2,
+                    }}
+                  >
+                    {m.name} · {m.time}
+                  </div>
+                  {m.text}
+                </div>
+              )
+            )}
+          </div>
+          {/* Top + bottom fade masks */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: 0,
+              height: 30,
+              background:
+                'linear-gradient(to bottom, rgba(15,10,10,0.95), transparent)',
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 30,
+              background:
+                'linear-gradient(to top, rgba(15,10,10,0.95), transparent)',
+              pointerEvents: 'none',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* BEAT 2 — The Diagnosis */}
+      <div
+        style={{
+          minHeight: '100vh',
+          padding: 'clamp(4rem, 8vh, 6rem) 20px 3rem',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: 18,
+        }}
+      >
+        <div
+          className="mono-eyebrow"
+          style={{ color: '#D4FF3A', letterSpacing: '0.25em' }}
+        >
+          [ 02 / 03 · The Diagnosis ]
+        </div>
+        <h2
+          className="headline-display uppercase text-ink"
+          style={{
+            fontSize: 'clamp(2rem, 7.5vw, 3rem)',
+            lineHeight: 0.98,
+            letterSpacing: '-0.025em',
+            margin: 0,
+          }}
+        >
+          Every tool fails the same way.
+        </h2>
+        <p
+          className="font-body"
+          style={{
+            color: 'rgba(245,245,240,0.65)',
+            fontSize: 15,
+            lineHeight: 1.55,
+            margin: 0,
+            marginBottom: 8,
+          }}
+        >
+          Different platforms. Same broken outcome. The tools people
+          reach for were never built for organizing sports.
+        </p>
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+          }}
+        >
+          {TOOL_CARDS.map((c) => (
+            <article
+              key={c.name}
+              style={{
+                background: 'rgba(15,10,10,0.75)',
+                border: '1px solid rgba(245,245,240,0.08)',
+                borderRadius: 14,
+                padding: '18px 18px 20px',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  marginBottom: 10,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <h3
+                  className="headline-display uppercase text-ink"
+                  style={{
+                    fontSize: 18,
+                    letterSpacing: '-0.02em',
+                    margin: 0,
+                    lineHeight: 1,
+                  }}
+                >
+                  {c.name}
+                </h3>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: 9,
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    color: '#ff6b6b',
+                    border: '1px solid rgba(255,107,107,0.45)',
+                    padding: '3px 8px',
+                    borderRadius: 100,
+                  }}
+                >
+                  [ {c.tag} ]
+                </span>
+              </div>
+              <p
+                className="font-body"
+                style={{
+                  color: 'rgba(245,245,240,0.72)',
+                  fontSize: 13,
+                  lineHeight: 1.55,
+                  margin: 0,
+                }}
+              >
+                {c.body}
+              </p>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      {/* BEAT 3 — The Verdict */}
+      <div
+        style={{
+          minHeight: '100vh',
+          padding: 'clamp(4rem, 8vh, 6rem) 20px 5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: 22,
+          textAlign: 'center',
+        }}
+      >
+        <div
+          className="mono-eyebrow"
+          style={{
+            color: '#D4FF3A',
+            letterSpacing: '0.25em',
+            alignSelf: 'center',
+          }}
+        >
+          [ 03 / 03 · The Verdict ]
+        </div>
+        <h2
+          className="headline-display uppercase text-ink"
+          style={{
+            fontSize: 'clamp(3.5rem, 18vw, 6rem)',
+            lineHeight: 0.9,
+            letterSpacing: '-0.04em',
+            margin: 0,
+            color: '#F5F5F0',
+          }}
+        >
+          ENOUGH.
+        </h2>
+        <span
+          aria-hidden
+          style={{
+            display: 'block',
+            width: 60,
+            height: 3,
+            background: '#D4FF3A',
+            alignSelf: 'center',
+            borderRadius: 2,
+          }}
+        />
+
+        {/* Stats grid — 2 columns */}
+        <div
+          style={{
+            marginTop: 10,
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 10,
+            textAlign: 'left',
+          }}
+        >
+          <div
+            style={{
+              background: 'rgba(40,10,10,0.4)',
+              border: '1px solid rgba(255,107,107,0.18)',
+              borderRadius: 12,
+              padding: '14px 12px',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'var(--font-mono), monospace',
+                fontSize: 9,
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,107,107,0.85)',
+                marginBottom: 10,
+              }}
+            >
+              Before
+            </div>
+            {STATS_BEFORE.map((s) => (
+              <div
+                key={s.label}
+                style={{
+                  marginBottom: 10,
+                  borderBottom: '1px dashed rgba(255,107,107,0.18)',
+                  paddingBottom: 8,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: 9,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(245,245,240,0.4)',
+                  }}
+                >
+                  {s.label}
+                </div>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-display), Inter, sans-serif',
+                    fontWeight: 900,
+                    fontSize: 14,
+                    letterSpacing: '-0.01em',
+                    color: 'rgba(245,245,240,0.85)',
+                    marginTop: 2,
+                  }}
+                >
+                  {s.value}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div
+            style={{
+              background: 'rgba(20,30,15,0.45)',
+              border: '1px solid rgba(212,255,58,0.3)',
+              borderRadius: 12,
+              padding: '14px 12px',
+              boxShadow: '0 0 20px rgba(212,255,58,0.08)',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'var(--font-mono), monospace',
+                fontSize: 9,
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                color: '#D4FF3A',
+                marginBottom: 10,
+              }}
+            >
+              After
+            </div>
+            {STATS_AFTER.map((s) => (
+              <div
+                key={s.label}
+                style={{
+                  marginBottom: 10,
+                  borderBottom: '1px dashed rgba(212,255,58,0.25)',
+                  paddingBottom: 8,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: 9,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(245,245,240,0.4)',
+                  }}
+                >
+                  {s.label}
+                </div>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-display), Inter, sans-serif',
+                    fontWeight: 900,
+                    fontSize: 14,
+                    letterSpacing: '-0.01em',
+                    color: '#D4FF3A',
+                    marginTop: 2,
+                  }}
+                >
+                  {s.value}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 6 promises */}
+        <ul
+          style={{
+            listStyle: 'none',
+            padding: 0,
+            margin: '14px 0 0',
+            textAlign: 'left',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+          }}
+        >
+          {PROMISES.map((p) => (
+            <li
+              key={p}
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 12,
+                fontFamily: 'var(--font-body), Inter, sans-serif',
+                fontSize: 14,
+                lineHeight: 1.45,
+                color: 'rgba(245,245,240,0.85)',
+              }}
+            >
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: 16,
+                  height: 1,
+                  background: '#D4FF3A',
+                  marginTop: 10,
+                  flexShrink: 0,
+                }}
+              />
+              <span>{p}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <style jsx>{`
+        @keyframes mp-chat-scroll {
+          0%   { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ===================================================================
 //  Main section
 // ===================================================================
 
@@ -261,6 +745,17 @@ export default function Problem() {
   const pinRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
   const [, force] = useState(0);
+  const [isPhone, setIsPhone] = useState(false);
+
+  // Tablet + phone get the static stacked fallback
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 1279px)');
+    setIsPhone(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsPhone(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   // Refs for quickSetters — avoid per-frame React re-renders
   const chatRef = useRef<HTMLDivElement>(null);
@@ -283,26 +778,31 @@ export default function Problem() {
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      const st = ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top top',
-        end: '+=250%',
-        pin: pinRef.current,
-        pinSpacing: true,
-        anticipatePin: 1,
-        scrub: 0.4,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const p = self.progress;
-          progressRef.current = p;
-          applyScrollState(p);
+      // True desktop only (≥1280px) — pinned 3-beat scrub narrative.
+      // Anything below (phone + tablet) collapses to a single 100vh
+      // frame showing beat 1 statically. No pin, no scrub.
+      ScrollTrigger.matchMedia({
+        '(min-width: 1280px)': () => {
+          ScrollTrigger.create({
+            trigger: sectionRef.current,
+            start: 'top top',
+            end: '+=250%',
+            pin: pinRef.current,
+            pinSpacing: true,
+            anticipatePin: 1,
+            scrub: 0.4,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              const p = self.progress;
+              progressRef.current = p;
+              applyScrollState(p);
+            },
+          });
         },
       });
 
-      // Initial apply
+      // Initial apply — beat 1 at opacity 1, others at 0
       applyScrollState(0);
-
-      return () => st.kill();
     }, sectionRef);
 
     // Force re-render so refs are attached before first onUpdate
@@ -442,18 +942,25 @@ export default function Problem() {
       data-progress-section
       data-progress-label="02 · The Problem"
       data-palette="problem"
-      className="relative w-full"
-      style={{ height: '350vh' }}
+      className="problem-section relative w-full"
+      style={
+        isPhone
+          ? { minHeight: '100vh' }
+          : { height: 'var(--problem-height, 350vh)' }
+      }
     >
+      {isPhone && <MobileProblem />}
+      {!isPhone && (
       <div
         ref={pinRef}
         className="relative w-full h-screen overflow-hidden"
       >
 
-        {/* Chat column — left side, dims across beats */}
+        {/* Chat column — left side, dims across beats. Desktop-only.
+            Tablet + phone render the beat text column full-width. */}
         <div
           ref={chatRef}
-          className="absolute inset-0 z-[5] pointer-events-none"
+          className="hidden xl:block absolute inset-0 z-[5] pointer-events-none"
           style={{ opacity: 0.6 }}
         >
           <ChatColumn progressRef={progressRef} />
@@ -482,7 +989,7 @@ export default function Problem() {
           ref={b1Ref}
           className="absolute inset-0 z-[30] grid-12 items-center pointer-events-none"
         >
-          <div className="col-start-7 col-span-5 pointer-events-auto">
+          <div className="col-span-12 xl:col-start-7 xl:col-span-5 pointer-events-auto px-4 xl:px-0">
             <div className="mono-eyebrow mb-6 text-[#ff6b6b]">
               01 ── The Chaos
             </div>
@@ -548,7 +1055,7 @@ export default function Problem() {
           className="absolute inset-0 z-[30] grid-12 items-center pointer-events-none"
           style={{ opacity: 0 }}
         >
-          <div className="col-start-2 col-span-4 pointer-events-auto">
+          <div className="col-span-12 xl:col-start-2 xl:col-span-4 pointer-events-auto px-4 xl:px-0">
             <div className="mono-eyebrow mb-6 text-lime">02 ── The Diagnosis</div>
             <h2
               className="headline-display uppercase text-ink mb-5"
@@ -578,7 +1085,7 @@ export default function Problem() {
             </p>
           </div>
 
-          <div className="col-start-7 col-span-5 pointer-events-auto">
+          <div className="col-span-12 xl:col-start-7 xl:col-span-5 pointer-events-auto px-4 xl:px-0">
             <div className="flex flex-col gap-5">
               {TOOL_CARDS.map((c, i) => (
                 <div
@@ -876,6 +1383,7 @@ export default function Problem() {
 
         <CornerBrackets />
       </div>
+      )}
     </section>
   );
 }

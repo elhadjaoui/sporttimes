@@ -358,22 +358,33 @@ export default function AmbientLayer() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let dpr = window.devicePixelRatio || 1;
+    // Cap DPR to 1.5 — 2x+ is invisibly sharp for soft blobs but ~4x the pixel work
+    let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const setSize = () => {
-      dpr = window.devicePixelRatio || 1;
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
     };
     setSize();
-    window.addEventListener('resize', setSize);
+    // Throttle resize handler — fires many times during drag-resize
+    let resizeT: number | null = null;
+    const onResize = () => {
+      if (resizeT !== null) window.clearTimeout(resizeT);
+      resizeT = window.setTimeout(setSize, 120);
+    };
+    window.addEventListener('resize', onResize);
 
     const reduced = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
     ).matches;
-    const count = window.innerWidth < 768 ? 10 : 18;
+    const isNarrow = window.innerWidth < 1280;
+    const count = reduced ? 0 : isNarrow ? 6 : 14;
+    // Target ~30fps on mobile, ~60fps on desktop — soft blobs don't need full framerate
+    const TARGET_FRAME_MS = isNarrow ? 1000 / 30 : 1000 / 60;
 
     type P = {
       x: number;
@@ -411,38 +422,79 @@ export default function AmbientLayer() {
       };
     };
 
-    let raf = 0;
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    // Skip the canvas entirely if reduced-motion is requested
+    if (reduced || count === 0) {
+      return () => {
+        window.removeEventListener('resize', onResize);
+      };
+    }
 
+    // Pause the canvas while the tab isn't visible
+    let paused = document.hidden;
+    const onVis = () => {
+      paused = document.hidden;
+    };
+    document.addEventListener('visibilitychange', onVis);
+
+    // Cache computed palette values — re-read only every ~400ms, not every frame
+    let cachedC1 = { r: 212, g: 255, b: 58 };
+    let cachedC2 = cachedC1;
+    let cachedMin = 0.15;
+    let cachedMax = 0.3;
+    let lastPaletteRead = 0;
+    const refreshPalette = (now: number) => {
+      if (now - lastPaletteRead < 400) return;
+      lastPaletteRead = now;
       const root = ROOT();
       const cs = root ? getComputedStyle(root) : null;
-      const color1 = cs?.getPropertyValue('--amb-particle').trim() ||
+      const color1 =
+        cs?.getPropertyValue('--amb-particle').trim() ||
         'rgba(212,255,58,0.5)';
-      const color2 = cs?.getPropertyValue('--amb-particle-2').trim() ||
-        color1;
-      const min =
+      const color2 =
+        cs?.getPropertyValue('--amb-particle-2').trim() || color1;
+      cachedC1 = parseRgba(color1);
+      cachedC2 = parseRgba(color2);
+      cachedMin =
         parseFloat(
           cs?.getPropertyValue('--amb-particle-min').trim() || '0.15'
         ) || 0.15;
-      const max =
+      cachedMax =
         parseFloat(
           cs?.getPropertyValue('--amb-particle-max').trim() || '0.30'
         ) || 0.30;
+    };
 
-      const c1 = parseRgba(color1);
-      const c2 = parseRgba(color2);
+    let raf = 0;
+    let lastFrame = 0;
+    const draw = (t: number) => {
+      if (paused) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+      if (t - lastFrame < TARGET_FRAME_MS) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+      lastFrame = t;
+      refreshPalette(t);
 
-      particles.forEach((p) => {
-        if (!reduced) {
-          p.x += p.vx;
-          p.y += p.vy;
-          if (p.x < -5) p.x = w() + 5;
-          if (p.x > w() + 5) p.x = -5;
-          if (p.y < -5) p.y = h() + 5;
-          if (p.y > h() + 5) p.y = -5;
-          p.phase += p.phaseSpeed;
-        }
+      ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+
+      const c1 = cachedC1;
+      const c2 = cachedC2;
+      const min = cachedMin;
+      const max = cachedMax;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < -5) p.x = w() + 5;
+        if (p.x > w() + 5) p.x = -5;
+        if (p.y < -5) p.y = h() + 5;
+        if (p.y > h() + 5) p.y = -5;
+        p.phase += p.phaseSpeed;
+
         const op = min + (max - min) * (0.5 + 0.5 * Math.sin(p.phase));
         const c = p.tone === 0 ? c1 : c2;
         ctx.beginPath();
@@ -451,14 +503,16 @@ export default function AmbientLayer() {
         ctx.shadowBlur = p.size * 3;
         ctx.shadowColor = `rgba(${c.r}, ${c.g}, ${c.b}, ${op * 0.5})`;
         ctx.fill();
-      });
+      }
       raf = requestAnimationFrame(draw);
     };
     raf = requestAnimationFrame(draw);
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener('resize', setSize);
+      window.removeEventListener('resize', onResize);
+      document.removeEventListener('visibilitychange', onVis);
+      if (resizeT !== null) window.clearTimeout(resizeT);
     };
   }, []);
 

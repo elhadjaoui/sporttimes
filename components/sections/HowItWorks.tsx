@@ -1275,7 +1275,7 @@ export default function HowItWorks() {
 
       <div className="grid-12 mt-24 relative z-10">
         {/* LEFT — step list */}
-        <div className="col-span-12 md:col-start-2 md:col-span-5 flex flex-col gap-16 pb-[30vh]">
+        <div className="col-span-12 xl:col-start-2 xl:col-span-5 flex flex-col gap-16 pb-[30vh]">
           {STEPS.map((step, i) => (
             <StepRow
               key={i}
@@ -1289,7 +1289,7 @@ export default function HowItWorks() {
         </div>
 
         {/* RIGHT — sticky big glowing visual, no border, fills space */}
-        <div className="hidden md:block md:col-start-7 md:col-span-6 relative">
+        <div className="hidden xl:block xl:col-start-7 xl:col-span-6 relative">
           <div
             className="sticky"
             style={{

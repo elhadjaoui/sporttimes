@@ -61,16 +61,19 @@ export default function Hero() {
         '-=0.5'
       );
 
-      // Scroll-scrubbed camera dolly + FOV crunch + pitch level-out.
-      // As the hero scrolls off screen, the camera descends from aerial
-      // to player-eye level with a telephoto FOV compression.
-      ScrollTrigger.create({
-        trigger: rootRef.current,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1,
-        onUpdate: (self) => {
-          scrollState.heroProgress = self.progress;
+      // Scroll-scrubbed camera dolly — true desktop only (≥1280px).
+      // Tablet + phone drop the scrub to avoid jank / pin lock-in.
+      ScrollTrigger.matchMedia({
+        '(min-width: 1280px)': () => {
+          ScrollTrigger.create({
+            trigger: rootRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 1,
+            onUpdate: (self) => {
+              scrollState.heroProgress = self.progress;
+            },
+          });
         },
       });
     }, rootRef);
@@ -210,7 +213,7 @@ export default function Hero() {
           IMPORTANT: outer grid is pointer-events-none so canvas under it
           stays interactive; the actual content column re-enables events. */}
       <div className="relative z-20 h-full grid-12 pointer-events-none">
-        <div className="col-span-12 md:col-start-1 md:col-span-7 h-full flex flex-col justify-center pt-24 pb-24 pointer-events-auto">
+        <div className="col-span-12 xl:col-start-1 xl:col-span-7 h-full flex flex-col justify-center pt-24 pb-24 pointer-events-auto">
           <div
             className="hero-fade mono-eyebrow mb-5 md:mb-7 group inline-flex items-center gap-3 cursor-default"
             data-cursor="hover"
@@ -221,7 +224,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className="hero-headline headline-display uppercase text-ink text-[clamp(2.25rem,5vw,4.5rem)] mb-7 md:mb-9">
+          <h1 className="hero-headline headline-display uppercase text-ink text-[clamp(2rem,10vw,4.5rem)] xl:text-[clamp(2.25rem,5vw,4.5rem)] mb-7 xl:mb-9">
             {HEADLINE.map((line, i) => (
               <span
                 key={i}
@@ -244,7 +247,7 @@ export default function Hero() {
             spot, show up ready to play.
           </p>
 
-          <div className="hero-fade flex flex-wrap items-center gap-3">
+          <div className="hero-fade flex flex-col xl:flex-row xl:flex-wrap items-stretch xl:items-center gap-3 w-full xl:w-auto">
             <MagneticButton href="#download" variant="primary">
               Download the app ↗
             </MagneticButton>
@@ -260,8 +263,8 @@ export default function Hero() {
         <ChapterMarker num="01" label="Welcome" />
       </div>
 
-      {/* Bottom-right scroll indicator */}
-      <div className="absolute z-20 bottom-6 md:bottom-10 right-6 md:right-10 hero-fade pointer-events-none">
+      {/* Bottom-right scroll indicator — desktop only */}
+      <div className="hidden xl:block absolute z-20 bottom-6 xl:bottom-10 right-6 xl:right-10 hero-fade pointer-events-none">
         <ScrollIndicator />
       </div>
 

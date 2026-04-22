@@ -39,7 +39,7 @@ export default function Nav() {
           </Link>
 
           {/* Live timestamp */}
-          <div className="hidden md:block font-mono text-[11px] tracking-[0.2em] uppercase text-ink/60">
+          <div className="hidden xl:block font-mono text-[11px] tracking-[0.2em] uppercase text-ink/60">
             {APP_LOCATION} · {now}
           </div>
 

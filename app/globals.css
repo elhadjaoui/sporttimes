@@ -145,3 +145,12 @@ html.lenis body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ───── Responsive section tuning ───── */
+
+/* Problem section pin duration — desktop-only pin (≥1280px).
+   Anything below collapses to a 100vh frame showing beat 1 statically. */
+:root { --problem-height: 350vh; }
+@media (max-width: 1279px) {
+  :root { --problem-height: 100vh; }
+}
