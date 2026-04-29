@@ -10,8 +10,12 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "20"
-      - key: NODE_ENV
-        value: production
+      # Force npm to install devDependencies during build.
+      # Without this, Render's default NODE_ENV=production skips
+      # tailwindcss, postcss, autoprefixer, typescript, @types/*
+      # and the next build fails with "Cannot find module 'tailwindcss'".
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
     healthCheckPath: /
