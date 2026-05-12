@@ -3,12 +3,16 @@
     "apps": [],
     "details": [
       {
-        "appID": "6763773577.app.sporttimes.ios",
+        "appID": "99B886KJYG.app.sporttimes.ios",
         "paths": [
+          "/home/*",
+          "/community",
+          "/profile",
           "/matches/*",
           "/communities/*",
           "/teams/*",
-          "/home/*",
+          "/feedback/*",
+          "/invites/*",
           "/notifications",
           "/settings"
         ]
