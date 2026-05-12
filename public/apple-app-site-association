@@ -5,16 +5,7 @@
       {
         "appID": "99B886KJYG.app.sporttimes.ios",
         "paths": [
-          "/home/*",
-          "/community",
-          "/profile",
-          "/matches/*",
-          "/communities/*",
-          "/teams/*",
-          "/feedback/*",
-          "/invites/*",
-          "/notifications",
-          "/settings"
+          "*"
         ]
       }
     ]
