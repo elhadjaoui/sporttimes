@@ -25,14 +25,23 @@ const mono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'SportTimes — See the lineup. Join the match.',
-  description:
-    'Stop chasing group chats. See exactly who is playing, what position, and how the team is shaping up — before you commit. Football, basketball, handball.',
   metadataBase: new URL('https://sporttimes.app'),
+  title: 'SportTimes — The match before the match',
+  description:
+    'The app that turns group-chat chaos into a confirmed 11-a-side. Launching this summer in Ben Guerir.',
   openGraph: {
-    title: 'SportTimes — See the lineup. Join the match.',
-    description: 'Sports coordination, reimagined.',
+    title: 'SportTimes — The match before the match',
+    description:
+      'The app that turns group-chat chaos into a confirmed 11-a-side. Launching this summer in Ben Guerir.',
     type: 'website',
+    images: [{ url: '/og/sporttimes-og.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SportTimes — The match before the match',
+    description:
+      'The app that turns group-chat chaos into a confirmed 11-a-side. Launching this summer in Ben Guerir.',
+    images: ['/og/sporttimes-og.png'],
   },
 };
 
