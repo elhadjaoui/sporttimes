@@ -1,57 +1,26 @@
 import type { Metadata } from 'next';
-import {
-  Inter,
-  JetBrains_Mono,
-  Caveat,
-  Permanent_Marker,
-  Kalam,
-} from 'next/font/google';
+import { Inter, Space_Grotesk, Space_Mono } from 'next/font/google';
 import './globals.css';
-import GrainOverlay from '@/components/ui/GrainOverlay';
 import LenisProvider from '@/components/ui/LenisProvider';
-import Preloader from '@/components/ui/Preloader';
-import Nav from '@/components/ui/Nav';
-import CustomCursor from '@/components/ui/CustomCursor';
-import ProgressScrubber from '@/components/ui/ProgressScrubber';
-import AmbientLayer from '@/components/ui/AmbientLayer';
 
-const display = Inter({
+const display = Space_Grotesk({
   subsets: ['latin'],
-  weight: ['800', '900'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-display',
   display: 'swap',
 });
 
 const body = Inter({
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-body',
   display: 'swap',
 });
 
-const mono = JetBrains_Mono({
+const mono = Space_Mono({
   subsets: ['latin'],
+  weight: ['400', '700'],
   variable: '--font-mono',
-  display: 'swap',
-});
-
-const caveat = Caveat({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-caveat',
-  display: 'swap',
-});
-
-const marker = Permanent_Marker({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-marker',
-  display: 'swap',
-});
-
-const kalam = Kalam({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-kalam',
   display: 'swap',
 });
 
@@ -73,20 +42,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${display.variable} ${body.variable} ${mono.variable} ${caveat.variable} ${marker.variable} ${kalam.variable}`}
-    >
-      <body className="bg-bg text-ink antialiased">
-        <AmbientLayer />
+    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+      <body className="antialiased" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
         <LenisProvider>
-          <Preloader />
-          <Nav />
-          <ProgressScrubber />
           {children}
         </LenisProvider>
-        <GrainOverlay />
-        <CustomCursor />
       </body>
     </html>
   );
