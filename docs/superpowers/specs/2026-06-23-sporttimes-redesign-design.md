@@ -102,7 +102,9 @@ Three CSS custom-property sets, scoped per section via `data-palette="dark" | "p
 }
 ```
 
-**Token coverage invariant:** every palette must define `--bg`, `--surface`, `--surface-2`, `--hairline`, `--text`, `--text-dim`, `--text-mute`, `--accent`, `--turf`, `--chalk`, `--grid`. Reusable components (`<PitchGrid>`, `<PitchFill>`, `<NotifyForm>`) may read any of these and must work in all three palettes.
+**Token coverage invariant:** every palette must define `--bg`, `--surface`, `--surface-2`, `--hairline`, `--text`, `--text-dim`, `--text-mute`, `--accent`, `--turf`, `--chalk`, `--grid`. **Cross-palette components** — `<PitchGrid>` (used on dark/paper/lime) and `<NotifyForm>` (used on dark/lime) — read these tokens and must render correctly in every palette they appear in. **Single-palette components** — `<PitchFill>` is rendered only inside Hero (`dark`), so it may assume `--accent` is lime. If a future change moves PitchFill to another palette, audit the assumption first.
+
+**Intentional collapses on lime:** `--bg` and `--surface` are both `#C6F24E` — there's no tonal step between the section background and an unstyled card surface on lime. The only step is `--surface-2` (`#BBE842`). This is fine for Phase 2 because the Launching-soon panel uses centered text + an inset form, not free-standing cards. If Phase 2-or-later adds a card on lime, it must use `--surface-2` explicitly.
 
 ### 4.3 Typography
 
@@ -112,7 +114,13 @@ Three CSS custom-property sets, scoped per section via `data-palette="dark" | "p
 | Body | Inter (next/font/google) | All prose. `17px / 1.55`. Max measure 62ch. |
 | Mono | Space Mono (next/font/google) | **Only** bracket eyebrows like `[ the problem ]`, status pills, captions. Always `--text-mute` color. Never on headings, never lime. |
 
-CSS variables (`--font-display`, `--font-body`, `--font-mono`) repoint to the new families. Existing utility class names in `app/globals.css` keep working — minimal downstream churn. **Font fallback chains must be updated too** (e.g., `font-family: var(--font-mono), 'Space Mono', monospace;`) — leaving `JetBrains Mono` in the fallback will pass review but render the wrong font on machines without Space Mono cached.
+CSS variables (`--font-display`, `--font-body`, `--font-mono`) repoint to the new families. Existing utility class names in `app/globals.css` keep working — minimal downstream churn.
+
+**Font fallback chains must be updated in two places:**
+1. `app/globals.css` (line 86 of the current file): the `.font-mono` utility's `font-family` fallback chain.
+2. `tailwind.config.ts` (line 25 of the current file): `theme.extend.fontFamily.mono` fallback array.
+
+Both currently name `'JetBrains Mono'` as a fallback. Replace with `'Space Mono'`. Leaving `JetBrains Mono` in either spot will pass review but render the wrong font on machines without Space Mono cached, and the Tailwind utility class is invoked from many surviving components.
 
 The current condensed-italic ALL-CAPS H1 style is removed.
 
@@ -144,7 +152,7 @@ Single `<PitchGrid />` component (`components/ui/PitchGrid.tsx`) renders the cha
 - Optional `parallax` prop (`false | 0.2..0.4`) → wraps render in `<Parallax>`.
 - Static under `prefers-reduced-motion`.
 
-Replaces the existing 3D `HeroScene` (Three.js).
+Replaces the now-deleted 3D `HeroScene`.
 
 ### 4.6 Deletion list
 
@@ -176,7 +184,23 @@ public/models/                              (empty)
 public/textures/                            (empty)
 ```
 
-`LenisProvider.tsx` is kept. `lib/constants.ts` is kept and pruned — `APP_NAME`, `APP_NAME_DISPLAY`, `APP_LOCATION`, `APP_TIMEZONE` stay; the `COLORS` object and `CHAPTERS` array are removed (the new system reads colors from CSS tokens, and chapters disappear with the old narrative).
+**Rewritten in place** (file kept, content fully replaced; **not** in the deletion list above):
+
+```
+components/sections/Hero.tsx                (Phase 1)
+components/sections/Problem.tsx             (Phase 1)
+components/sections/Footer.tsx              (Phase 2)
+app/page.tsx                                (Phase 1)
+app/globals.css                             (Phase 1)
+app/privacy/page.tsx                        (Phase 1 — palette refresh only)
+app/terms/page.tsx                          (Phase 1 — palette refresh only)
+tailwind.config.ts                          (Phase 1 — font fallbacks)
+next.config.mjs                             (Phase 1 — images.formats)
+lib/constants.ts                            (Phase 1 — drop COLORS + CHAPTERS)
+package.json                                (Phase 1 uninstall, Phase 2 install)
+```
+
+`LenisProvider.tsx` is kept untouched. `lib/constants.ts` keeps `APP_NAME`, `APP_NAME_DISPLAY`, `APP_LOCATION`, `APP_TIMEZONE`; the `COLORS` object and `CHAPTERS` array are dropped (the new system reads colors from CSS tokens, and chapters disappear with the old narrative).
 
 ### 4.7 File structure after refactor
 
@@ -318,7 +342,7 @@ const POS433: ReadonlyArray<readonly [number, number]> = [
   1. Scroll-into-view via IntersectionObserver (`threshold: 0.3`).
   2. `window.load + 400ms`.
   Internal `hasFired` boolean guards against double-firing if both events race. Because `<PitchFill>` is `next/dynamic({ ssr: false })`, the component mounts post-hydration; on desktop where the Hero is in view at first paint, the IntersectionObserver typically fires first.
-- Order: GK → DEF (left→right) → MID (left→right) → FWD (LF, RF, CF).
+- Order: GK → DEF (left→right) → MID (left→right) → FWD (LF, RF) → CF.
 - Stagger: 230ms between slots. Total sequence ≈ 2.5s.
 - Each slot fade-in: dashed circle shrinks to ~0.4 opacity, lime ring + dot pop in with `scale 0.6 → 1`, 240ms, ease `power3.out`.
 - Counter (mono, dark-screen `--text-dim`, final tick lime): types `0/11 → 11/11` in sync with slot fills.
@@ -423,7 +447,7 @@ const POS433: ReadonlyArray<readonly [number, number]> = [
 
 **Section close:** 4–6vh gradient fade from `--bg` (paper) to next section's `--bg` (dark) so the dark Roadmap doesn't slam in at a hard edge. The fade is a static CSS gradient, so it is unaffected by `prefers-reduced-motion`.
 
-**Body type token assignment on paper:** prose body uses `--text-dim` (`#5A5F57` on `#EDEFEA`, contrast ratio ~5.46:1, passes WCAG AA for body text ≥ 18px and large body at 17px). Headlines use `--text`. Eyebrows and captions use `--text-mute`. Verify with a contrast tool at PR time.
+**Body type token assignment on paper:** prose body uses `--text-dim` (`#5A5F57` on `#EDEFEA`, contrast ratio ~5.46:1, passes WCAG AA). Headlines use `--text`. Eyebrows and captions use `--text-mute`. Verify with a contrast tool at PR time. The same ratio is referenced in §8.1; the canonical value is 5.46:1.
 
 ### 5.6 Roadmap — horizontal scrub timeline
 
@@ -613,7 +637,7 @@ Framer Motion `<AnimatePresence mode="wait">` handles state-to-state transitions
 - Tap targets ≥ 44×44px throughout. Verified manually on form submit, social links, Nav CTA, Sticky CTA.
 - Visible focus rings: `outline: 2px solid var(--accent); outline-offset: 2px;` — works across all three palettes (lime on dark, ink on paper, ink on lime).
 - Never `outline: none` without a replacement.
-- Color contrast ≥ AA: body type on paper (`#5A5F57` on `#EDEFEA` ≈ 5.2:1, passes), ink on lime (`#0B0D10` on `#C6F24E` ≈ 15:1, passes), all dark-section combos already pass.
+- Color contrast ≥ AA: body type on paper (`#5A5F57` on `#EDEFEA` ≈ 5.46:1, passes), ink on lime (`#0B0D10` on `#C6F24E` ≈ 15:1, passes), all dark-section combos already pass.
 
 ### 8.2 Performance
 
@@ -644,21 +668,24 @@ Framer Motion `<AnimatePresence mode="wait">` handles state-to-state transitions
 
 ### Phase 1 — Foundation + opening half
 
-A single mergeable PR delivering, in roughly this order:
+A single mergeable PR delivering, in this order. **The ordering matters** — the current `Hero.tsx` imports `components/three/HeroScene` and the current `Problem.tsx` imports `ChapterMarker`, `CornerBrackets`, etc. Deleting those imported files before the consumers are rewritten leaves the working tree in a non-buildable state. The order below rewrites consumers before deleting their dependencies.
 
-1. **Tokens + type:** rewrite `app/globals.css` with the three palette sets from §4.2 and the type system from §4.3. Update font fallback chains. Add `next/font` Space Grotesk + Inter + Space Mono loaders in `app/layout.tsx`.
-2. **Dependency surgery:** `npm uninstall @react-three/fiber @react-three/drei three`. Verify `package.json` and `package-lock.json` updated.
-3. **Delete the deletion list** (§4.6) — all files listed, including `Download.tsx`, `Nav.tsx` (the old one in `components/ui/`), `MagneticButton.tsx`, the entire `components/three/` directory, and the empty `public/models/` + `public/textures/` directories.
-4. **Move source screenshots:** `git mv screens/ docs/source-assets/screens/` to clean up repo root.
-5. **Rewrite `app/page.tsx`:** new section order. For sections that don't yet exist (Roadmap, LaunchingSoon, StayConnected, Footer), use **height-preserving placeholder components** (`min-h: 100vh`, empty `data-palette="dark"` blocks with a single mono "// Phase 2" label) so the page renders end-to-end and the checkpoint is walkable.
-6. **Prune `lib/constants.ts`:** drop `COLORS` and `CHAPTERS`; keep `APP_NAME`, `APP_NAME_DISPLAY`, `APP_LOCATION`, `APP_TIMEZONE`.
-7. **Refresh `app/privacy/page.tsx` and `app/terms/page.tsx`:** change `data-palette="hero"` → `data-palette="dark"`, swap any inline hex colors for tokens. No content changes.
-8. **Motion primitives:** `<Reveal>`, `<Parallax>`, `<PitchGrid>` in `components/ui/`.
-9. **Signature animation:** `<PitchFill>` (§5.3).
-10. **Sections (Phase 1 set):** `Nav.tsx` (§5.1), `Hero.tsx` (§5.2), `Problem.tsx` (§5.4), `Solution.tsx` (§5.5).
-11. **Screenshots:** crop 4 from `docs/source-assets/screens/`, export to `public/screens/01-community.png` … `04-jump-in.png` per §5.5.
-12. **Configure `next.config.mjs`:** add `images: { formats: ['image/avif', 'image/webp'] }`.
-13. **Build green:** `npm run lint && npx tsc --noEmit && npm run build` must all pass before PR open.
+1. **Tokens + type:** rewrite `app/globals.css` with the three palette sets from §4.2 and the type system from §4.3. Add `next/font` Space Grotesk + Inter + Space Mono loaders in `app/layout.tsx`. Update font fallback chains in **both** `app/globals.css` and `tailwind.config.ts`.
+2. **Configure `next.config.mjs`:** add `images: { formats: ['image/avif', 'image/webp'] }`.
+3. **Motion primitives:** `<Reveal>`, `<Parallax>`, `<PitchGrid>` in `components/ui/`. (Built early — Hero and Problem need them.)
+4. **Signature animation:** `<PitchFill>` (§5.3).
+5. **New section: `Nav.tsx`** (§5.1) at `components/sections/Nav.tsx`.
+6. **Rewrite-in-place: `Hero.tsx`** (§5.2). After this step, the file no longer imports `HeroScene`, `MagneticButton`, `CornerBrackets`, etc.
+7. **Rewrite-in-place: `Problem.tsx`** (§5.4). After this step, the file no longer imports `CornerBrackets` etc.
+8. **New section: `Solution.tsx`** (§5.5).
+9. **Rewrite `app/page.tsx`:** new section order. Imports `Nav`, `Hero`, `Problem`, `Solution`, and uses **height-preserving placeholder components** (`min-h: 100vh`, empty `data-palette="dark"` blocks with a single mono "// Phase 2" label) for Roadmap, LaunchingSoon, StayConnected, and Footer so the page renders end-to-end and the checkpoint is walkable.
+10. **Refresh `app/privacy/page.tsx` and `app/terms/page.tsx`:** change `data-palette="hero"` → `data-palette="dark"`, swap any inline hex colors for tokens. No content changes.
+11. **Prune `lib/constants.ts`:** drop `COLORS` and `CHAPTERS`; keep `APP_NAME`, `APP_NAME_DISPLAY`, `APP_LOCATION`, `APP_TIMEZONE`.
+12. **Now delete** the deletion list (§4.6) — every file listed, including `Download.tsx`, `Nav.tsx` (the old one in `components/ui/`), `MagneticButton.tsx`, the entire `components/three/` directory, and the empty `public/models/` + `public/textures/` directories. At this point nothing imports them.
+13. **Dependency surgery:** `npm uninstall @react-three/fiber @react-three/drei three`. Verify `package.json` and `package-lock.json` updated. (Done after deletion so the lockfile reflects an actually-unused state.)
+14. **Move source screenshots:** `git mv screens/ docs/source-assets/screens/` to clean up repo root.
+15. **Screenshots:** crop 4 from `docs/source-assets/screens/`, export to `public/screens/01-community.png` … `04-jump-in.png` per §5.5.
+16. **Build green:** `npm run lint && npx tsc --noEmit && npm run build` must all pass before PR open. This is the final gate — if step 12 or 13 broke an import that survived, you'd see it here.
 
 ### Checkpoint
 
