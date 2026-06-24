@@ -1,34 +1,22 @@
+import dynamic from 'next/dynamic';
 import Nav from '@/components/sections/Nav';
 import Hero from '@/components/sections/Hero';
 import Problem from '@/components/sections/Problem';
 import Solution from '@/components/sections/Solution';
+import StickyMobileCTA from '@/components/ui/StickyMobileCTA';
 
-function Phase2Placeholder({ id, label }: { id: string; label: string }) {
-  return (
-    <section
-      id={id}
-      data-palette="dark"
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderTop: '1px solid var(--hairline)',
-      }}
-    >
-      <span
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
-          letterSpacing: '0.22em',
-          color: 'var(--text-mute)',
-        }}
-      >
-        {label}
-      </span>
-    </section>
-  );
-}
+const Roadmap = dynamic(() => import('@/components/sections/Roadmap'), {
+  loading: () => <div style={{ minHeight: '100vh' }} aria-hidden />,
+});
+const LaunchingSoon = dynamic(() => import('@/components/sections/LaunchingSoon'), {
+  loading: () => <div style={{ minHeight: '90vh' }} aria-hidden />,
+});
+const StayConnected = dynamic(() => import('@/components/sections/StayConnected'), {
+  loading: () => <div style={{ minHeight: '80vh' }} aria-hidden />,
+});
+const Footer = dynamic(() => import('@/components/sections/Footer'), {
+  loading: () => <div style={{ minHeight: '120px' }} aria-hidden />,
+});
 
 export default function Page() {
   return (
@@ -38,11 +26,12 @@ export default function Page() {
         <Hero />
         <Problem />
         <Solution />
-        <Phase2Placeholder id="roadmap" label="// Phase 2 — roadmap" />
-        <Phase2Placeholder id="launching-soon" label="// Phase 2 — launching-soon" />
-        <Phase2Placeholder id="stay-connected" label="// Phase 2 — stay-connected" />
-        <Phase2Placeholder id="footer" label="// Phase 2 — footer" />
+        <Roadmap />
+        <LaunchingSoon />
+        <StayConnected />
+        <Footer />
       </main>
+      <StickyMobileCTA />
     </>
   );
 }
