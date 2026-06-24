@@ -2,12 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #050505;
-  --ink: #F5F5F0;
-  --muted: rgba(245, 245, 240, 0.6);
-  --lime: #D4FF3A;
+/* ===== Palette tokens (3 sets, scoped via data-palette) =====
+   Default to the dark palette so sections without an explicit
+   data-palette attribute still render readably. */
+
+:root,
+[data-palette="dark"] {
+  --bg: #0B0D10;
+  --surface: #14171C;
+  --surface-2: #1B1F26;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --text: #F2F4F7;
+  --text-dim: #9BA1AA;
+  --text-mute: #6B7079;
+  --accent: #C6F24E;
+  --turf: #0E1714;
+  --chalk: rgba(255, 255, 255, 0.14);
+  --grid: rgba(255, 255, 255, 0.07);
 }
+
+[data-palette="paper"] {
+  --bg: #EDEFEA;
+  --surface: #FFFFFF;
+  --surface-2: #F4F5F0;
+  --hairline: rgba(11, 13, 16, 0.06);
+  --text: #0B0D10;
+  --text-dim: #5A5F57;
+  --text-mute: #8A8F86;
+  --accent: #0B0D10;
+  --turf: #DDE3D5;
+  --chalk: rgba(11, 13, 16, 0.14);
+  --grid: rgba(11, 13, 16, 0.08);
+}
+
+[data-palette="lime"] {
+  --bg: #C6F24E;
+  --surface: #C6F24E;
+  --surface-2: #BBE842;
+  --hairline: rgba(11, 13, 16, 0.18);
+  --text: #0B0D10;
+  --text-dim: rgba(11, 13, 16, 0.7);
+  --text-mute: rgba(11, 13, 16, 0.55);
+  --accent: #0B0D10;
+  --turf: #BBE842;
+  --chalk: rgba(11, 13, 16, 0.18);
+  --grid: rgba(11, 13, 16, 0.12);
+}
+
+/* ===== Base + reset ===== */
 
 * {
   -webkit-font-smoothing: antialiased;
@@ -16,78 +58,59 @@
 
 html {
   background: var(--bg);
-  color: var(--ink);
+  color: var(--text);
   scroll-behavior: auto; /* Lenis handles smooth scroll */
 }
 
 body {
   background: var(--bg);
-  color: var(--ink);
+  color: var(--text);
   overflow-x: hidden;
+  font-family: var(--font-body), Inter, system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+/* Each section paints its own palette background so the global body
+   doesn't bleed at section boundaries. */
+section[data-palette] {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ===== Lenis smooth scroll bridge ===== */
+
+html.lenis,
+html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-scrolling iframe { pointer-events: none; }
+
+/* ===== Type primitives ===== */
+
+.headline-display {
+  font-family: var(--font-display), 'Space Grotesk', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+}
+
+.font-body {
   font-family: var(--font-body), Inter, system-ui, sans-serif;
 }
 
-/* Lenis smooth scroll classes */
-html.lenis,
-html.lenis body {
-  height: auto;
+.font-mono {
+  font-family: var(--font-mono), 'Space Mono', monospace;
 }
 
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-
-.lenis.lenis-stopped {
-  overflow: hidden;
-}
-
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
-}
-
-/* Display headline base — Inter 900, modern geometric sans */
-.headline-display {
-  font-family: var(--font-display), 'Inter', system-ui, sans-serif;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 0.92;
-}
-
-/* Headline letters — proximity hover is driven by JS (see Hero.tsx).
-   Only the initial display and transitions-on-leave live here. */
-.line-hover .letter {
-  display: inline-block;
-  will-change: color, transform;
-}
-
-/* Beat 3 CTA — continuous lime glow pulse */
-@keyframes ctaGlowPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 rgba(212, 255, 58, 0),
-      0 0 14px rgba(212, 255, 58, 0.25);
-  }
-  50% {
-    box-shadow:
-      0 0 0 rgba(212, 255, 58, 0),
-      0 0 36px rgba(212, 255, 58, 0.55);
-  }
-}
-.cta-glow {
-  animation: ctaGlowPulse 2s ease-in-out infinite;
-}
-
-/* Mono eyebrow base */
+/* Bracketed eyebrow label — used everywhere as the small caps marker */
 .mono-eyebrow {
-  font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  font-family: var(--font-mono), 'Space Mono', monospace;
+  text-transform: lowercase;
+  letter-spacing: 0.18em;
   font-size: 11px;
-  color: var(--lime);
+  color: var(--text-mute);
 }
 
 @media (min-width: 768px) {
@@ -96,61 +119,34 @@ html.lenis body {
   }
 }
 
-/* Mask reveal helper — used for line-by-line GSAP reveals */
-.mask-line {
-  display: block;
-  overflow: hidden;
-  line-height: 0.9;
+/* ===== Focus ring (always visible, palette-aware) ===== */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
-.mask-line > span {
-  display: block;
-  will-change: transform;
+/* ===== Reduced-motion override ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-/* 12-column grid utility */
+/* ===== 12-col grid helper (used by sections) ===== */
+
 .grid-12 {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: 24px;
-  width: 100%;
+  gap: 24px;
+  padding-left: clamp(20px, 4vw, 64px);
+  padding-right: clamp(20px, 4vw, 64px);
   max-width: 1440px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 24px;
-  padding-right: 24px;
-}
-
-@media (max-width: 767px) {
-  .grid-12 {
-    column-gap: 16px;
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-}
-
-/* Section wrapper */
-.section-pad {
-  padding-top: clamp(8rem, 14vh, 12rem);
-  padding-bottom: clamp(8rem, 14vh, 12rem);
-}
-
-/* Reduce motion respect */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* ───── Responsive section tuning ───── */
-
-/* Problem section pin duration — desktop-only pin (≥1280px).
-   Anything below collapses to a 100vh frame showing beat 1 statically. */
-:root { --problem-height: 350vh; }
-@media (max-width: 1279px) {
-  :root { --problem-height: 100vh; }
 }
