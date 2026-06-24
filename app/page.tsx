@@ -1,54 +1,48 @@
-import dynamic from 'next/dynamic';
+import Nav from '@/components/sections/Nav';
 import Hero from '@/components/sections/Hero';
 import Problem from '@/components/sections/Problem';
+import Solution from '@/components/sections/Solution';
 
-// Below-the-fold sections — code-split so the initial JS payload
-// stays lean. Each has a height-preserving fallback to avoid layout
-// shift while its chunk loads on approach.
-const HowItWorks = dynamic(
-  () => import('@/components/sections/HowItWorks'),
-  {
-    loading: () => <SectionFallback minH="100vh" />,
-  }
-);
-const Sports = dynamic(() => import('@/components/sections/Sports'), {
-  loading: () => <SectionFallback minH="100vh" />,
-});
-const LockerRoom = dynamic(
-  () => import('@/components/sections/LockerRoom'),
-  {
-    loading: () => <SectionFallback minH="100vh" />,
-  }
-);
-const Download = dynamic(() => import('@/components/sections/Download'), {
-  loading: () => <SectionFallback minH="100vh" />,
-});
-const Footer = dynamic(() => import('@/components/sections/Footer'), {
-  loading: () => <SectionFallback minH="60vh" />,
-});
-
-function SectionFallback({ minH }: { minH: string }) {
+function Phase2Placeholder({ id, label }: { id: string; label: string }) {
   return (
-    <div
-      aria-hidden
+    <section
+      id={id}
+      data-palette="dark"
       style={{
-        minHeight: minH,
-        width: '100%',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderTop: '1px solid var(--hairline)',
       }}
-    />
+    >
+      <span
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          letterSpacing: '0.22em',
+          color: 'var(--text-mute)',
+        }}
+      >
+        {label}
+      </span>
+    </section>
   );
 }
 
 export default function Page() {
   return (
-    <main className="relative">
-      <Hero />
-      <Problem />
-      <HowItWorks />
-      <Sports />
-      <LockerRoom />
-      <Download />
-      <Footer />
-    </main>
+    <>
+      <Nav />
+      <main>
+        <Hero />
+        <Problem />
+        <Solution />
+        <Phase2Placeholder id="roadmap" label="// Phase 2 — roadmap" />
+        <Phase2Placeholder id="launching-soon" label="// Phase 2 — launching-soon" />
+        <Phase2Placeholder id="stay-connected" label="// Phase 2 — stay-connected" />
+        <Phase2Placeholder id="footer" label="// Phase 2 — footer" />
+      </main>
+    </>
   );
 }
