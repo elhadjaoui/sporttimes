@@ -11,7 +11,7 @@ export default function TermsPage() {
   return (
     <main
       className="relative w-full"
-      data-palette="hero"
+      data-palette="dark"
       style={{
         minHeight: '100vh',
         paddingTop: 'clamp(7rem, 12vh, 10rem)',
@@ -22,16 +22,16 @@ export default function TermsPage() {
         <div className="col-span-12 md:col-start-2 md:col-span-8">
           <Link
             href="/"
-            data-cursor="hover"
+
             className="mono-eyebrow inline-flex items-center gap-2 mb-8"
-            style={{ color: 'var(--lime)', letterSpacing: '0.2em' }}
+            style={{ color: 'var(--accent)', letterSpacing: '0.2em' }}
           >
             ← Back to home
           </Link>
 
           <div className="mono-eyebrow mb-4">[ Legal · Terms ]</div>
           <h1
-            className="headline-display uppercase text-ink mb-6"
+            className="headline-display mb-6"
             style={{
               fontSize: 'clamp(2.25rem, 5vw, 4rem)',
               lineHeight: 0.98,
@@ -140,8 +140,8 @@ export default function TermsPage() {
               Legal questions, disputes, or account issues? Write to{' '}
               <a
                 href="mailto:contact@sporttimes.app"
-                data-cursor="hover"
-                style={{ color: 'var(--lime)', textDecoration: 'underline' }}
+
+                style={{ color: 'var(--accent)', textDecoration: 'underline' }}
               >
                 contact@sporttimes.app
               </a>
@@ -164,7 +164,7 @@ function Section({
   return (
     <section style={{ marginBottom: '2.25rem' }}>
       <h2
-        className="headline-display uppercase text-ink"
+        className="headline-display"
         style={{
           fontSize: 'clamp(1.1rem, 1.6vw, 1.35rem)',
           letterSpacing: '-0.015em',
