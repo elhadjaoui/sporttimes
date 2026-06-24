@@ -1641,7 +1641,7 @@ export default function Page() {
 
 Run: `npx tsc --noEmit`
 
-Expected: a few remaining errors from `components/sections/{HowItWorks,LockerRoom,Sports,Footer,Download,ChatChaos}.tsx` (those files are still on disk, still importing deleted UI components). These vanish in Task 16. Errors from `app/page.tsx` itself: should be **zero**.
+Expected: a few remaining errors from `components/sections/{HowItWorks,LockerRoom,Sports,Footer,Download,ChatChaos}.tsx` (those files are still on disk, still importing deleted UI components). These vanish in Task 17. Errors from `app/page.tsx` itself: should be **zero**.
 
 - [ ] **Step 3: Open `http://localhost:3000` and visually confirm**
 
