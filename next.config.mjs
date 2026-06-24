@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['three'],
-  experimental: {
-    optimizePackageImports: ['@react-three/drei'],
+  images: {
+    formats: ['image/avif', 'image/webp'],
   },
   async headers() {
     return [
