@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import MagneticButton from '@/components/ui/MagneticButton';
-import ChapterMarker from '@/components/ui/ChapterMarker';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 import CornerBrackets from '@/components/ui/CornerBrackets';
 import { getLenis } from '@/hooks/useLenis';
@@ -81,33 +80,18 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  // Slow fade-in of the 3D scene from black — triggered when the preloader
-  // curtain finishes opening (or after a max delay if the event never fires).
+  // Slow fade-in of the 3D scene from black — fires once on mount now that
+  // the Preloader has been removed (no more `preloader-done` event to wait on).
   useEffect(() => {
     if (!sceneRef.current) return;
     const el = sceneRef.current;
     el.style.opacity = '0';
-
-    let fired = false;
-    const fadeIn = () => {
-      if (fired) return;
-      fired = true;
-      gsap.to(el, {
-        opacity: 1,
-        duration: 1.8,
-        ease: 'power2.out',
-        delay: 0.15,
-      });
-    };
-
-    window.addEventListener('preloader-done', fadeIn);
-    // Fallback: if the preloader was already dismissed / isn't present, fade in anyway
-    const fallback = window.setTimeout(fadeIn, 3500);
-
-    return () => {
-      window.removeEventListener('preloader-done', fadeIn);
-      window.clearTimeout(fallback);
-    };
+    gsap.to(el, {
+      opacity: 1,
+      duration: 1.8,
+      ease: 'power2.out',
+      delay: 0.3,
+    });
   }, []);
 
   // Proximity-based hover on headline letters. The nearer the cursor, the
@@ -179,7 +163,7 @@ export default function Hero() {
       ref={rootRef}
       id="top"
       data-progress-section
-      data-progress-label="01 · Welcome"
+      data-progress-label="Welcome"
       data-palette="hero"
       className="relative h-screen w-full overflow-hidden"
     >
@@ -216,11 +200,10 @@ export default function Hero() {
         <div className="col-span-12 xl:col-start-1 xl:col-span-7 h-full flex flex-col justify-center pt-24 pb-24 pointer-events-auto">
           <div
             className="hero-fade mono-eyebrow mb-5 md:mb-7 group inline-flex items-center gap-3 cursor-default"
-            data-cursor="hover"
           >
             <span className="block h-px w-6 bg-lime/60 transition-all duration-500 group-hover:w-12 group-hover:bg-lime" />
             <span className="transition-colors duration-500 group-hover:text-lime">
-              [ Made for players · by players ]
+              Made for players · by players
             </span>
           </div>
 
@@ -229,7 +212,6 @@ export default function Hero() {
               <span
                 key={i}
                 className="mask-line hero-line line-hover cursor-default"
-                data-cursor="blend"
               >
                 <span className="line-inner whitespace-nowrap">
                   {line.split('').map((char, j) => (
@@ -256,11 +238,6 @@ export default function Hero() {
             </MagneticButton>
           </div>
         </div>
-      </div>
-
-      {/* Bottom-left chapter marker */}
-      <div className="absolute z-20 bottom-6 md:bottom-10 left-6 md:left-10 hero-fade pointer-events-none">
-        <ChapterMarker num="01" label="Welcome" />
       </div>
 
       {/* Bottom-right scroll indicator — desktop only */}

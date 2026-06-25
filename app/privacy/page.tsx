@@ -22,14 +22,14 @@ export default function PrivacyPage() {
         <div className="col-span-12 md:col-start-2 md:col-span-8">
           <Link
             href="/"
-            data-cursor="hover"
+
             className="mono-eyebrow inline-flex items-center gap-2 mb-8"
             style={{ color: 'var(--lime)', letterSpacing: '0.2em' }}
           >
             ← Back to home
           </Link>
 
-          <div className="mono-eyebrow mb-4">[ Legal · Privacy ]</div>
+          <div className="mono-eyebrow mb-4">Legal · Privacy</div>
           <h1
             className="headline-display uppercase text-ink mb-6"
             style={{
@@ -126,7 +126,7 @@ export default function PrivacyPage() {
               Questions, data requests, or complaints? Write to{' '}
               <a
                 href="mailto:contact@sporttimes.app"
-                data-cursor="hover"
+
                 style={{ color: 'var(--lime)', textDecoration: 'underline' }}
               >
                 contact@sporttimes.app

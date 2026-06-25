@@ -2,11 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Dark palette (existing — page default) ===== */
 :root {
   --bg: #050505;
   --ink: #F5F5F0;
   --muted: rgba(245, 245, 240, 0.6);
   --lime: #D4FF3A;
+}
+
+/* ===== Paper palette (new — light sections) =====
+   Scope these to any section / element that opts in via data-palette="paper". */
+[data-palette="paper"] {
+  --bg: #EDEFEA;
+  --ink: #0B0D10;
+  --muted: #5A5F57;
+  /* paper-specific aliases (used by .card + scoped helpers) */
+  --paper: #EDEFEA;
+  --paper-ink: #0B0D10;
+  --paper-dim: #5A5F57;
+  --paper-line: rgba(11, 13, 16, 0.07);
+}
+
+/* ===== Standardized component tokens ===== */
+:root {
+  --card-radius: 16px;
+  /* Soft shadow — only paint on paper backgrounds, never on dark.
+     Applied via .shadow-soft (utility) or var(--shadow-soft) (inline). */
+  --shadow-soft: 0 20px 40px rgba(11, 13, 16, 0.06);
 }
 
 * {
@@ -27,27 +49,22 @@ body {
   font-family: var(--font-body), Inter, system-ui, sans-serif;
 }
 
+/* Paper-palette sections paint their own bg so they break the dark body. */
+section[data-palette="paper"],
+[data-palette="paper"] {
+  background: var(--bg);
+  color: var(--ink);
+}
+
 /* Lenis smooth scroll classes */
 html.lenis,
 html.lenis body {
   height: auto;
 }
-
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
-}
-
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-
-.lenis.lenis-stopped {
-  overflow: hidden;
-}
-
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
-}
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-scrolling iframe { pointer-events: none; }
 
 /* Display headline base — Inter 900, modern geometric sans */
 .headline-display {
@@ -81,7 +98,8 @@ html.lenis body {
   animation: ctaGlowPulse 2s ease-in-out infinite;
 }
 
-/* Mono eyebrow base */
+/* Mono eyebrow base — brackets dropped per chrome refactor.
+   Bracketed text in JSX should have its [ ] characters stripped too. */
 .mono-eyebrow {
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
   text-transform: uppercase;
@@ -89,11 +107,10 @@ html.lenis body {
   font-size: 11px;
   color: var(--lime);
 }
+[data-palette="paper"] .mono-eyebrow { color: var(--paper-dim); }
 
 @media (min-width: 768px) {
-  .mono-eyebrow {
-    font-size: 12px;
-  }
+  .mono-eyebrow { font-size: 12px; }
 }
 
 /* Mask reveal helper — used for line-by-line GSAP reveals */
@@ -102,7 +119,6 @@ html.lenis body {
   overflow: hidden;
   line-height: 0.9;
 }
-
 .mask-line > span {
   display: block;
   will-change: transform;
@@ -135,6 +151,50 @@ html.lenis body {
   padding-bottom: clamp(8rem, 14vh, 12rem);
 }
 
+/* ===== Standardized card + soft shadow utility ===== */
+.card {
+  border-radius: var(--card-radius);
+}
+[data-palette="paper"] .card,
+[data-palette="paper"].card {
+  background: #FFFFFF;
+  border: 1px solid var(--paper-line);
+  box-shadow: var(--shadow-soft);
+}
+
+.shadow-soft { box-shadow: var(--shadow-soft); }
+
+/* ===== One reusable scroll-reveal utility =====
+   Apply data-reveal to any element. The page-level RevealObserver client
+   component (mounted once in layout.tsx) wires up IntersectionObserver and
+   adds the .is-revealed class on first intersect. Children with [data-reveal-child]
+   inherit a 60ms stagger driven by an inline --reveal-i index. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 320ms cubic-bezier(.22, .61, .36, 1),
+    transform 320ms cubic-bezier(.22, .61, .36, 1);
+  will-change: opacity, transform;
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+[data-reveal] [data-reveal-child] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 320ms cubic-bezier(.22, .61, .36, 1),
+    transform 320ms cubic-bezier(.22, .61, .36, 1);
+  transition-delay: calc(var(--reveal-i, 0) * 60ms);
+  will-change: opacity, transform;
+}
+[data-reveal].is-revealed [data-reveal-child] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Reduce motion respect */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -143,6 +203,11 @@ html.lenis body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  [data-reveal],
+  [data-reveal] [data-reveal-child] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 

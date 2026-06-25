@@ -27,7 +27,7 @@ const PANELS: Panel[] = [
   {
     id: 'football',
     palette: 'football',
-    eyebrow: '[ Football ]',
+    eyebrow: 'Football',
     accent: '#D4FF3A',
     headline: ['See your team.', 'Claim your spot.', 'Play.'],
     body:
@@ -38,7 +38,7 @@ const PANELS: Panel[] = [
   {
     id: 'basketball',
     palette: 'basketball',
-    eyebrow: '[ Basketball ]',
+    eyebrow: 'Basketball',
     accent: '#FF6B1A',
     headline: ['Build your five.', 'Reserve the court.', 'Play.'],
     body:
@@ -49,7 +49,7 @@ const PANELS: Panel[] = [
   {
     id: 'handball',
     palette: 'handball',
-    eyebrow: '[ Handball ]',
+    eyebrow: 'Handball',
     accent: '#00E5FF',
     headline: ['Handball,', 'with tools', 'that fit.'],
     body:
@@ -60,7 +60,7 @@ const PANELS: Panel[] = [
   {
     id: 'more',
     palette: 'roadmap',
-    eyebrow: '[ And more ]',
+    eyebrow: 'And more',
     accent: '#D4FF3A',
     headline: ['Your sport', 'is next.'],
     body:
@@ -504,7 +504,7 @@ function PillRow({
         <button
           key={p}
           type="button"
-          data-cursor="hover"
+
           aria-pressed={active === i}
           onMouseEnter={() => {
             pauseUntil.current = performance.now() + 5000;
@@ -592,7 +592,7 @@ function PanelContent({
           className="mono-eyebrow"
           style={{ fontSize: 10, opacity: 0.55 }}
         >
-          [ Chapter 04 · {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')} ]
+          Chapter 04 · {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
         </div>
       </div>
 
@@ -775,7 +775,7 @@ function PanelContent({
                             : 'rgba(212, 255, 58, 0.7)',
                         }}
                       >
-                        [ Coming ]
+                        Coming
                       </span>
                     </button>
                   );
@@ -794,7 +794,7 @@ function PanelContent({
                   lineHeight: 1.5,
                 }}
               >
-                [ The roster keeps growing — vote for your sport in the app ]
+                The roster keeps growing — vote for your sport in the app
               </div>
             </div>
           ) : (
@@ -811,7 +811,7 @@ function PanelContent({
                   <div
                     key={l.name}
                     data-more-label
-                    data-cursor="hover"
+
                     className="absolute cursor-default"
                     style={{
                       left: l.left,
@@ -884,7 +884,7 @@ function PanelContent({
                   color: 'rgba(245,245,240,0.4)',
                 }}
               >
-                [ The roster keeps growing — vote for your sport in the app ]
+                The roster keeps growing — vote for your sport in the app
               </div>
             </div>
           )}
@@ -1163,7 +1163,7 @@ export default function Sports() {
       ref={sectionRef}
       id="sports"
       data-progress-section
-      data-progress-label="04 · The Sports"
+      data-progress-label="The Sports"
       className="sports-section relative w-full"
     >
       <div ref={stickyRef} className="sports-sticky">

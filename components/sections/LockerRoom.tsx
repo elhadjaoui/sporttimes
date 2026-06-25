@@ -319,7 +319,7 @@ function StatusTag({ status }: { status: StatusLevel }) {
             whiteSpace: 'nowrap',
           }}
         >
-          [ in design ]
+          in design
         </div>
       );
     case 'on-roadmap':
@@ -335,7 +335,7 @@ function StatusTag({ status }: { status: StatusLevel }) {
             whiteSpace: 'nowrap',
           }}
         >
-          [ on the roadmap ]
+          on the roadmap
         </div>
       );
     case 'adopted':
@@ -392,7 +392,7 @@ function SeqHeader({
           marginBottom: 8,
         }}
       >
-        [ {seq} / 07 ]
+        {seq} / 07
       </div>
       <div
         style={{
@@ -894,7 +894,7 @@ function ArtifactBody({ feature }: { feature: Feature }) {
               marginBottom: 8,
             }}
           >
-            [ {seq} / 07 ]
+            {seq} / 07
           </div>
           <h3
             style={{
@@ -1090,7 +1090,7 @@ function InfoPanel({ feature }: { feature: Feature }) {
           marginBottom: 6,
         }}
       >
-        [ {feature.seq} / 07 ]
+        {feature.seq} / 07
       </div>
       <div
         style={{
@@ -1306,7 +1306,7 @@ function MobileRoadmap() {
                     color: 'var(--lime, #D4FF3A)',
                   }}
                 >
-                  [ {f.seq} / 07 ]
+                  {f.seq} / 07
                 </span>
                 <StatusTag status={f.status} />
               </div>
@@ -1580,18 +1580,12 @@ export default function LockerRoom() {
       ref={sectionRef}
       id="roadmap-features"
       data-progress-section
-      data-progress-label="05 · Follow the thread"
+      data-progress-label="Follow the thread"
       data-palette="roadmap-warm"
       className="relative w-full section-pad overflow-hidden"
     >
       <div className="grid-12 relative z-[5] mb-10 md:mb-14">
         <div className="col-span-12 md:col-start-2 md:col-span-9">
-          <div
-            className="mono-eyebrow mb-4"
-            style={{ color: 'rgba(255, 215, 160, 0.85)' }}
-          >
-            [ Chapter 05 · Follow the thread ]
-          </div>
           <h2
             className="headline-display uppercase text-ink mb-4"
             style={{
@@ -1666,7 +1660,7 @@ export default function LockerRoom() {
                 }}
                 onHoverStart={() => setHoveredIdx(i)}
                 onHoverEnd={() => setHoveredIdx(null)}
-                data-cursor="hover"
+
               >
                 <ArtifactBody feature={f} />
               </motion.div>

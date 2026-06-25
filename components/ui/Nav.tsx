@@ -1,29 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { APP_NAME_DISPLAY, APP_LOCATION, APP_TIMEZONE } from '@/lib/constants';
+import { APP_NAME_DISPLAY } from '@/lib/constants';
 import MenuOverlay from './MenuOverlay';
 
-function formatTime(d: Date) {
-  return new Intl.DateTimeFormat('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-    timeZone: APP_TIMEZONE,
-  }).format(d);
-}
-
 export default function Nav() {
-  const [now, setNow] = useState<string>('');
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    setNow(formatTime(new Date()));
-    const id = setInterval(() => setNow(formatTime(new Date())), 1000);
-    return () => clearInterval(id);
-  }, []);
 
   return (
     <>
@@ -33,15 +16,9 @@ export default function Nav() {
           <Link
             href="/"
             className="font-display text-base md:text-lg tracking-tightest uppercase leading-none hover:text-lime transition-colors"
-            data-cursor="hover"
           >
             {APP_NAME_DISPLAY}
           </Link>
-
-          {/* Live timestamp */}
-          <div className="hidden xl:block font-mono text-[11px] tracking-[0.2em] uppercase text-ink/60">
-            {APP_LOCATION} · {now}
-          </div>
 
           {/* Menu */}
           <button

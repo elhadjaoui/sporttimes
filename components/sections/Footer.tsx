@@ -29,7 +29,7 @@ function CopyableEmail({ email }: { email: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      data-cursor="hover"
+
       aria-label={`Copy ${email} to clipboard`}
       title={copied ? 'Copied!' : 'Click to copy'}
       style={{
@@ -235,7 +235,7 @@ export default function Footer() {
       ref={rootRef}
       id="footer"
       data-progress-section
-      data-progress-label="07 · Footer"
+      data-progress-label="Footer"
       data-palette="hero"
       className="relative w-full overflow-hidden"
       style={{
@@ -298,7 +298,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.name}
-                data-cursor="hover"
+
                 className="social-link"
                 style={{
                   color: 'rgba(245,245,240,0.6)',
@@ -358,7 +358,7 @@ export default function Footer() {
                 <span
                   key={i}
                   className="footer-line cursor-default"
-                  data-cursor="blend"
+
                   style={{
                     display: 'block',
                     overflow: 'hidden',
@@ -393,7 +393,7 @@ export default function Footer() {
 
             <div className="footer-play-accent">
               <div className="footer-play-eyebrow">
-                [ The match before the match · 2026 ]
+                The match before the match · 2026
               </div>
               <div className="footer-play-stats">
                 <div className="footer-play-stat">
@@ -411,7 +411,7 @@ export default function Footer() {
               </div>
               <a
                 href="#download"
-                data-cursor="hover"
+
                 className="footer-play-cta"
               >
                 Open the app ↗
@@ -460,7 +460,7 @@ export default function Footer() {
               <a
                 key={l.label}
                 href={l.href}
-                data-cursor="hover"
+
                 className="footer-link"
                 style={{
                   color: 'rgba(245,245,240,0.55)',

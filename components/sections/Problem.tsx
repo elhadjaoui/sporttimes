@@ -275,7 +275,7 @@ function MobileProblem() {
           className="mono-eyebrow"
           style={{ color: '#ff6b6b', letterSpacing: '0.25em' }}
         >
-          [ 01 / 03 · The Chaos ]
+          The Chaos
         </div>
         <h2
           className="headline-display uppercase text-ink"
@@ -420,7 +420,7 @@ function MobileProblem() {
           className="mono-eyebrow"
           style={{ color: '#D4FF3A', letterSpacing: '0.25em' }}
         >
-          [ 02 / 03 · The Diagnosis ]
+          The Diagnosis
         </div>
         <h2
           className="headline-display uppercase text-ink"
@@ -497,7 +497,7 @@ function MobileProblem() {
                     borderRadius: 100,
                   }}
                 >
-                  [ {c.tag} ]
+                  {c.tag}
                 </span>
               </div>
               <p
@@ -536,7 +536,7 @@ function MobileProblem() {
             alignSelf: 'center',
           }}
         >
-          [ 03 / 03 · The Verdict ]
+          The Verdict
         </div>
         <h2
           className="headline-display uppercase text-ink"
@@ -940,7 +940,7 @@ export default function Problem() {
       ref={sectionRef}
       id="problem"
       data-progress-section
-      data-progress-label="02 · The Problem"
+      data-progress-label="The Problem"
       data-palette="problem"
       className="problem-section relative w-full"
       style={
@@ -979,9 +979,6 @@ export default function Problem() {
           }}
         />
 
-        {/* Chapter marker (persistent, top-left) */}
-        <ChapterMarker progressRef={progressRef} />
-
         {/* ============================================================
             BEAT 1 — THE CHAOS (right column text block)
             ============================================================ */}
@@ -991,7 +988,7 @@ export default function Problem() {
         >
           <div className="col-span-12 xl:col-start-7 xl:col-span-5 pointer-events-auto px-4 xl:px-0">
             <div className="mono-eyebrow mb-6 text-[#ff6b6b]">
-              01 ── The Chaos
+              The Chaos
             </div>
 
             <blockquote
@@ -1056,7 +1053,7 @@ export default function Problem() {
           style={{ opacity: 0 }}
         >
           <div className="col-span-12 xl:col-start-2 xl:col-span-4 pointer-events-auto px-4 xl:px-0">
-            <div className="mono-eyebrow mb-6 text-lime">02 ── The Diagnosis</div>
+            <div className="mono-eyebrow mb-6 text-lime">The Diagnosis</div>
             <h2
               className="headline-display uppercase text-ink mb-5"
               style={{
@@ -1143,7 +1140,7 @@ export default function Problem() {
                       color: '#ff6b6b',
                     }}
                   >
-                    [ {c.tag} ]
+                    {c.tag}
                   </span>
                 </div>
               ))}
@@ -1159,7 +1156,7 @@ export default function Problem() {
           className="absolute inset-0 z-[35] flex flex-col items-center justify-center pointer-events-none px-6"
           style={{ opacity: 0 }}
         >
-          <div className="mono-eyebrow mb-6 text-lime">03 ── The Verdict</div>
+          <div className="mono-eyebrow mb-6 text-lime">The Verdict</div>
           <h2
             ref={enoughRef}
             className="headline-display uppercase text-ink"
@@ -1271,7 +1268,7 @@ export default function Problem() {
               willChange: 'transform, opacity',
             }}
           >
-            [ Next: what we built ↓ ]
+            Next: what we built ↓
           </div>
         </div>
 
@@ -1437,36 +1434,3 @@ function StatusDot() {
   );
 }
 
-// ===================================================================
-//  Chapter marker — top-left, sticky across beats
-// ===================================================================
-
-function ChapterMarker({
-  progressRef,
-}: {
-  progressRef: React.MutableRefObject<number>;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    let raf = 0;
-    const tick = () => {
-      if (ref.current) {
-        const p = progressRef.current;
-        const label =
-          p < 0.35 ? '01 · The Chaos' : p < 0.70 ? '02 · The Diagnosis' : '03 · The Verdict';
-        ref.current.textContent = `[ Chapter 02 · ${label} ]`;
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [progressRef]);
-  return (
-    <div
-      ref={ref}
-      className="absolute z-[45] top-20 left-6 md:left-10 pointer-events-none font-mono text-[10px] md:text-[11px] tracking-[0.25em] uppercase text-lime"
-    >
-      [ Chapter 02 · The Chaos ]
-    </div>
-  );
-}

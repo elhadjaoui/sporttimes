@@ -286,7 +286,7 @@ function Viz01() {
               textTransform: 'uppercase',
             }}
           >
-            [ Community ]
+            Community
           </div>
           <div className="flex items-baseline gap-2">
             <span
@@ -460,7 +460,7 @@ function Viz01() {
         {/* JOIN button */}
         <button
           type="button"
-          data-cursor="hover"
+
           className="viz1-row viz1-join w-full"
           style={{
             padding: '16px 24px',
@@ -1184,7 +1184,7 @@ function StepRow({
   return (
     <div
       className="group cursor-default"
-      data-cursor="hover"
+
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
       onClick={onClick}
@@ -1257,16 +1257,13 @@ export default function HowItWorks() {
       ref={sectionRef}
       id="how"
       data-progress-section
-      data-progress-label="03 · How It Works"
+      data-progress-label="How It Works"
       data-palette="how"
       className="relative w-full"
       style={{ minHeight: '220vh' }}
     >
       <div className="grid-12 pt-[18vh] relative z-10">
         <div className="col-span-12 md:col-start-2 md:col-span-10">
-          <div className="mono-eyebrow mb-5">
-            [ Chapter 03 · How it works ]
-          </div>
           <h2 className="headline-display uppercase text-ink text-[clamp(2.5rem,6vw,5rem)] leading-[0.95] max-w-[18ch]">
             From discovery to kickoff.
           </h2>

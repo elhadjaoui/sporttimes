@@ -24,7 +24,7 @@ function AppStoreBadge() {
   return (
     <a
       href="#"
-      data-cursor="hover"
+
       className="store-badge"
       aria-label="Download on the App Store"
       style={{
@@ -962,7 +962,7 @@ export default function Download() {
       ref={rootRef}
       id="download"
       data-progress-section
-      data-progress-label="06 · Download"
+      data-progress-label="Download"
       data-palette="download"
       className="relative w-full overflow-hidden"
       style={{ minHeight: '100vh', paddingTop: 'clamp(5rem, 10vh, 8rem)', paddingBottom: 'clamp(5rem, 10vh, 8rem)' }}
@@ -973,10 +973,6 @@ export default function Download() {
           ref={fadeRef}
           className="col-span-12 xl:col-start-2 xl:col-span-7"
         >
-          <div className="mono-eyebrow mb-6 dl-fade">
-            [ Chapter 06 · Download ]
-          </div>
-
           <h2
             ref={headlineRef}
             aria-label="Your next match is already happening."
@@ -991,7 +987,7 @@ export default function Download() {
               <span
                 key={i}
                 className="dl-line cursor-default"
-                data-cursor="blend"
+
                 style={{
                   display: 'block',
                   overflow: 'hidden',
@@ -1061,7 +1057,7 @@ export default function Download() {
                   color: 'var(--lime, #d4ff3a)',
                 }}
               >
-                [ Or scan to download ]
+                Or scan to download
               </div>
             </div>
           </div>
@@ -1089,7 +1085,7 @@ export default function Download() {
           zIndex: 5,
         }}
       >
-        [ Available on iOS and Android ]
+        Available on iOS and Android
       </div>
 
       <style jsx>{`
