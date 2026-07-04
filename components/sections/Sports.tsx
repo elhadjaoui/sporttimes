@@ -1,1273 +1,1134 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import CornerBrackets from '@/components/ui/CornerBrackets';
+import {
+  MdOutlineSportsSoccer,
+  MdOutlineSportsBasketball,
+  MdOutlineSportsVolleyball,
+  MdOutlineSportsHandball,
+  MdOutlineSportsTennis,
+  MdOutlineSportsRugby,
+} from 'react-icons/md';
+import type { IconType } from 'react-icons';
 
 // ===================================================================
-//  Data
+//  Sports — ONE engine, football first, then every team sport.
+//
+//  Layout: 2-column on desktop — copy on the left, engine constellation
+//  on the right. This avoids the constellation overlapping the sub copy
+//  when both compete for the same vertical space.
+//
+//  Background: section is transparent. The global AmbientLayer paints
+//  via its "sports" palette and tweens smoothly between sections, so
+//  every section seam is a single soft ambient tween, not a stack of
+//  per-section paints meeting at a hard line.
+//
+//  Three scrubbed beats:
+//   1. Football only — core + football node on a lime spoke.
+//   2. Expand — spokes draw outward, other sports populate, headline
+//      crossfades to "Engineered for every team sport."
+//   3. Engine in action — per-sport format chips reveal, flowing data
+//      dashes start traveling along every spoke, lime pulses run
+//      outward from the core, engine spec caption appears.
+//
+//  ALL motion is GSAP — no CSS transitions / @keyframes.
 // ===================================================================
 
-type PanelId = 'football' | 'basketball' | 'handball' | 'more';
+const INK = '#F5F5F0';
+const DIM = 'rgba(245, 245, 240, 0.62)';
+const HAIRLINE = 'rgba(245, 245, 240, 0.10)';
+const LIME = '#D4FF3A';
 
-type Panel = {
-  id: PanelId;
-  palette: string;
-  eyebrow: string;
-  accent: string;
-  headline: string[];
-  body: string;
-  pills?: string[];
-  venueKind?: 'football' | 'basketball' | 'handball';
+type Sport = {
+  id: string;
+  name: string;
+  formats: string;
+  Icon: IconType;
 };
 
-const PANELS: Panel[] = [
-  {
-    id: 'football',
-    palette: 'football',
-    eyebrow: '[ Football ]',
-    accent: '#D4FF3A',
-    headline: ['See your team.', 'Claim your spot.', 'Play.'],
-    body:
-      'From Tuesday pickup to Sunday league — every formation, every format, every player on the pitch before the whistle.',
-    pills: ['5v5', '7v7', '9v9', '11v11'],
-    venueKind: 'football',
-  },
-  {
-    id: 'basketball',
-    palette: 'basketball',
-    eyebrow: '[ Basketball ]',
-    accent: '#FF6B1A',
-    headline: ['Build your five.', 'Reserve the court.', 'Play.'],
-    body:
-      'Pickup runs, rec leagues, 3v3 tournaments — organized with real rosters, not "I\u2019ll try to be there."',
-    pills: ['3v3', '5v5', 'Half court', 'Full court'],
-    venueKind: 'basketball',
-  },
-  {
-    id: 'handball',
-    palette: 'handball',
-    eyebrow: '[ Handball ]',
-    accent: '#00E5FF',
-    headline: ['Handball,', 'with tools', 'that fit.'],
-    body:
-      'Club rosters. School teams. League brackets. Built for the way handball actually works — not bolted on from another sport.',
-    pills: ['7v7', 'Club', 'School', 'League'],
-    venueKind: 'handball',
-  },
-  {
-    id: 'more',
-    palette: 'roadmap',
-    eyebrow: '[ And more ]',
-    accent: '#D4FF3A',
-    headline: ['Your sport', 'is next.'],
-    body:
-      'The same visual lineup, community, and match tools — coming to the sports your people actually play.',
-  },
+// Material Design Outlined sports icons — consistent single-stroke
+// style, library-quality. Padel uses the tennis icon (racquet sport
+// family); Futsal uses the soccer icon (it IS indoor football).
+const SPORTS: Sport[] = [
+  { id: 'football',   name: 'Football',   formats: '5v5 · 7v7 · 9v9 · 11v11', Icon: MdOutlineSportsSoccer     },
+  { id: 'basketball', name: 'Basketball', formats: '3v3 · 5v5',               Icon: MdOutlineSportsBasketball },
+  { id: 'volleyball', name: 'Volleyball', formats: '4v4 · 6v6',               Icon: MdOutlineSportsVolleyball },
+  { id: 'handball',   name: 'Handball',   formats: '7v7',                     Icon: MdOutlineSportsHandball   },
+  { id: 'padel',      name: 'Padel',      formats: '2v2',                     Icon: MdOutlineSportsTennis     },
+  { id: 'futsal',     name: 'Futsal',     formats: '5v5',                     Icon: MdOutlineSportsSoccer     },
+  { id: 'rugby',      name: 'Rugby',      formats: '7s · 15s',                Icon: MdOutlineSportsRugby      },
 ];
 
-const MORE_LABELS: Array<{
-  name: string;
-  left: string;
-  top: string;
-  size: number;
-}> = [
-  { name: 'Running',      left: '6%',  top: '12%', size: 2.5 },
-  { name: 'Tennis',       left: '54%', top: '6%',  size: 2.3 },
-  { name: 'Volleyball',   left: '28%', top: '28%', size: 2.4 },
-  { name: 'Padel',        left: '72%', top: '26%', size: 2.0 },
-  { name: 'Gym',          left: '8%',  top: '46%', size: 2.6 },
-  { name: 'Futsal',       left: '48%', top: '48%', size: 2.1 },
-  { name: 'Pool',         left: '76%', top: '50%', size: 2.2 },
-  { name: 'Rugby',        left: '22%', top: '72%', size: 2.0 },
-  { name: 'Table Tennis', left: '56%', top: '74%', size: 1.7 },
-];
-
-// ===================================================================
-//  Per-format lineups — dots change when a format pill is active
-// ===================================================================
-
-type Dot = [number, number];
-
-const FOOTBALL_FORMATIONS: Record<string, Dot[]> = {
-  '5v5': [
-    [35, 95],          // GK
-    [18, 72], [52, 72], // back pair
-    [35, 50],          // mid
-  ],
-  '7v7': [
-    [35, 95],
-    [15, 78], [55, 78],
-    [15, 55], [35, 52], [55, 55],
-  ],
-  '9v9': [
-    [35, 95],
-    [14, 80], [35, 82], [56, 80],
-    [16, 58], [35, 52], [54, 58],
-    [26, 28],
-  ],
-  '11v11': [
-    [35, 95],
-    [11, 80], [26, 82], [44, 82], [59, 80],
-    [20, 58], [35, 52], [50, 58],
-    [16, 28], [54, 28],
-  ],
-};
-
-const BASKETBALL_FORMATIONS: Record<string, Dot[]> = {
-  '3v3': [
-    [15, 45], [35, 45],
-  ],
-  '5v5': [
-    [15, 30], [35, 30],
-    [20, 55], [30, 55],
-  ],
-  'Half court': [
-    [15, 38], [35, 38],
-    [15, 55], [35, 55],
-  ],
-  'Full court': [
-    [15, 28], [35, 28],
-    [20, 55], [30, 55],
-  ],
-};
-
-const HANDBALL_FORMATIONS: Record<string, Dot[]> = {
-  '7v7': [
-    [20, 68], // GK
-    [10, 58], [30, 58],
-    [15, 48], [25, 48],
-    [20, 35],
-  ],
-  'Club': [
-    [20, 68],
-    [8, 55], [32, 55],
-    [13, 45], [27, 45],
-    [20, 32],
-  ],
-  'School': [
-    [20, 68],
-    [12, 58], [28, 58],
-    [15, 50], [25, 50],
-    [20, 38],
-  ],
-  'League': [
-    [20, 68],
-    [6, 55], [34, 55],
-    [12, 46], [28, 46],
-    [20, 30],
-  ],
-};
-
-const ACCENT_POS: Record<string, Dot> = {
-  football: [35, 18],
-  basketball: [25, 30],
-  handball: [20, 22],
-};
-
-// ===================================================================
-//  Venue SVGs
-// ===================================================================
-
-function FormationDot({
-  x,
-  y,
-  r,
-  strokeR,
-  active,
-}: {
-  x: number;
-  y: number;
-  r: number;
-  strokeR: number;
-  active: boolean;
-}) {
-  return (
-    <g
-      style={{
-        transformBox: 'fill-box',
-        transformOrigin: 'center',
-        opacity: active ? 1 : 0,
-        transform: active ? 'scale(1)' : 'scale(0.55)',
-        transition:
-          'opacity 420ms cubic-bezier(0.22, 1, 0.36, 1), transform 420ms cubic-bezier(0.22, 1, 0.36, 1)',
-      }}
-    >
-      <circle
-        cx={x}
-        cy={y}
-        r={strokeR}
-        fill="none"
-        stroke="#F5F5F0"
-        strokeWidth="0.3"
-        strokeOpacity="0.7"
-      />
-      <circle cx={x} cy={y} r={r} fill="#F5F5F0" opacity="0.9" />
-    </g>
-  );
-}
-
-function FootballPitchSvg({
-  accent,
-  activeFormat,
-}: {
-  accent: string;
-  activeFormat: string;
-}) {
-  const op1 = 0.4;
-  const op2 = 0.28;
-  const [ax, ay] = ACCENT_POS.football;
-  return (
-    <svg viewBox="0 0 70 100" width="100%" style={{ display: 'block', overflow: 'visible' }}>
-      <rect x="0" y="0" width="70" height="100" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.4" />
-      <line x1="0" y1="50" x2="70" y2="50" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.3" />
-      <circle cx="35" cy="50" r="9" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.3" />
-      <circle cx="35" cy="50" r="0.55" fill="#F5F5F0" fillOpacity="0.55" />
-      <rect x="15" y="0" width="40" height="14" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.3" />
-      <rect x="24" y="0" width="22" height="6" fill="none" stroke="#F5F5F0" strokeOpacity={op2} strokeWidth="0.3" />
-      <path d="M 29 14 A 6 6 0 0 0 41 14" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.3" />
-      <rect x="15" y="86" width="40" height="14" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.3" />
-      <rect x="24" y="94" width="22" height="6" fill="none" stroke="#F5F5F0" strokeOpacity={op2} strokeWidth="0.3" />
-      <path d="M 29 86 A 6 6 0 0 1 41 86" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.3" />
-      <rect x="30" y="-3" width="10" height="3" fill="none" stroke="#F5F5F0" strokeOpacity={op2} strokeWidth="0.3" />
-      <rect x="30" y="100" width="10" height="3" fill="none" stroke="#F5F5F0" strokeOpacity={op2} strokeWidth="0.3" />
-
-      {Object.entries(FOOTBALL_FORMATIONS).map(([fmt, dots]) =>
-        dots.map(([x, y], i) => (
-          <FormationDot
-            key={`${fmt}-${i}`}
-            x={x}
-            y={y}
-            r={2.2}
-            strokeR={2.6}
-            active={fmt === activeFormat}
-          />
-        ))
-      )}
-
-      <g className="venue-dot-accent" style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
-        <circle cx={ax} cy={ay} r="2.8" fill="none" stroke={accent} strokeWidth="0.5" />
-        <circle cx={ax} cy={ay} r="2.2" fill={accent} opacity="0.85" />
-      </g>
-    </svg>
-  );
-}
-
-function BasketballCourtSvg({
-  accent,
-  activeFormat,
-}: {
-  accent: string;
-  activeFormat: string;
-}) {
-  const op1 = 0.4;
-  const [ax, ay] = ACCENT_POS.basketball;
-  return (
-    <svg viewBox="0 0 50 94" width="100%" style={{ display: 'block', overflow: 'visible' }}>
-      <rect x="0" y="0" width="50" height="94" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.3" />
-      <line x1="0" y1="47" x2="50" y2="47" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <circle cx="25" cy="47" r="6" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <rect x="17" y="0" width="16" height="19" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <circle cx="25" cy="19" r="6" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <path d="M 3 0 L 3 14 A 22 22 0 0 0 47 14 L 47 0" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <line x1="21" y1="-2" x2="29" y2="-2" stroke={accent} strokeOpacity="0.8" strokeWidth="0.4" />
-      <circle cx="25" cy="2" r="1" fill={accent} opacity="0.8" />
-      <rect x="17" y="75" width="16" height="19" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <circle cx="25" cy="75" r="6" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <path d="M 3 94 L 3 80 A 22 22 0 0 1 47 80 L 47 94" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <line x1="21" y1="96" x2="29" y2="96" stroke={accent} strokeOpacity="0.8" strokeWidth="0.4" />
-      <circle cx="25" cy="92" r="1" fill={accent} opacity="0.8" />
-
-      {Object.entries(BASKETBALL_FORMATIONS).map(([fmt, dots]) =>
-        dots.map(([x, y], i) => (
-          <FormationDot
-            key={`${fmt}-${i}`}
-            x={x}
-            y={y}
-            r={1.6}
-            strokeR={2}
-            active={fmt === activeFormat}
-          />
-        ))
-      )}
-
-      <g className="venue-dot-accent" style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
-        <circle cx={ax} cy={ay} r="2.2" fill="none" stroke={accent} strokeWidth="0.4" />
-        <circle cx={ax} cy={ay} r="1.7" fill={accent} opacity="0.85" />
-      </g>
-    </svg>
-  );
-}
-
-function HandballCourtSvg({
-  accent,
-  activeFormat,
-}: {
-  accent: string;
-  activeFormat: string;
-}) {
-  const op1 = 0.4;
-  const op2 = 0.28;
-  const [ax, ay] = ACCENT_POS.handball;
-  return (
-    <svg viewBox="0 0 40 80" width="100%" style={{ display: 'block', overflow: 'visible' }}>
-      <rect x="0" y="0" width="40" height="80" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.3" />
-      <line x1="0" y1="40" x2="40" y2="40" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <path d="M 12 0 L 12 4 A 8 8 0 0 0 28 4 L 28 0" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <path d="M 9 0 L 9 4 A 11 11 0 0 0 31 4 L 31 0" fill="none" stroke="#F5F5F0" strokeOpacity={op2} strokeWidth="0.25" strokeDasharray="0.8 0.6" />
-      <line x1="18" y1="7" x2="22" y2="7" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <rect x="16" y="-2" width="8" height="2" fill="none" stroke={accent} strokeOpacity="0.8" strokeWidth="0.4" />
-      <path d="M 12 80 L 12 76 A 8 8 0 0 1 28 76 L 28 80" fill="none" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <path d="M 9 80 L 9 76 A 11 11 0 0 1 31 76 L 31 80" fill="none" stroke="#F5F5F0" strokeOpacity={op2} strokeWidth="0.25" strokeDasharray="0.8 0.6" />
-      <line x1="18" y1="73" x2="22" y2="73" stroke="#F5F5F0" strokeOpacity={op1} strokeWidth="0.25" />
-      <rect x="16" y="80" width="8" height="2" fill="none" stroke={accent} strokeOpacity="0.8" strokeWidth="0.4" />
-
-      {Object.entries(HANDBALL_FORMATIONS).map(([fmt, dots]) =>
-        dots.map(([x, y], i) => (
-          <FormationDot
-            key={`${fmt}-${i}`}
-            x={x}
-            y={y}
-            r={1.3}
-            strokeR={1.6}
-            active={fmt === activeFormat}
-          />
-        ))
-      )}
-
-      <g className="venue-dot-accent" style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
-        <circle cx={ax} cy={ay} r="1.7" fill="none" stroke={accent} strokeWidth="0.35" />
-        <circle cx={ax} cy={ay} r="1.3" fill={accent} opacity="0.85" />
-      </g>
-    </svg>
-  );
-}
-
-function VenueFor({
-  kind,
-  accent,
-  activeFormat,
-}: {
-  kind: Panel['venueKind'];
-  accent: string;
-  activeFormat: string;
-}) {
-  if (kind === 'football')
-    return <FootballPitchSvg accent={accent} activeFormat={activeFormat} />;
-  if (kind === 'basketball')
-    return <BasketballCourtSvg accent={accent} activeFormat={activeFormat} />;
-  if (kind === 'handball')
-    return <HandballCourtSvg accent={accent} activeFormat={activeFormat} />;
-  return null;
-}
-
-// ===================================================================
-//  Coming-soon sport icons — minimal wireframes
-// ===================================================================
-
-function SportIcon({
-  name,
-  color,
-  size,
-}: {
-  name: string;
-  color: string;
-  size: number;
-}) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    stroke: color,
-    strokeWidth: 1.6,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
+// Polar layout in SVG-px on a 600 viewBox. Football at 12 o'clock.
+const RADIUS = 240;
+const NODE_POSITIONS = SPORTS.map((_, i) => {
+  const angle = -90 + i * (360 / SPORTS.length);
+  const rad = (angle * Math.PI) / 180;
+  return {
+    angle,
+    x: Math.cos(rad) * RADIUS,
+    y: Math.sin(rad) * RADIUS,
   };
-  switch (name) {
-    case 'Running':
-      return (
-        <svg {...common}>
-          <circle cx="14" cy="5" r="1.6" fill={color} stroke="none" />
-          <path d="M 5 13 L 10 10 L 13 12 L 12 16 L 15 20" />
-          <path d="M 10 10 L 8 14 L 4 14" />
-          <path d="M 13 9 L 18 11" />
-        </svg>
-      );
-    case 'Tennis':
-      return (
-        <svg {...common}>
-          <ellipse cx="9" cy="9" rx="5" ry="5.5" />
-          <path d="M 13 13 L 20 20" strokeWidth="2.2" />
-        </svg>
-      );
-    case 'Volleyball':
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="8" />
-          <path d="M 4 12 Q 12 15 20 12" />
-          <path d="M 12 4 Q 9 12 12 20" />
-          <path d="M 12 4 Q 15 12 12 20" />
-        </svg>
-      );
-    case 'Padel':
-      return (
-        <svg {...common}>
-          <ellipse cx="12" cy="8" rx="5" ry="5.5" />
-          <path d="M 12 13.5 L 12 21" strokeWidth="2" />
-        </svg>
-      );
-    case 'Futsal':
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="8" />
-          <polygon points="12,8 15.5,10.5 14,14.5 10,14.5 8.5,10.5" />
-        </svg>
-      );
-    case 'Rugby':
-      return (
-        <svg {...common}>
-          <ellipse
-            cx="12"
-            cy="12"
-            rx="8"
-            ry="5"
-            transform="rotate(-25 12 12)"
-          />
-          <path
-            d="M 8 10 L 16 14"
-            strokeWidth="1.2"
-            strokeDasharray="1 1.4"
-          />
-        </svg>
-      );
-    case 'Table Tennis':
-      return (
-        <svg {...common}>
-          <circle cx="10" cy="10" r="5" />
-          <path d="M 14 14 L 19 19" strokeWidth="2" />
-        </svg>
-      );
-    case 'Gym':
-      return (
-        <svg {...common}>
-          <path d="M 3 9 L 3 15" strokeWidth="2.4" />
-          <path d="M 6 7 L 6 17" strokeWidth="2.2" />
-          <path d="M 6 12 L 18 12" strokeWidth="2" />
-          <path d="M 18 7 L 18 17" strokeWidth="2.2" />
-          <path d="M 21 9 L 21 15" strokeWidth="2.4" />
-        </svg>
-      );
-    case 'Pool':
-      return (
-        <svg {...common}>
-          <path d="M 2.5 7 Q 6 5 10 7 Q 14 9 18 7 Q 20.5 6 22 7" />
-          <path d="M 2.5 12 Q 6 10 10 12 Q 14 14 18 12 Q 20.5 11 22 12" />
-          <path d="M 2.5 17 Q 6 15 10 17 Q 14 19 18 17 Q 20.5 16 22 17" />
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
+});
+
+const HEADLINES = ['Built for football.', 'Engineered for every team sport.'];
+const ENGINE_SPEC = ['lineup builder', 'scheduling', 'check-in', 'real-time sync'];
 
 // ===================================================================
-//  Format pills — auto-cycling highlight (unique layoutId per panel)
-// ===================================================================
-
-function PillRow({
-  pills,
-  accent,
-  panelId,
-  active,
-  onActive,
-}: {
-  pills: string[];
-  accent: string;
-  panelId: PanelId;
-  active: number;
-  onActive: (i: number) => void;
-}) {
-  const pauseUntil = useRef(0);
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      if (performance.now() < pauseUntil.current) return;
-      onActive((active + 1) % pills.length);
-    }, 2800);
-    return () => window.clearInterval(id);
-  }, [pills.length, active, onActive]);
-  return (
-    <div className="flex items-center gap-2 flex-wrap">
-      {pills.map((p, i) => (
-        <button
-          key={p}
-          type="button"
-          data-cursor="hover"
-          aria-pressed={active === i}
-          onMouseEnter={() => {
-            pauseUntil.current = performance.now() + 5000;
-            onActive(i);
-          }}
-          className="relative inline-flex items-center"
-          style={{
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 10,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            padding: '6px 14px',
-            borderRadius: 100,
-            color: active === i ? '#050505' : 'rgba(245,245,240,0.75)',
-            border: active === i ? 'none' : '1px solid rgba(245,245,240,0.2)',
-            background: active === i ? 'transparent' : 'rgba(245,245,240,0.03)',
-            cursor: 'none',
-            zIndex: 1,
-            transition: 'color 0.3s ease-out',
-          }}
-        >
-          {active === i && (
-            <motion.span
-              layoutId={`sport-pill-hl-${panelId}`}
-              className="absolute inset-0"
-              style={{
-                borderRadius: 100,
-                background: accent,
-                boxShadow: `0 0 24px ${accent}55`,
-                zIndex: -1,
-              }}
-              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-            />
-          )}
-          {p}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ===================================================================
-//  Panel content
-// ===================================================================
-
-function PanelContent({
-  panel,
-  index,
-  total,
-  venueRef,
-  moreLabelsSetter,
-}: {
-  panel: Panel;
-  index: number;
-  total: number;
-  venueRef: (el: HTMLDivElement | null) => void;
-  moreLabelsSetter?: (el: HTMLDivElement | null) => void;
-}) {
-  const [activePill, setActivePill] = useState(0);
-  const activeFormat = panel.pills ? panel.pills[activePill] : '';
-  const [isPhone, setIsPhone] = useState(false);
-  const [tapped, setTapped] = useState<string | null>(null);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    // Tablet + phone → mobile grid for the MORE panel.
-    const mq = window.matchMedia('(max-width: 1279px)');
-    setIsPhone(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setIsPhone(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-  // Auto-dismiss tap-to-highlight after 2s
-  useEffect(() => {
-    if (!tapped) return;
-    const t = window.setTimeout(() => setTapped(null), 2000);
-    return () => window.clearTimeout(t);
-  }, [tapped]);
-  return (
-    <>
-      <div
-        className="absolute top-6 left-6 md:top-10 md:left-10 panel-enter"
-        style={{ zIndex: 10 }}
-      >
-        <div
-          className="mono-eyebrow"
-          style={{ fontSize: 10, opacity: 0.55 }}
-        >
-          [ Chapter 04 · {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')} ]
-        </div>
-      </div>
-
-      <div className="grid-12 items-center w-full">
-        <div className="col-span-12 xl:col-start-2 xl:col-span-5 xl:pr-6">
-          <div
-            className="mono-eyebrow mb-5 panel-enter"
-            style={{ color: panel.accent }}
-          >
-            {panel.eyebrow}
-          </div>
-          <h3
-            className="headline-display uppercase text-ink mb-7 panel-enter"
-            style={{
-              fontSize: 'clamp(1.85rem, 4vw, 3.75rem)',
-              lineHeight: 0.98,
-              letterSpacing: '-0.025em',
-            }}
-          >
-            {panel.headline.map((line, li) => (
-              <span key={li} style={{ display: 'block' }}>
-                {line}
-              </span>
-            ))}
-          </h3>
-          <p
-            className="font-body mb-7 panel-enter"
-            style={{
-              color: 'rgba(245,245,240,0.7)',
-              fontSize: 16,
-              lineHeight: 1.55,
-              maxWidth: '42ch',
-            }}
-          >
-            {panel.body}
-          </p>
-          {panel.pills && (
-            <div className="panel-enter mb-8 xl:mb-0">
-              <PillRow
-                pills={panel.pills}
-                accent={panel.accent}
-                panelId={panel.id}
-                active={activePill}
-                onActive={setActivePill}
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="col-span-12 xl:col-start-8 xl:col-span-4 flex items-center justify-center panel-enter mt-4 xl:mt-0">
-          {panel.venueKind ? (
-            <div
-              style={{
-                width: '100%',
-                maxWidth: 420,
-                aspectRatio:
-                  panel.venueKind === 'handball' ? '1/2' : '7/10',
-                perspective: '1400px',
-                position: 'relative',
-              }}
-            >
-              <div
-                ref={venueRef}
-                className="venue-transform"
-                style={
-                  {
-                    '--rx': '42deg',
-                    '--rz': '-6deg',
-                    '--ry': '0deg',
-                    transform:
-                      'rotateX(var(--rx)) rotateZ(var(--rz)) rotateY(var(--ry))',
-                    transformStyle: 'preserve-3d',
-                    filter: `drop-shadow(0 40px 60px rgba(0,0,0,0.5)) drop-shadow(0 0 40px ${panel.accent}30)`,
-                    position: 'relative',
-                  } as React.CSSProperties
-                }
-              >
-                <VenueFor
-                  kind={panel.venueKind}
-                  accent={panel.accent}
-                  activeFormat={activeFormat}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    pointerEvents: 'none',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      right: 0,
-                      height: 1,
-                      background: panel.accent,
-                      opacity: 0.35,
-                      boxShadow: `0 0 6px ${panel.accent}88`,
-                      animation: 'venueScanY 6s linear infinite',
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          ) : isPhone ? (
-            <div className="w-full">
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                  gap: 12,
-                  padding: '0 16px',
-                }}
-              >
-                {MORE_LABELS.map((l) => {
-                  const isTapped = tapped === l.name;
-                  const anyTapped = tapped !== null;
-                  return (
-                    <button
-                      key={l.name}
-                      type="button"
-                      onClick={() =>
-                        setTapped(isTapped ? null : l.name)
-                      }
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 10,
-                        padding: '18px 10px 14px',
-                        background: 'rgba(20, 20, 25, 0.6)',
-                        border: isTapped
-                          ? '1px solid #D4FF3A'
-                          : '1px solid rgba(245, 245, 240, 0.1)',
-                        borderRadius: 12,
-                        color: '#F5F5F0',
-                        minHeight: 120,
-                        cursor: 'pointer',
-                        transform: isTapped ? 'scale(1.05)' : 'scale(1)',
-                        opacity:
-                          anyTapped && !isTapped ? 0.55 : 1,
-                        transition:
-                          'transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease, border-color 260ms ease',
-                        boxShadow: isTapped
-                          ? '0 0 20px rgba(212, 255, 58, 0.28)'
-                          : 'none',
-                      }}
-                    >
-                      <span style={{ opacity: 0.75 }}>
-                        <SportIcon
-                          name={l.name}
-                          color="#F5F5F0"
-                          size={36}
-                        />
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-display), Inter, sans-serif',
-                          fontWeight: 900,
-                          fontSize: 13,
-                          letterSpacing: '-0.01em',
-                          textTransform: 'uppercase',
-                          textAlign: 'center',
-                          lineHeight: 1.05,
-                          color: '#F5F5F0',
-                        }}
-                      >
-                        {l.name}
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-mono), monospace',
-                          fontSize: 9,
-                          letterSpacing: '0.22em',
-                          textTransform: 'uppercase',
-                          color: isTapped
-                            ? 'var(--lime, #D4FF3A)'
-                            : 'rgba(212, 255, 58, 0.7)',
-                        }}
-                      >
-                        [ Coming ]
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <div
-                style={{
-                  marginTop: 20,
-                  padding: '0 16px',
-                  textAlign: 'center',
-                  fontFamily: 'var(--font-mono), monospace',
-                  fontSize: 9,
-                  letterSpacing: '0.22em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(245, 245, 240, 0.45)',
-                  lineHeight: 1.5,
-                }}
-              >
-                [ The roster keeps growing — vote for your sport in the app ]
-              </div>
-            </div>
-          ) : (
-            <div
-              ref={moreLabelsSetter}
-              className="relative w-full"
-              style={{ height: '70vh', maxHeight: 560 }}
-            >
-              {MORE_LABELS.map((l, idx) => {
-                const iconSize = Math.max(22, l.size * 10);
-                const floatDuration = 4.5 + (idx % 4) * 0.7;
-                const floatDelay = idx * 0.28;
-                return (
-                  <div
-                    key={l.name}
-                    data-more-label
-                    data-cursor="hover"
-                    className="absolute cursor-default"
-                    style={{
-                      left: l.left,
-                      top: l.top,
-                      opacity: 0,
-                      willChange: 'opacity, transform',
-                    }}
-                  >
-                    <div
-                      className="repel-layer"
-                      style={{
-                        transform:
-                          'translate(var(--rx, 0px), var(--ry, 0px))',
-                        transition:
-                          'transform 520ms cubic-bezier(0.22, 1, 0.36, 1)',
-                        willChange: 'transform',
-                      }}
-                    >
-                      <div
-                        className="float-layer"
-                        style={{
-                          animation: `sportFloat ${floatDuration}s ease-in-out ${floatDelay}s infinite`,
-                        }}
-                      >
-                        <div className="inline-flex items-center gap-3">
-                          <SportIcon
-                            name={l.name}
-                            color="#D4FF3A"
-                            size={iconSize}
-                          />
-                          <span
-                            style={{
-                              fontFamily: 'var(--font-display)',
-                              fontWeight: 900,
-                              fontSize: `${l.size}rem`,
-                              letterSpacing: '-0.02em',
-                              textTransform: 'uppercase',
-                              color: 'rgba(245,245,240,0.72)',
-                              lineHeight: 0.9,
-                            }}
-                          >
-                            {l.name}
-                          </span>
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: 'JetBrains Mono, monospace',
-                            fontSize: 9,
-                            letterSpacing: '0.28em',
-                            textTransform: 'uppercase',
-                            color: 'rgba(212,255,58,0.7)',
-                            marginTop: 6,
-                            marginLeft: iconSize + 12,
-                          }}
-                        >
-                          Coming soon
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <div
-                className="absolute bottom-2 left-0 right-0 text-center font-mono"
-                style={{
-                  fontSize: 9,
-                  letterSpacing: '0.25em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(245,245,240,0.4)',
-                }}
-              >
-                [ The roster keeps growing — vote for your sport in the app ]
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ===================================================================
-//  Section — horizontal pinned scroll
+//  Component
 // ===================================================================
 
 export default function Sports() {
   const sectionRef = useRef<HTMLElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const panelRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const venueRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const moreLabelsRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const formatRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const spokeRefs = useRef<(SVGLineElement | null)[]>([]);
+  const pulseLineRefs = useRef<(SVGLineElement | null)[]>([]);
+  const pulseRefs = useRef<(SVGCircleElement | null)[]>([]);
+  const coreRef = useRef<HTMLDivElement>(null);
+  const coreGlowRef = useRef<HTMLDivElement>(null);
+  const engineSpecRef = useRef<HTMLDivElement>(null);
+  const headlineRefs = useRef<(HTMLHeadingElement | null)[]>([]);
+
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (!sectionRef.current || !trackRef.current) return;
+    if (typeof window === 'undefined') return;
+    const rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mb = window.matchMedia('(max-width: 879px)');
+    const updRm = () => setReducedMotion(rm.matches);
+    const updMb = () => setIsMobile(mb.matches);
+    updRm(); updMb();
+    rm.addEventListener('change', updRm);
+    mb.addEventListener('change', updMb);
+    return () => {
+      rm.removeEventListener('change', updRm);
+      mb.removeEventListener('change', updMb);
+    };
+  }, []);
+
+  // -------------------- Desktop: pinned scrubbed timeline --------------------
+  useEffect(() => {
+    if (reducedMotion || isMobile) return;
+    const stage = stageRef.current;
+    if (!stage) return;
+
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
+      spokeRefs.current.forEach((line, i) => {
+        if (!line) return;
+        const isFootball = i === 0;
+        gsap.set(line, {
+          attr: { 'stroke-dashoffset': isFootball ? 0 : 1 },
+          opacity: isFootball ? 0.95 : 0.5,
+        });
+      });
+      pulseLineRefs.current.forEach((line) => {
+        if (line) gsap.set(line, { opacity: 0 });
+      });
+      nodeRefs.current.forEach((node, i) => {
+        if (!node) return;
+        gsap.set(node, {
+          scale: i === 0 ? 1 : 0,
+          opacity: i === 0 ? 1 : 0,
+        });
+      });
+      formatRefs.current.forEach((fmt, i) => {
+        if (!fmt) return;
+        gsap.set(fmt, { opacity: i === 0 ? 1 : 0, y: i === 0 ? 0 : 4 });
+      });
+      pulseRefs.current.forEach((p) => {
+        if (p) gsap.set(p, { opacity: 0 });
+      });
+      if (engineSpecRef.current) {
+        gsap.set(engineSpecRef.current, { opacity: 0, y: 6 });
+      }
+      if (headlineRefs.current[0]) {
+        gsap.set(headlineRefs.current[0], { opacity: 1, y: 0 });
+      }
+      if (headlineRefs.current[1]) {
+        gsap.set(headlineRefs.current[1], { opacity: 0, y: 10 });
+      }
 
-      // ============== DESKTOP ==============
-      mm.add('(min-width: 1280px)', () => {
-        const panels = panelRefs.current.filter(
-          (p): p is HTMLDivElement => !!p
-        );
-        const n = panels.length;
+      if (coreGlowRef.current) {
+        gsap.to(coreGlowRef.current, {
+          scale: 1.08,
+          opacity: 1,
+          duration: 2.4,
+          ease: 'sine.inOut',
+          repeat: -1,
+          yoyo: true,
+        });
+      }
 
-        const scrollTween = gsap.to(trackRef.current, {
-          x: () => -(n - 1) * window.innerWidth,
+      // Flowing dashes on the spokes
+      const pulseLineTweens: gsap.core.Tween[] = [];
+      pulseLineRefs.current.forEach((line) => {
+        if (!line) return;
+        const tw = gsap.to(line, {
+          attr: { 'stroke-dashoffset': -22 },
+          duration: 1.6,
           ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current!,
-            start: 'top top',
-            end: 'bottom bottom',
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-          },
+          repeat: -1,
         });
+        pulseLineTweens.push(tw);
+      });
 
-        // ---- Per-panel entry animations ----
-        panels.forEach((panel, i) => {
-          const enterEls = panel.querySelectorAll<HTMLElement>('.panel-enter');
-          if (enterEls.length === 0) return;
-
-          gsap.set(enterEls, { opacity: 0, y: 40 });
-
-          const entry = gsap.timeline({ paused: true });
-          entry.to(enterEls, {
-            opacity: 1,
-            y: 0,
-            stagger: 0.08,
-            duration: 0.8,
-            ease: 'expo.out',
-          });
-
-          if (i === 0) {
-            gsap.delayedCall(0.2, () => entry.play());
-          } else {
-            ScrollTrigger.create({
-              trigger: panel,
-              containerAnimation: scrollTween,
-              start: 'left 80%',
-              once: true,
-              onEnter: () => entry.play(),
-            });
-          }
+      // Traveling pulse dots
+      const pulseTweens: gsap.core.Tween[] = [];
+      pulseRefs.current.forEach((pulse, i) => {
+        if (!pulse) return;
+        const p = NODE_POSITIONS[i];
+        gsap.set(pulse, { attr: { cx: 300, cy: 300 } });
+        const tw = gsap.to(pulse, {
+          attr: { cx: 300 + p.x, cy: 300 + p.y },
+          duration: 2.2,
+          ease: 'power1.inOut',
+          repeat: -1,
+          delay: 0.16 * i,
         });
+        pulseTweens.push(tw);
+      });
 
-        // ---- Persistent in-panel motion ----
-        PANELS.forEach((panel, i) => {
-          const panelEl = panelRefs.current[i];
-          const venueEl = venueRefs.current[i];
-          if (!panelEl) return;
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: stage,
+          start: 'top top',
+          end: '+=2400',
+          scrub: 1,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+        },
+      });
 
-          // Venue iso-rotation drift (CSS-var tweens)
-          if (venueEl && panel.venueKind) {
-            gsap.to(venueEl, {
-              '--rz': '-9deg',
-              duration: 7,
-              ease: 'sine.inOut',
-              repeat: -1,
-              yoyo: true,
-            });
-            gsap.to(venueEl, {
-              '--rx': '45deg',
-              duration: 5.5,
-              ease: 'sine.inOut',
-              repeat: -1,
-              yoyo: true,
-            });
-            gsap.to(venueEl, {
-              '--ry': '4deg',
-              duration: 9,
-              ease: 'sine.inOut',
-              repeat: -1,
-              yoyo: true,
-            });
-          }
+      const B1 = 0.32;
+      const B2 = 0.66;
 
-          // Accent dot pulse (continuous)
-          const accentDot = panelEl.querySelector<SVGGElement>(
-            '.venue-dot-accent'
-          );
-          if (accentDot) {
-            gsap.to(accentDot, {
-              scale: 1.18,
-              duration: 1,
-              ease: 'sine.inOut',
-              repeat: -1,
-              yoyo: true,
-              transformOrigin: 'center',
-            });
-          }
-        });
+      tl.to(
+        spokeRefs.current.slice(1).filter(Boolean) as SVGLineElement[],
+        {
+          attr: { 'stroke-dashoffset': 0 },
+          duration: 0.18,
+          stagger: 0.018,
+          ease: 'power2.out',
+        },
+        B1 - 0.04
+      );
+      tl.to(
+        nodeRefs.current.slice(1).filter(Boolean) as HTMLDivElement[],
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.18,
+          stagger: 0.022,
+          ease: 'back.out(1.6)',
+        },
+        B1
+      );
+      tl.to(headlineRefs.current[0]!, { opacity: 0, y: -8, duration: 0.06 }, B1 - 0.02);
+      tl.to(headlineRefs.current[1]!, { opacity: 1, y: 0, duration: 0.06 }, B1 + 0.02);
 
-        // ---- MORE constellation stagger (opacity only; transforms live on nested CSS layers) ----
-        const moreIdx = PANELS.findIndex((p) => p.id === 'more');
-        const morePanel = panelRefs.current[moreIdx];
-        if (morePanel && moreLabelsRef.current) {
-          const labels = moreLabelsRef.current.querySelectorAll<HTMLElement>(
-            '[data-more-label]'
-          );
-          gsap.set(labels, { opacity: 0 });
-          ScrollTrigger.create({
-            trigger: morePanel,
-            containerAnimation: scrollTween,
-            start: 'left 70%',
-            once: true,
-            onEnter: () => {
-              gsap.to(labels, {
-                opacity: 1,
-                duration: 0.6,
-                stagger: 0.07,
-                ease: 'power2.out',
-              });
-            },
-          });
-        }
+      tl.to(
+        formatRefs.current.slice(1).filter(Boolean) as HTMLDivElement[],
+        { opacity: 1, y: 0, duration: 0.12, stagger: 0.02, ease: 'power2.out' },
+        B2
+      );
+      tl.to(
+        pulseLineRefs.current.filter(Boolean) as SVGLineElement[],
+        { opacity: 1, duration: 0.18, stagger: 0.015 },
+        B2 + 0.01
+      );
+      tl.to(
+        pulseRefs.current.filter(Boolean) as SVGCircleElement[],
+        { opacity: 1, duration: 0.15, stagger: 0.02 },
+        B2 + 0.02
+      );
+      if (engineSpecRef.current) {
+        tl.to(
+          engineSpecRef.current,
+          { opacity: 1, y: 0, duration: 0.14, ease: 'power2.out' },
+          B2 + 0.04
+        );
+      }
 
-        return () => {
-          // matchMedia auto-cleans tweens created here
+      ScrollTrigger.create({
+        trigger: stage,
+        start: 'top bottom',
+        end: 'bottom top',
+        onEnter: () => {
+          pulseTweens.forEach((t) => t.play());
+          pulseLineTweens.forEach((t) => t.play());
+        },
+        onLeave: () => {
+          pulseTweens.forEach((t) => t.pause());
+          pulseLineTweens.forEach((t) => t.pause());
+        },
+        onEnterBack: () => {
+          pulseTweens.forEach((t) => t.play());
+          pulseLineTweens.forEach((t) => t.play());
+        },
+        onLeaveBack: () => {
+          pulseTweens.forEach((t) => t.pause());
+          pulseLineTweens.forEach((t) => t.pause());
+        },
+      });
+
+      nodeRefs.current.forEach((node) => {
+        if (!node) return;
+        const ring = node.querySelector('.sports-node-ring') as HTMLElement | null;
+        const onEnter = () => {
+          gsap.to(node, { scale: 1.06, duration: 0.28, ease: 'power3.out' });
+          if (ring) gsap.to(ring, { opacity: 1, duration: 0.28, ease: 'power3.out' });
+        };
+        const onLeave = () => {
+          gsap.to(node, { scale: 1, duration: 0.35, ease: 'power3.out' });
+          if (ring) gsap.to(ring, { opacity: 0, duration: 0.35, ease: 'power3.out' });
+        };
+        node.addEventListener('pointerenter', onEnter);
+        node.addEventListener('pointerleave', onLeave);
+        (node as HTMLDivElement & { _cleanup?: () => void })._cleanup = () => {
+          node.removeEventListener('pointerenter', onEnter);
+          node.removeEventListener('pointerleave', onLeave);
         };
       });
+    }, stage);
 
-      // ============== MOBILE ==============
-      mm.add('(max-width: 1279px)', () => {
-        const panels = panelRefs.current.filter(
-          (p): p is HTMLDivElement => !!p
-        );
-
-        panels.forEach((panel) => {
-          const enterEls = panel.querySelectorAll<HTMLElement>('.panel-enter');
-          gsap.from(enterEls, {
-            opacity: 0,
-            y: 30,
-            duration: 0.6,
-            stagger: 0.07,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: panel,
-              start: 'top 75%',
-            },
-          });
-        });
-
-        // Simpler venue rotation on mobile (no Y-axis tilt)
-        PANELS.forEach((panel, i) => {
-          const venueEl = venueRefs.current[i];
-          if (venueEl && panel.venueKind) {
-            gsap.to(venueEl, {
-              '--rz': '-9deg',
-              duration: 7,
-              ease: 'sine.inOut',
-              repeat: -1,
-              yoyo: true,
-            });
-            gsap.to(venueEl, {
-              '--rx': '45deg',
-              duration: 5.5,
-              ease: 'sine.inOut',
-              repeat: -1,
-              yoyo: true,
-            });
-          }
-
-          // Accent pulse still on mobile
-          const panelEl = panelRefs.current[i];
-          if (!panelEl) return;
-          const accentDot = panelEl.querySelector<SVGGElement>(
-            '.venue-dot-accent'
-          );
-          if (accentDot) {
-            gsap.to(accentDot, {
-              scale: 1.18,
-              duration: 1,
-              ease: 'sine.inOut',
-              repeat: -1,
-              yoyo: true,
-              transformOrigin: 'center',
-            });
-          }
-        });
-      });
-
-      return () => mm.revert();
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  // =========================================================
-  //  MORE constellation — cursor repel (desktop only)
-  // =========================================================
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-    const container = moreLabelsRef.current;
-    if (!container) return;
-
-    const labels = Array.from(
-      container.querySelectorAll<HTMLElement>('[data-more-label]')
-    );
-    if (labels.length === 0) return;
-
-    const REPEL_RADIUS = 170;
-    const MAX_PUSH = 65;
-    let inside = false;
-
-    const onMove = (e: MouseEvent) => {
-      inside = true;
-      labels.forEach((el) => {
-        const r = el.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        const dx = cx - e.clientX;
-        const dy = cy - e.clientY;
-        const d = Math.hypot(dx, dy);
-        if (d < REPEL_RADIUS && d > 0) {
-          const f = Math.pow((REPEL_RADIUS - d) / REPEL_RADIUS, 1.4);
-          el.style.setProperty('--rx', `${(dx / d) * f * MAX_PUSH}px`);
-          el.style.setProperty('--ry', `${(dy / d) * f * MAX_PUSH}px`);
-        } else {
-          el.style.setProperty('--rx', '0px');
-          el.style.setProperty('--ry', '0px');
-        }
-      });
-    };
-
-    const onLeave = () => {
-      if (!inside) return;
-      inside = false;
-      labels.forEach((el) => {
-        el.style.setProperty('--rx', '0px');
-        el.style.setProperty('--ry', '0px');
-      });
-    };
-
-    container.addEventListener('mousemove', onMove);
-    container.addEventListener('mouseleave', onLeave);
     return () => {
-      container.removeEventListener('mousemove', onMove);
-      container.removeEventListener('mouseleave', onLeave);
+      nodeRefs.current.forEach((n) => {
+        const wn = n as (HTMLDivElement & { _cleanup?: () => void }) | null;
+        if (wn?._cleanup) wn._cleanup();
+      });
+      ctx.revert();
     };
-  }, []);
+  }, [reducedMotion, isMobile]);
+
+  if (isMobile) return <MobileSports />;
+  if (reducedMotion) return <StaticConstellation />;
 
   return (
     <section
       ref={sectionRef}
       id="sports"
       data-progress-section
-      data-progress-label="04 · The Sports"
-      className="sports-section relative w-full"
+      data-progress-label="The Sports"
+      data-palette="sports"
+      className="relative"
+      style={{ background: 'transparent', overflow: 'visible' }}
     >
-      <div ref={stickyRef} className="sports-sticky">
-        <CornerBrackets />
-
-        <div ref={trackRef} className="sports-track">
-          {PANELS.map((panel, i) => (
-            <div
-              key={panel.id}
-              ref={(el) => {
-                panelRefs.current[i] = el;
-              }}
-              className="sport-panel"
-              data-sport={panel.id}
-              data-palette={panel.palette}
-            >
-              <PanelContent
-                panel={panel}
-                index={i}
-                total={PANELS.length}
-                venueRef={(el) => {
-                  venueRefs.current[i] = el;
-                }}
-                moreLabelsSetter={
-                  panel.id === 'more'
-                    ? (el) => {
-                        moreLabelsRef.current = el;
-                      }
-                    : undefined
-                }
-              />
+      <div ref={stageRef} className="sports-stage">
+        <div className="sports-stage-grid">
+          {/* LEFT — copy + engine spec */}
+          <div className="sports-copy">
+            <div className="sports-eyebrow">one engine</div>
+            <div className="sports-headlines">
+              {HEADLINES.map((h, i) => (
+                <h2
+                  key={h}
+                  ref={(el) => {
+                    headlineRefs.current[i] = el;
+                  }}
+                  className="sports-headline"
+                >
+                  {h}
+                </h2>
+              ))}
             </div>
-          ))}
+            <p className="sports-sub">
+              From a five-a-side futsal to an 11v11 league. One engine adapts
+              to every team sport.
+            </p>
+            <div ref={engineSpecRef} className="sports-spec" aria-hidden>
+              <span className="sports-spec-label">engine</span>
+              <div className="sports-spec-list">
+                {ENGINE_SPEC.map((s) => (
+                  <span key={s} className="sports-spec-item">{s}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT — constellation */}
+          <div className="sports-constellation">
+            <div className="sports-stack">
+              <svg viewBox="0 0 600 600" className="sports-spokes" aria-hidden>
+                <circle
+                  cx="300" cy="300" r={RADIUS - 10}
+                  fill="none" stroke={INK} strokeOpacity="0.05"
+                  strokeWidth="1" strokeDasharray="2 6"
+                />
+                {/* Base spokes */}
+                {NODE_POSITIONS.map((p, i) => (
+                  <line
+                    key={`l${i}`}
+                    ref={(el) => {
+                      spokeRefs.current[i] = el;
+                    }}
+                    x1="300" y1="300"
+                    x2={300 + p.x} y2={300 + p.y}
+                    stroke={i === 0 ? LIME : INK}
+                    strokeOpacity={i === 0 ? 1 : 0.18}
+                    strokeWidth={i === 0 ? 1.6 : 1}
+                    strokeLinecap="round"
+                    pathLength={1}
+                    strokeDasharray="1 1"
+                    strokeDashoffset={1}
+                  />
+                ))}
+                {/* Flowing-dash overlay lines */}
+                {NODE_POSITIONS.map((p, i) => (
+                  <line
+                    key={`pl${i}`}
+                    ref={(el) => {
+                      pulseLineRefs.current[i] = el;
+                    }}
+                    x1="300" y1="300"
+                    x2={300 + p.x} y2={300 + p.y}
+                    stroke={LIME}
+                    strokeOpacity={i === 0 ? 0.9 : 0.55}
+                    strokeWidth={i === 0 ? 1.6 : 1.1}
+                    strokeLinecap="round"
+                    strokeDasharray="3 19"
+                    strokeDashoffset={0}
+                  />
+                ))}
+                {/* Traveling pulse dots */}
+                {NODE_POSITIONS.map((_, i) => (
+                  <circle
+                    key={`p${i}`}
+                    ref={(el) => {
+                      pulseRefs.current[i] = el;
+                    }}
+                    cx="300" cy="300"
+                    r={i === 0 ? 4 : 3}
+                    fill={LIME}
+                    opacity="0"
+                  />
+                ))}
+              </svg>
+
+              {SPORTS.map((sport, i) => {
+                const p = NODE_POSITIONS[i];
+                const isFootball = i === 0;
+                const Icon = sport.Icon;
+                return (
+                  <div
+                    key={sport.id}
+                    ref={(el) => {
+                      nodeRefs.current[i] = el;
+                    }}
+                    className={`sports-node ${isFootball ? 'sports-node-accent' : ''}`}
+                    style={{
+                      left: `calc(50% + ${(p.x / 600) * 100}%)`,
+                      top: `calc(50% + ${(p.y / 600) * 100}%)`,
+                    }}
+                  >
+                    <div className="sports-node-inner">
+                      <div className="sports-node-chip">
+                        <span aria-hidden className="sports-node-ring" />
+                        <Icon size={34} aria-hidden />
+                      </div>
+                      <div className="sports-node-label">{sport.name}</div>
+                      <div
+                        ref={(el) => {
+                          formatRefs.current[i] = el;
+                        }}
+                        className="sports-node-format"
+                      >
+                        {sport.formats}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Core */}
+              <div ref={coreRef} className="sports-core">
+                <div ref={coreGlowRef} aria-hidden className="sports-core-glow" />
+                <div className="sports-core-disc">
+                  <Image
+                    src="/screens/logo.png"
+                    alt="SportTimes"
+                    width={150}
+                    height={150}
+                    priority
+                    className="sports-core-logo"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <style jsx>{`
-        .sports-section {
+        .sports-stage {
           position: relative;
-          height: calc(100vh + ${(PANELS.length - 1) * 100}vw);
-        }
-        .sports-sticky {
-          position: sticky;
-          top: 0;
-          width: 100%;
           height: 100vh;
-          overflow: hidden;
+          width: 100%;
+          overflow: visible;
+          color: ${INK};
+          isolation: isolate;
         }
-        .sports-track {
-          display: flex;
-          width: calc(100vw * ${PANELS.length});
-          height: 100%;
-          will-change: transform;
-        }
-        .sport-panel {
+        .sports-stage-grid {
           position: relative;
-          width: 100vw;
+          z-index: 3;
           height: 100%;
-          flex-shrink: 0;
+          width: 100%;
+          max-width: 1440px;
+          margin: 0 auto;
+          padding: clamp(24px, 4vh, 56px) clamp(20px, 4vw, 56px);
+          display: grid;
+          grid-template-columns: 0.85fr 1.15fr;
+          align-items: center;
+          gap: clamp(28px, 4vw, 80px);
+        }
+        .sports-copy {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 2.5vh, 28px);
+          max-width: 560px;
+        }
+        .sports-eyebrow {
+          font-family: var(--font-mono), monospace;
+          font-size: 12px;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: ${DIM};
+        }
+        /* Headlines — reserve enough px-based vertical space for the
+           2-line "Engineered for every team sport." variant. */
+        .sports-headlines {
+          position: relative;
+          width: 100%;
+          height: clamp(130px, 11vw, 180px);
+        }
+        .sports-headline {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          margin: 0;
+          font-family: var(--font-display), Inter, sans-serif;
+          font-weight: 900;
+          font-size: clamp(2.25rem, 4.4vw, 3.6rem);
+          line-height: 1.04;
+          letter-spacing: -0.035em;
+          color: ${INK};
+        }
+        .sports-sub {
+          font-family: var(--font-body), Inter, sans-serif;
+          font-size: 16px;
+          line-height: 1.55;
+          color: ${DIM};
+          margin: 0;
+          max-width: 48ch;
+        }
+        .sports-spec {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 8px;
+        }
+        .sports-spec-label {
+          font-family: var(--font-mono), monospace;
+          font-size: 10px;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+          color: ${LIME};
+          opacity: 0.85;
+        }
+        .sports-spec-list {
+          display: inline-flex;
+          gap: 6px 8px;
+          flex-wrap: wrap;
+          max-width: 380px;
+        }
+        .sports-spec-item {
+          font-family: var(--font-mono), monospace;
+          font-size: 10.5px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: ${INK};
+          padding: 4px 10px;
+          border-radius: 999px;
+          border: 1px solid ${HAIRLINE};
+          background: rgba(245, 245, 240, 0.04);
+        }
+
+        .sports-constellation {
+          position: relative;
+          width: 100%;
+          height: 100%;
           display: flex;
           align-items: center;
+          justify-content: center;
         }
-        @media (max-width: 1279px) {
-          .sports-section {
-            height: auto;
-          }
-          .sports-sticky {
-            position: relative;
-            height: auto;
-            overflow: visible;
-          }
-          .sports-track {
-            display: block;
-            width: 100%;
-            height: auto;
-          }
-          .sport-panel {
-            width: 100vw;
-            height: auto;
-            min-height: 100vh;
-            align-items: flex-start;
-            padding: 96px 0 56px;
-            box-sizing: border-box;
-          }
-          /* Shrink the isometric venue so the stacked headline + body
-             + pills don't get pushed off-screen. */
-          .sport-panel :global([style*="perspective"]) {
-            max-width: 240px !important;
-          }
+        .sports-stack {
+          position: relative;
+          width: min(680px, 70vmin);
+          height: min(680px, 70vmin);
+          max-height: 86vh;
+          aspect-ratio: 1 / 1;
         }
-      `}</style>
+        .sports-spokes {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+        }
+        .sports-node {
+          position: absolute;
+          transform: translate(-50%, -50%);
+          cursor: pointer;
+          z-index: 3;
+        }
+        .sports-node-inner {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+        .sports-node-chip {
+          position: relative;
+          width: 66px;
+          height: 66px;
+          border-radius: 999px;
+          background: rgba(245, 245, 240, 0.04);
+          border: 1px solid ${HAIRLINE};
+          box-shadow:
+            0 8px 22px rgba(0, 0, 0, 0.5),
+            inset 0 0 0 1px rgba(245, 245, 240, 0.02);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(245, 245, 240, 0.92);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+        }
+        .sports-node-accent .sports-node-chip {
+          background: ${LIME};
+          border-color: rgba(212, 255, 58, 0.6);
+          color: #0A0A0A;
+          box-shadow:
+            0 12px 32px rgba(212, 255, 58, 0.35),
+            0 6px 16px rgba(0, 0, 0, 0.5);
+        }
+        .sports-node-ring {
+          position: absolute;
+          inset: -8px;
+          border-radius: 999px;
+          border: 1px solid ${LIME};
+          opacity: 0;
+          pointer-events: none;
+        }
+        .sports-node-label {
+          font-family: var(--font-display), Inter, sans-serif;
+          font-weight: 800;
+          font-size: 14px;
+          letter-spacing: 0.01em;
+          color: ${INK};
+          white-space: nowrap;
+        }
+        .sports-node-format {
+          font-family: var(--font-mono), monospace;
+          font-size: 10.5px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: ${DIM};
+          white-space: nowrap;
+        }
 
-      <style jsx global>{`
-        @keyframes venueScanY {
-          0%   { top: 0%; opacity: 0; }
-          10%  { opacity: 0.35; }
-          90%  { opacity: 0.35; }
-          100% { top: 100%; opacity: 0; }
+        .sports-core {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 5;
+          width: 220px;
+          height: 220px;
         }
-        @keyframes sportFloat {
-          0%, 100% { transform: translate3d(0, 0, 0); }
-          50%      { transform: translate3d(0, -8px, 0); }
+        .sports-core-glow {
+          position: absolute;
+          inset: -20px;
+          border-radius: 999px;
+          background: radial-gradient(
+            circle at 50% 50%,
+            rgba(212, 255, 58, 0.55) 0%,
+            rgba(212, 255, 58, 0.18) 40%,
+            transparent 70%
+          );
+          filter: blur(34px);
+          opacity: 0.7;
+          z-index: -1;
+          pointer-events: none;
+        }
+        .sports-core-disc {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          border-radius: 999px;
+          background: #08090A;
+          border: 2px solid ${LIME};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          box-shadow:
+            0 0 0 8px rgba(212, 255, 58, 0.08),
+            0 24px 60px rgba(0, 0, 0, 0.6);
+        }
+        .sports-core-disc :global(.sports-core-logo) {
+          width: 150px;
+          height: 150px;
+          object-fit: contain;
+          display: block;
+        }
+
+        @media (max-width: 1100px) {
+          .sports-stage-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+          }
+          .sports-headline { font-size: clamp(1.8rem, 3.6vw, 2.6rem); }
+          .sports-stack { width: min(560px, 64vmin); height: min(560px, 64vmin); }
+          .sports-node-chip { width: 56px; height: 56px; }
+          .sports-core { width: 170px; height: 170px; }
+          .sports-core-disc :global(.sports-core-logo) { width: 115px; height: 115px; }
         }
       `}</style>
+    </section>
+  );
+}
+
+// ===================================================================
+//  Mobile fallback — no pin, no infinite tweens. Static constellation.
+// ===================================================================
+function MobileSports() {
+  const radius = 138;
+  return (
+    <section
+      id="sports"
+      data-progress-section
+      data-progress-label="The Sports"
+      data-palette="sports"
+      className="relative"
+      style={{
+        background: 'transparent',
+        color: INK,
+        padding: 'clamp(4rem, 10vh, 7rem) 0',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          padding: '0 20px',
+          gap: 24,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--font-mono), monospace',
+            fontSize: 11,
+            letterSpacing: '0.28em',
+            textTransform: 'uppercase',
+            color: DIM,
+          }}
+        >
+          one engine
+        </div>
+        <h2
+          style={{
+            fontFamily: 'var(--font-display), Inter, sans-serif',
+            fontWeight: 900,
+            fontSize: 'clamp(1.8rem, 6vw, 2.4rem)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.035em',
+            margin: 0,
+            color: INK,
+            maxWidth: '16ch',
+          }}
+        >
+          Built for football. Engineered for every team sport.
+        </h2>
+        <div
+          style={{
+            position: 'relative',
+            width: radius * 2 + 110,
+            height: radius * 2 + 110,
+            marginTop: 8,
+          }}
+        >
+          <svg
+            viewBox={`0 0 ${radius * 2 + 110} ${radius * 2 + 110}`}
+            style={{ position: 'absolute', inset: 0 }}
+            aria-hidden
+          >
+            {SPORTS.map((_, i) => {
+              const angle = -90 + i * (360 / SPORTS.length);
+              const rad = (angle * Math.PI) / 180;
+              const cx = radius + 55;
+              const cy = radius + 55;
+              return (
+                <line
+                  key={i}
+                  x1={cx} y1={cy}
+                  x2={cx + Math.cos(rad) * radius}
+                  y2={cy + Math.sin(rad) * radius}
+                  stroke={i === 0 ? LIME : INK}
+                  strokeOpacity={i === 0 ? 1 : 0.18}
+                  strokeWidth={i === 0 ? 1.4 : 1}
+                />
+              );
+            })}
+          </svg>
+          {SPORTS.map((sport, i) => {
+            const angle = -90 + i * (360 / SPORTS.length);
+            const rad = (angle * Math.PI) / 180;
+            const x = Math.cos(rad) * radius;
+            const y = Math.sin(rad) * radius;
+            const Icon = sport.Icon;
+            const isFootball = i === 0;
+            return (
+              <div
+                key={sport.id}
+                style={{
+                  position: 'absolute',
+                  top: `calc(50% + ${y}px)`,
+                  left: `calc(50% + ${x}px)`,
+                  transform: 'translate(-50%, -50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <div
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 999,
+                    background: isFootball ? LIME : 'rgba(245,245,240,0.04)',
+                    border: `1px solid ${isFootball ? 'rgba(212,255,58,0.6)' : HAIRLINE}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: isFootball ? '#0A0A0A' : INK,
+                  }}
+                >
+                  <Icon size={28} />
+                </div>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-display), Inter, sans-serif',
+                    fontWeight: 800,
+                    fontSize: 12,
+                    color: INK,
+                  }}
+                >
+                  {sport.name}
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: 9,
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color: DIM,
+                  }}
+                >
+                  {sport.formats}
+                </span>
+              </div>
+            );
+          })}
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 124,
+              height: 124,
+              borderRadius: 999,
+              background: '#08090A',
+              border: `2px solid ${LIME}`,
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 0 6px rgba(212,255,58,0.10)',
+            }}
+          >
+            <Image
+              src="/screens/logo.png"
+              alt="SportTimes"
+              width={90}
+              height={90}
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+        </div>
+        <div
+          style={{
+            display: 'inline-flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: 6,
+            maxWidth: 320,
+            marginTop: 6,
+          }}
+        >
+          {ENGINE_SPEC.map((s) => (
+            <span
+              key={s}
+              style={{
+                fontFamily: 'var(--font-mono), monospace',
+                fontSize: 10,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: INK,
+                padding: '4px 10px',
+                borderRadius: 999,
+                border: `1px solid ${HAIRLINE}`,
+                background: 'rgba(245,245,240,0.04)',
+              }}
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===================================================================
+//  Reduced-motion fallback — full expanded constellation, no motion.
+// ===================================================================
+function StaticConstellation() {
+  return (
+    <section
+      id="sports"
+      data-progress-section
+      data-progress-label="The Sports"
+      data-palette="sports"
+      className="relative"
+      style={{
+        background: 'transparent',
+        color: INK,
+        padding: 'clamp(6rem, 14vh, 10rem) 0',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          display: 'grid',
+          gridTemplateColumns: '0.85fr 1.15fr',
+          alignItems: 'center',
+          gap: 64,
+          maxWidth: 1200,
+          margin: '0 auto',
+          padding: '0 24px',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div
+            style={{
+              fontFamily: 'var(--font-mono), monospace',
+              fontSize: 12,
+              letterSpacing: '0.28em',
+              textTransform: 'uppercase',
+              color: DIM,
+            }}
+          >
+            one engine
+          </div>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display), Inter, sans-serif',
+              fontWeight: 900,
+              fontSize: 'clamp(2rem, 4.2vw, 3.4rem)',
+              lineHeight: 1.04,
+              letterSpacing: '-0.035em',
+              margin: 0,
+              color: INK,
+              maxWidth: '18ch',
+            }}
+          >
+            Built for football. Engineered for every team sport.
+          </h2>
+          <p
+            style={{
+              fontFamily: 'var(--font-body), Inter, sans-serif',
+              fontSize: 16,
+              lineHeight: 1.55,
+              color: DIM,
+              margin: 0,
+              maxWidth: '46ch',
+            }}
+          >
+            From a five-a-side futsal to an 11v11 league. One engine adapts
+            to every team sport.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono), monospace',
+                fontSize: 10,
+                letterSpacing: '0.32em',
+                textTransform: 'uppercase',
+                color: LIME,
+                opacity: 0.85,
+              }}
+            >
+              engine
+            </span>
+            <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '6px 8px' }}>
+              {ENGINE_SPEC.map((s) => (
+                <span
+                  key={s}
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: 10.5,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: INK,
+                    padding: '4px 10px',
+                    borderRadius: 999,
+                    border: `1px solid ${HAIRLINE}`,
+                    background: 'rgba(245,245,240,0.04)',
+                  }}
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{ position: 'relative', aspectRatio: '1/1', width: '100%', maxWidth: 560 }}>
+          <svg viewBox="0 0 600 600" style={{ position: 'absolute', inset: 0 }} aria-hidden>
+            <circle
+              cx="300" cy="300" r={RADIUS - 10}
+              fill="none" stroke={INK} strokeOpacity="0.05"
+              strokeWidth="1" strokeDasharray="2 6"
+            />
+            {NODE_POSITIONS.map((p, i) => (
+              <line
+                key={i}
+                x1="300" y1="300"
+                x2={300 + p.x} y2={300 + p.y}
+                stroke={i === 0 ? LIME : INK}
+                strokeOpacity={i === 0 ? 1 : 0.2}
+                strokeWidth={i === 0 ? 1.6 : 1}
+              />
+            ))}
+          </svg>
+          {SPORTS.map((sport, i) => {
+            const p = NODE_POSITIONS[i];
+            const Icon = sport.Icon;
+            const isFootball = i === 0;
+            return (
+              <div
+                key={sport.id}
+                style={{
+                  position: 'absolute',
+                  top: `calc(50% + ${(p.y / 600) * 100}%)`,
+                  left: `calc(50% + ${(p.x / 600) * 100}%)`,
+                  transform: 'translate(-50%, -50%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 999,
+                    background: isFootball ? LIME : 'rgba(245,245,240,0.04)',
+                    border: `1px solid ${isFootball ? 'rgba(212,255,58,0.6)' : HAIRLINE}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: isFootball ? '#0A0A0A' : INK,
+                  }}
+                >
+                  <Icon size={32} />
+                </div>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-display), Inter, sans-serif',
+                    fontWeight: 800,
+                    fontSize: 13,
+                    color: INK,
+                  }}
+                >
+                  {sport.name}
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: 10,
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color: DIM,
+                  }}
+                >
+                  {sport.formats}
+                </span>
+              </div>
+            );
+          })}
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 190,
+              height: 190,
+              borderRadius: 999,
+              background: '#08090A',
+              border: `2px solid ${LIME}`,
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 0 8px rgba(212,255,58,0.10)',
+            }}
+          >
+            <Image
+              src="/screens/logo.png"
+              alt="SportTimes"
+              width={130}
+              height={130}
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

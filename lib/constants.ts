@@ -20,31 +20,31 @@ export const CHAPTERS = [
     num: '01',
     name: 'THE PROBLEM',
     anchor: 'problem',
-    tagline: 'Group chats weren’t built for this.',
+    tagline: 'It’s not the players. It’s the chat.',
   },
   {
     num: '02',
     name: 'HOW IT WORKS',
     anchor: 'how',
-    tagline: 'Three steps. No more guesswork.',
+    tagline: 'Open. See. Confirmed.',
   },
   {
     num: '03',
     name: 'THE SPORTS',
     anchor: 'sports',
-    tagline: 'Football, basketball, handball — and more on the way.',
+    tagline: 'One engine, every team sport.',
   },
   {
     num: '04',
-    name: 'THE ROADMAP',
+    name: 'ROADMAP',
     anchor: 'roadmap-features',
-    tagline: 'Seven features pinned to the coach’s board.',
+    tagline: 'Next on the pitch.',
   },
   {
     num: '05',
-    name: 'DOWNLOAD',
+    name: 'WAITLIST',
     anchor: 'download',
-    tagline: 'iOS now. Android soon.',
+    tagline: 'Be first on the pitch.',
   },
 ] as const;
 

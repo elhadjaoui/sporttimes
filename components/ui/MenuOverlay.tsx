@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CHAPTERS, APP_NAME_DISPLAY } from '@/lib/constants';
 import { getLenis } from '@/hooks/useLenis';
-import CornerBrackets from './CornerBrackets';
 
 export default function MenuOverlay({
   open,
@@ -65,24 +65,28 @@ export default function MenuOverlay({
             }}
           />
 
-          {/* Corner brackets */}
-          <CornerBrackets />
-
           {/* Header row */}
           <div className="relative z-10 flex items-center justify-between px-6 md:px-10 pt-7">
-            <div className="flex items-center gap-4">
-              <span className="font-display text-lg uppercase">
+            <div className="flex items-center gap-3 md:gap-4">
+              <Image
+                src="/screens/logo.png"
+                alt=""
+                width={32}
+                height={32}
+                className="h-7 w-7 md:h-8 md:w-8 rounded-md object-contain"
+              />
+              <span className="font-display text-lg uppercase leading-none">
                 {APP_NAME_DISPLAY}
               </span>
               <span className="hidden md:inline-block w-8 h-px bg-lime/50" />
               <span className="hidden md:inline-block font-mono text-[10px] tracking-[0.25em] uppercase text-ink/50">
-                [ Navigation · {CHAPTERS.length.toString().padStart(2, '0')} chapters ]
+                Navigation · {CHAPTERS.length.toString().padStart(2, '0')} chapters
               </span>
             </div>
             <button
               type="button"
               onClick={onClose}
-              data-cursor="hover"
+
               className="group flex items-center gap-3 font-mono text-[11px] tracking-[0.2em] uppercase text-ink/80 hover:text-lime transition-colors"
             >
               <span>Close</span>
@@ -116,7 +120,7 @@ export default function MenuOverlay({
                       type="button"
                       onClick={() => handleJump(c.anchor)}
                       onMouseEnter={() => setHovered(i)}
-                      data-cursor="hover"
+
                       className="group flex items-baseline gap-6 md:gap-12 w-full text-left py-4 md:py-5 transition-opacity duration-300"
                       style={{
                         opacity: isAnyHovered && !isHovered ? 0.32 : 1,
@@ -147,7 +151,7 @@ export default function MenuOverlay({
             <aside className="hidden md:flex md:col-span-4 flex-col justify-between min-h-[360px] pt-2">
               <div>
                 <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-ink/40 mb-3">
-                  [ Now showing ]
+                  Now showing
                 </div>
                 <motion.p
                   key={hovered ?? 'default'}
@@ -164,7 +168,7 @@ export default function MenuOverlay({
                 <div className="h-px w-full bg-ink/10" />
                 <div className="flex items-baseline justify-between font-mono text-[10px] tracking-[0.2em] uppercase text-ink/45">
                   <span>Made in Ben Guerir</span>
-                  <span className="text-lime/70">v0.1 · Pre-launch</span>
+                  <span className="text-lime/70">Summer 2026 · Waitlist open</span>
                 </div>
               </div>
             </aside>
@@ -173,8 +177,7 @@ export default function MenuOverlay({
           {/* Footer hint */}
           <div className="absolute z-10 bottom-6 left-6 md:left-10 right-6 md:right-10 flex items-center justify-between font-mono text-[10px] tracking-[0.25em] uppercase text-ink/40">
             <span>
-              [ Chapters · 01 —{' '}
-              {CHAPTERS.length.toString().padStart(2, '0')} ]
+              Chapters · 01 — {CHAPTERS.length.toString().padStart(2, '0')}
             </span>
             <span className="hidden md:inline">
               Press <span className="text-lime/80">Esc</span> to close

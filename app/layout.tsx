@@ -9,11 +9,10 @@ import {
 import './globals.css';
 import GrainOverlay from '@/components/ui/GrainOverlay';
 import LenisProvider from '@/components/ui/LenisProvider';
-import Preloader from '@/components/ui/Preloader';
 import Nav from '@/components/ui/Nav';
-import CustomCursor from '@/components/ui/CustomCursor';
 import ProgressScrubber from '@/components/ui/ProgressScrubber';
 import AmbientLayer from '@/components/ui/AmbientLayer';
+import RevealObserver from '@/components/ui/RevealObserver';
 
 const display = Inter({
   subsets: ['latin'],
@@ -60,10 +59,13 @@ export const metadata: Metadata = {
   description:
     'Stop chasing group chats. See exactly who is playing, what position, and how the team is shaping up — before you commit. Football, basketball, handball.',
   metadataBase: new URL('https://sporttimes.app'),
+  // Favicon + apple-touch icon are auto-wired via app/icon.png and
+  // app/apple-icon.png — Next.js App Router detects them by filename.
   openGraph: {
     title: 'SportTimes — See the lineup. Join the match.',
     description: 'Sports coordination, reimagined.',
     type: 'website',
+    images: ['/screens/logo.png'],
   },
 };
 
@@ -80,13 +82,12 @@ export default function RootLayout({
       <body className="bg-bg text-ink antialiased">
         <AmbientLayer />
         <LenisProvider>
-          <Preloader />
           <Nav />
           <ProgressScrubber />
           {children}
         </LenisProvider>
         <GrainOverlay />
-        <CustomCursor />
+        <RevealObserver />
       </body>
     </html>
   );

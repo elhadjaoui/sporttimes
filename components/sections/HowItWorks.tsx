@@ -1,1329 +1,1209 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
+import Image from 'next/image';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 // ===================================================================
-//  Data
+//  How It Works — ONE pinned, scroll-scrubbed cinematic stage.
+//
+//  Scroll is the camera: a single 100vh stage is pinned for ~2600px;
+//  during that window the device rotates in CSS 3D, three crossfaded
+//  layers cycle through (community → lineup-fill → confirmed), and
+//  three depth chips lift on Z to hover in front of the glass.
+//
+//  Stage tone breaks the dark body with a desaturated turf-at-dusk
+//  slate-green (#161C18) easing in/out of the base #08090A via a
+//  scroll-driven --stage-bg custom property — no white, no hard seam.
+//
+//  Performance: only transform + opacity are tweened. Aurora blur is
+//  static. The stage-bg is the single full-bleed paint exception.
 // ===================================================================
 
-type Step = { num: string; title: string; body: string };
+type Step = {
+  num: string;
+  head: string;
+  sub: string;
+  src: string;
+  alt: string;
+};
 
 const STEPS: Step[] = [
   {
     num: '01',
-    title: 'Join a community.',
-    body: 'Campus, city, club, workplace. Join the squads that match how you actually play. Public groups open in one tap, private groups after admin approval.',
+    head: 'Open your community.',
+    sub:
+      'Campus, city, club, workplace — find the squad you actually play with.',
+    src: '/screens/howitworks-community.png',
+    alt:
+      'A SportTimes community page showing nearby squads with public and private badges.',
   },
   {
     num: '02',
-    title: 'Discover matches.',
-    body: 'Every match from every squad, in one feed. Filter by sport, browse by day, find your format. 5v5, 7v7, 11v11 — whatever you came to play.',
+    head: 'See the lineup form.',
+    sub:
+      "Positions claim themselves in real time — who's playing, and where.",
+    src: '/screens/howitworks-lineup.png',
+    alt:
+      'A live lineup view in the SportTimes app filling into a 4-3-3 formation.',
   },
   {
     num: '03',
-    title: 'See the lineup.',
-    body: 'The pitch, the formation, the players. Watch positions fill in real time. Know exactly who you are playing with before you ever step on the field.',
+    head: 'Confirmed.',
+    sub:
+      'One tap. Captain approves. Show up at the right field at the right time.',
+    src: '/screens/howitworks-jumpin.png',
+    alt:
+      'A player profile in the SportTimes app showing the confirmed slot and match details.',
+  },
+];
+
+// 11 avatar positions for the 4-3-3 fill (% of the pitch overlay area).
+// Tuned to sit cleanly over the lineup screenshot's formation rows.
+const FORMATION_433: Array<{ x: number; y: number; tone: 'lime' | 'paper' }> = [
+  // Forwards
+  { x: 22, y: 16, tone: 'lime' },
+  { x: 50, y: 12, tone: 'lime' },
+  { x: 78, y: 16, tone: 'lime' },
+  // Midfield
+  { x: 28, y: 36, tone: 'paper' },
+  { x: 50, y: 40, tone: 'paper' },
+  { x: 72, y: 36, tone: 'paper' },
+  // Defense
+  { x: 18, y: 60, tone: 'paper' },
+  { x: 40, y: 62, tone: 'paper' },
+  { x: 60, y: 62, tone: 'paper' },
+  { x: 82, y: 60, tone: 'paper' },
+  // Keeper
+  { x: 50, y: 86, tone: 'lime' },
+];
+
+// Three depth chips — anchored to the device, lifted on translateZ
+// so they hover in front of the glass when the device rotates.
+type Chip = {
+  eyebrow: string;
+  title: string;
+  tone: 'lime' | 'paper';
+  top?: string;
+  bottom?: string;
+  left?: string;
+  right?: string;
+  z: number; // px on Z
+  rotate: number;
+};
+
+const CHIPS: Chip[] = [
+  {
+    eyebrow: 'Join request',
+    title: 'Approved',
+    tone: 'paper',
+    top: '12%',
+    right: '-22%',
+    z: 80,
+    rotate: 3,
   },
   {
-    num: '04',
-    title: 'Jump in.',
-    body: 'One tap. Captain approves. Your face appears in the lineup. You show up ready to play, not wondering if the match will happen.',
+    eyebrow: 'Slot filled',
+    title: 'Karim · LB',
+    tone: 'paper',
+    bottom: '22%',
+    left: '-22%',
+    z: 90,
+    rotate: -4,
+  },
+  {
+    eyebrow: "You're in",
+    title: 'Confirmed',
+    tone: 'lime',
+    top: '38%',
+    right: '-26%',
+    z: 88,
+    rotate: 5,
   },
 ];
 
-// 4-3-3 positions on a 70×100 vertical pitch (shared across vizes 03/04).
-// Coordinate system matches the shared HeroPitchSvg.
-type Pos = [number, number];
-const POS433: Pos[] = [
-  [35, 92], // GK
-  [14, 72], [28, 72], [42, 72], [56, 72], // DEF
-  [22, 48], [35, 48], [48, 48], // MID
-  [18, 25], [52, 25], // FWD LF, RF
-  [35, 18], // CF — empty
-];
-const CF_INDEX = 10;
-
-// Full-detail pitch rendered in the Hero's visual language — white
-// field lines, penalty boxes + 6-yard boxes + arcs + spots, goals
-// rendered just outside the pitch, subtle fog-green fill gradient.
-// Used by Viz 03 and Viz 04 so the lineup stages match Section 01.
-function HeroPitchSvg() {
-  // Match the Hero's PitchWireframe exactly: no green grass, no outer
-  // fill — just faint white wireframe lines on whatever dark bg is
-  // behind. Default stroke opacity tuned to match the hero's ~0.32.
-  const stroke = '#F5F5F0';
-  const opMain = 0.38;
-  const opSub = 0.28;
-
-  return (
-    <g>
-      {/* Outer boundary */}
-      <rect x="0" y="0" width="70" height="100" fill="none" stroke={stroke} strokeOpacity={opMain} strokeWidth="0.4" />
-
-      {/* Halfway line + center circle + spot */}
-      <line x1="0" y1="50" x2="70" y2="50" stroke={stroke} strokeOpacity={opMain} strokeWidth="0.3" />
-      <circle cx="35" cy="50" r="9" fill="none" stroke={stroke} strokeOpacity={opMain} strokeWidth="0.3" />
-      <circle cx="35" cy="50" r="0.55" fill={stroke} fillOpacity="0.55" />
-
-      {/* Top penalty box + 6-yard + arc + spot */}
-      <rect x="15" y="0" width="40" height="14" fill="none" stroke={stroke} strokeOpacity={opMain} strokeWidth="0.3" />
-      <rect x="24" y="0" width="22" height="6" fill="none" stroke={stroke} strokeOpacity={opSub} strokeWidth="0.3" />
-      <path d="M 29 14 A 6 6 0 0 0 41 14" fill="none" stroke={stroke} strokeOpacity={opMain} strokeWidth="0.3" />
-      <circle cx="35" cy="9.5" r="0.45" fill={stroke} fillOpacity="0.5" />
-
-      {/* Bottom penalty box + 6-yard + arc + spot */}
-      <rect x="15" y="86" width="40" height="14" fill="none" stroke={stroke} strokeOpacity={opMain} strokeWidth="0.3" />
-      <rect x="24" y="94" width="22" height="6" fill="none" stroke={stroke} strokeOpacity={opSub} strokeWidth="0.3" />
-      <path d="M 29 86 A 6 6 0 0 1 41 86" fill="none" stroke={stroke} strokeOpacity={opMain} strokeWidth="0.3" />
-      <circle cx="35" cy="90.5" r="0.45" fill={stroke} fillOpacity="0.5" />
-
-      {/* Goals — wire rectangles just outside each end */}
-      <rect x="30" y="-3" width="10" height="3" fill="none" stroke={stroke} strokeOpacity={opSub} strokeWidth="0.3" />
-      <rect x="30" y="100" width="10" height="3" fill="none" stroke={stroke} strokeOpacity={opSub} strokeWidth="0.3" />
-    </g>
-  );
-}
-
-// Player dot in the hero's visual language — thin outline ring + solid
-// bright core. Matches Section 01's PlayerDot at this 2D scale.
-function HeroPlayerDot({
-  cx,
-  cy,
-  r = 2.3,
-}: {
-  cx: number;
-  cy: number;
-  r?: number;
-}) {
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={r + 0.35} fill="none" stroke="#F5F5F0" strokeWidth="0.3" />
-      <circle cx={cx} cy={cy} r={r} fill="#F5F5F0" />
-    </g>
-  );
-}
+// Stage tones
+const STAGE_DARK = '#08090A';
+const STAGE_BREAK = '#161C18'; // turf-at-dusk
 
 // ===================================================================
-//  Shared — isometric stage
-//  Applies perspective + rotate so children sit on a tilted plane
-//  like the hero pitch. Kids use `preserve-3d` where they need depth.
-// ===================================================================
-
-function IsoStage({
-  children,
-  tilt = 52,
-  roll = -8,
-  scale = 1,
-}: {
-  children: React.ReactNode;
-  tilt?: number;
-  roll?: number;
-  scale?: number;
-}) {
-  return (
-    <div
-      className="absolute inset-0 flex items-center justify-center"
-      style={{ perspective: '1400px' }}
-    >
-      <div
-        style={{
-          transform: `rotateX(${tilt}deg) rotateZ(${roll}deg) scale(${scale})`,
-          transformStyle: 'preserve-3d',
-          position: 'relative',
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// ===================================================================
-//  Visualization 01 — The Community Container
-//
-//  A community holds matches, members, sport, location — it's the
-//  thing you join FIRST. We render it as ONE big glowing container
-//  that visibly contains those parts, with a JOIN button hooked into
-//  it. No more confusing radar/network.
-// ===================================================================
-
-const COMMUNITY = {
-  badge: 's/',
-  name: 'THE CAMPUS',
-  location: 'Casablanca · Av Hassan II',
-  members: 132,
-  matchesThisWeek: 14,
-  sports: ['Football', 'Basketball', 'Handball'],
-};
-
-function Viz01() {
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!rootRef.current) return;
-    const ctx = gsap.context(() => {
-      // Whole panel emerges from dark
-      gsap.from('.viz1-panel', {
-        opacity: 0,
-        scale: 0.88,
-        filter: 'blur(18px)',
-        duration: 0.9,
-        ease: 'power3.out',
-      });
-
-      // Inner content reveals stagger
-      gsap.from('.viz1-row', {
-        opacity: 0,
-        y: 18,
-        stagger: 0.12,
-        duration: 0.6,
-        ease: 'power3.out',
-        delay: 0.4,
-      });
-
-      // Member avatars pop in one by one
-      gsap.from('.viz1-avatar', {
-        opacity: 0,
-        scale: 0,
-        stagger: 0.06,
-        duration: 0.45,
-        ease: 'back.out(2)',
-        delay: 0.7,
-        transformOrigin: 'center',
-      });
-
-      // Counter ticks up
-      gsap.fromTo(
-        '.viz1-count',
-        { innerText: 0 },
-        {
-          innerText: COMMUNITY.members,
-          duration: 1.4,
-          ease: 'power2.out',
-          snap: { innerText: 1 },
-          delay: 0.8,
-        }
-      );
-      gsap.fromTo(
-        '.viz1-matches',
-        { innerText: 0 },
-        {
-          innerText: COMMUNITY.matchesThisWeek,
-          duration: 1.4,
-          ease: 'power2.out',
-          snap: { innerText: 1 },
-          delay: 0.9,
-        }
-      );
-
-      // Outer halo breathes
-      gsap.to('.viz1-halo', {
-        opacity: 0.35,
-        scale: 1.05,
-        duration: 2.6,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-        transformOrigin: 'center',
-      });
-
-      // JOIN button pulses
-      gsap.to('.viz1-join', {
-        boxShadow: '0 0 60px rgba(212,255,58,0.85)',
-        duration: 1.4,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-      });
-    }, rootRef);
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div
-      ref={rootRef}
-      className="relative w-full h-full flex items-center justify-center"
-    >
-      {/* Outer halo — gives the community its "container" glow */}
-      <div
-        className="viz1-halo absolute"
-        style={{
-          width: 540,
-          height: 540,
-          borderRadius: '50%',
-          background:
-            'radial-gradient(circle, rgba(212,255,58,0.28) 0%, rgba(212,255,58,0.06) 45%, transparent 70%)',
-          filter: 'blur(8px)',
-          opacity: 0.55,
-        }}
-      />
-
-      {/* Panel — the community itself */}
-      <div
-        className="viz1-panel relative"
-        style={{
-          width: 460,
-          padding: 36,
-          borderRadius: 28,
-          background:
-            'linear-gradient(155deg, #141414 0%, #0a0a0a 100%)',
-          border: '1px solid rgba(212,255,58,0.35)',
-          boxShadow:
-            '0 50px 120px rgba(0,0,0,0.7), 0 0 80px rgba(212,255,58,0.18), inset 0 1px 0 rgba(255,255,255,0.04)',
-          color: '#F5F5F0',
-        }}
-      >
-        {/* Top — eyebrow + community badge + name */}
-        <div className="viz1-row mb-7">
-          <div
-            className="font-mono mb-3"
-            style={{
-              fontSize: 10,
-              letterSpacing: '0.3em',
-              color: 'rgba(212,255,58,0.7)',
-              textTransform: 'uppercase',
-            }}
-          >
-            [ Community ]
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span
-              className="font-mono"
-              style={{
-                fontSize: 22,
-                color: 'rgba(212,255,58,0.6)',
-                letterSpacing: '-0.02em',
-                fontWeight: 700,
-              }}
-            >
-              {COMMUNITY.badge}
-            </span>
-            <h4
-              className="headline-display uppercase"
-              style={{
-                fontSize: 38,
-                lineHeight: 0.95,
-                letterSpacing: '-0.025em',
-                textShadow: '0 0 24px rgba(212,255,58,0.18)',
-              }}
-            >
-              {COMMUNITY.name}
-            </h4>
-          </div>
-          <div
-            className="mt-2 font-mono"
-            style={{
-              fontSize: 11,
-              letterSpacing: '0.18em',
-              color: 'rgba(245,245,240,0.55)',
-              textTransform: 'uppercase',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z" />
-              <circle cx="12" cy="9" r="2.5" />
-            </svg>
-            {COMMUNITY.location}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div
-          className="viz1-row"
-          style={{
-            height: 1,
-            background:
-              'linear-gradient(90deg, transparent, rgba(245,245,240,0.18), transparent)',
-            marginBottom: 22,
-          }}
-        />
-
-        {/* Stats row — what the community CONTAINS */}
-        <div className="viz1-row grid grid-cols-2 gap-4 mb-6">
-          <div>
-            <div
-              className="font-mono mb-1"
-              style={{
-                fontSize: 9,
-                letterSpacing: '0.25em',
-                color: 'rgba(245,245,240,0.45)',
-                textTransform: 'uppercase',
-              }}
-            >
-              Members
-            </div>
-            <div
-              className="headline-display"
-              style={{
-                fontSize: 36,
-                lineHeight: 1,
-                color: '#F5F5F0',
-                letterSpacing: '-0.02em',
-              }}
-            >
-              <span className="viz1-count">{COMMUNITY.members}</span>
-            </div>
-          </div>
-          <div>
-            <div
-              className="font-mono mb-1"
-              style={{
-                fontSize: 9,
-                letterSpacing: '0.25em',
-                color: 'rgba(245,245,240,0.45)',
-                textTransform: 'uppercase',
-              }}
-            >
-              Matches / week
-            </div>
-            <div
-              className="headline-display"
-              style={{
-                fontSize: 36,
-                lineHeight: 1,
-                color: '#D4FF3A',
-                letterSpacing: '-0.02em',
-                textShadow: '0 0 18px rgba(212,255,58,0.4)',
-              }}
-            >
-              <span className="viz1-matches">{COMMUNITY.matchesThisWeek}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Member pile + sports */}
-        <div className="viz1-row flex items-center justify-between mb-7">
-          <div style={{ display: 'flex' }}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <span
-                key={i}
-                className="viz1-avatar"
-                style={{
-                  display: 'inline-block',
-                  width: 30,
-                  height: 30,
-                  borderRadius: '50%',
-                  background: ['#3a3a3a', '#555', '#2a2a2a', '#4a4a4a', '#3f3f3f', '#262626'][i],
-                  border: '2px solid #0a0a0a',
-                  marginLeft: i === 0 ? 0 : -10,
-                }}
-              />
-            ))}
-            <span
-              className="viz1-avatar"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 30,
-                height: 30,
-                borderRadius: '50%',
-                background: 'rgba(212,255,58,0.18)',
-                border: '1px solid rgba(212,255,58,0.5)',
-                marginLeft: -10,
-                fontFamily: 'JetBrains Mono, monospace',
-                fontSize: 10,
-                color: '#D4FF3A',
-                fontWeight: 700,
-              }}
-            >
-              +{COMMUNITY.members - 6}
-            </span>
-          </div>
-          <div className="flex gap-2">
-            {COMMUNITY.sports.map((s) => (
-              <span
-                key={s}
-                className="viz1-avatar"
-                style={{
-                  fontFamily: 'JetBrains Mono, monospace',
-                  fontSize: 9,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(245,245,240,0.55)',
-                  border: '1px solid rgba(245,245,240,0.18)',
-                  padding: '4px 8px',
-                  borderRadius: 100,
-                }}
-              >
-                {s}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* JOIN button */}
-        <button
-          type="button"
-          data-cursor="hover"
-          className="viz1-row viz1-join w-full"
-          style={{
-            padding: '16px 24px',
-            borderRadius: 100,
-            background: '#D4FF3A',
-            color: '#050505',
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 12,
-            letterSpacing: '0.25em',
-            textTransform: 'uppercase',
-            fontWeight: 700,
-            border: 'none',
-            cursor: 'none',
-            boxShadow: '0 0 30px rgba(212,255,58,0.4)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-          }}
-        >
-          <span>Join community</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-            <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-
-        {/* Bottom hint — explicit "container" message */}
-        <div
-          className="viz1-row mt-5 font-mono text-center"
-          style={{
-            fontSize: 10,
-            letterSpacing: '0.22em',
-            color: 'rgba(245,245,240,0.4)',
-            textTransform: 'uppercase',
-          }}
-        >
-          ↳ The container. Holds every match, every player.
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ===================================================================
-//  Visualization 02 — Floating match card, iso-tilted
-// ===================================================================
-
-type Match = {
-  title: string;
-  group: string;
-  format: string;
-  time: string;
-  loc: string;
-  filled: number;
-};
-
-const MATCHES: Match[] = [
-  { title: 'Sunday Match', group: 'Stars United', format: '11v11', time: '18:30', loc: 'East Field', filled: 9 },
-  { title: 'Friday Pickup', group: 'The Campus', format: '7v7', time: '19:00', loc: 'Campus Court', filled: 6 },
-  { title: 'Tournament Final', group: 'City League', format: '5v5', time: '21:00', loc: 'North Field', filled: 4 },
-  { title: 'Weekend Scrim', group: 'Workplace Run', format: '9v9', time: '14:00', loc: 'South Pitch', filled: 7 },
-];
-
-function MiniLineupGlowing({ filled, total }: { filled: number; total: number }) {
-  const positions: Pos[] = [
-    [35, 92], [14, 72], [28, 72], [42, 72], [56, 72],
-    [22, 50], [35, 50], [48, 50], [22, 25], [48, 25], [35, 18],
-  ];
-  return (
-    <svg viewBox="0 0 70 100" width="110" style={{ display: 'block', filter: 'drop-shadow(0 0 14px rgba(212,255,58,0.18))' }}>
-      <rect x="2" y="2" width="66" height="96" fill="rgba(15,46,26,0.9)" stroke="#D4FF3A" strokeOpacity="0.35" strokeWidth="0.5" />
-      <line x1="2" y1="50" x2="68" y2="50" stroke="#D4FF3A" strokeOpacity="0.25" strokeWidth="0.3" />
-      <circle cx="35" cy="50" r="7" fill="none" stroke="#D4FF3A" strokeOpacity="0.3" strokeWidth="0.3" />
-      {positions.slice(0, total).map(([x, y], i) =>
-        i < filled ? (
-          <circle key={i} cx={x} cy={y} r="2.5" fill="#F5F5F0" />
-        ) : (
-          <circle key={i} cx={x} cy={y} r="2.5" fill="none" stroke="#D4FF3A" strokeWidth="0.5" strokeDasharray="1 0.8" />
-        )
-      )}
-    </svg>
-  );
-}
-
-function Viz02() {
-  const [idx, setIdx] = useState(0);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const id = window.setInterval(
-      () => setIdx((i) => (i + 1) % MATCHES.length),
-      3200
-    );
-    return () => window.clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    if (!rootRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.from('.viz2-root', {
-        opacity: 0,
-        scale: 0.85,
-        filter: 'blur(16px)',
-        duration: 0.9,
-        ease: 'power3.out',
-      });
-    }, rootRef);
-    return () => ctx.revert();
-  }, []);
-
-  const m = MATCHES[idx];
-
-  return (
-    <div ref={rootRef} className="viz2-root relative w-full h-full flex flex-col items-center justify-center gap-8">
-      <div
-        style={{ perspective: '1600px', width: '100%', display: 'flex', justifyContent: 'center' }}
-      >
-        <div
-          style={{
-            transform: 'rotateX(18deg) rotateY(-12deg) rotateZ(-2deg)',
-            transformStyle: 'preserve-3d',
-            width: 460,
-            height: 240,
-            position: 'relative',
-          }}
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 30, rotateX: 8 }}
-              animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              exit={{ opacity: 0, y: -30, rotateX: -6 }}
-              transition={{ duration: 0.45, ease: 'easeOut' }}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: 18,
-                background: 'linear-gradient(135deg, #141414 0%, #0a0a0a 100%)',
-                boxShadow:
-                  '0 40px 90px rgba(0,0,0,0.7), 0 0 60px rgba(212,255,58,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
-                border: '1px solid rgba(212,255,58,0.28)',
-                padding: 24,
-                color: '#F5F5F0',
-                display: 'flex',
-                gap: 18,
-                overflow: 'hidden',
-              }}
-            >
-              {/* Inner lime corner ribbon */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  width: 0,
-                  height: 0,
-                  borderTop: '22px solid #D4FF3A',
-                  borderLeft: '22px solid transparent',
-                }}
-              />
-
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div
-                  style={{
-                    alignSelf: 'flex-start',
-                    padding: '4px 10px',
-                    borderRadius: 100,
-                    background: 'rgba(212,255,58,0.15)',
-                    border: '1px solid rgba(212,255,58,0.35)',
-                    color: '#D4FF3A',
-                    fontFamily: 'JetBrains Mono, monospace',
-                    fontSize: 9,
-                    letterSpacing: '0.22em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {m.group}
-                </div>
-                <div
-                  style={{
-                    fontWeight: 900,
-                    fontSize: 26,
-                    letterSpacing: '-0.02em',
-                    lineHeight: 1,
-                    textTransform: 'uppercase',
-                    textShadow: '0 0 20px rgba(212,255,58,0.15)',
-                  }}
-                >
-                  {m.title}
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 16,
-                    fontFamily: 'JetBrains Mono, monospace',
-                    fontSize: 10,
-                    letterSpacing: '0.18em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  <span>
-                    <span style={{ color: 'rgba(245,245,240,0.4)' }}>Fmt</span>{' '}
-                    <span>{m.format}</span>
-                  </span>
-                  <span>
-                    <span style={{ color: 'rgba(245,245,240,0.4)' }}>Time</span>{' '}
-                    <span>{m.time}</span>
-                  </span>
-                </div>
-                <div
-                  style={{
-                    fontFamily: 'JetBrains Mono, monospace',
-                    fontSize: 10,
-                    letterSpacing: '0.18em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  <span style={{ color: 'rgba(245,245,240,0.4)' }}>Field</span>{' '}
-                  <span>{m.loc}</span>
-                </div>
-                <div
-                  style={{
-                    marginTop: 'auto',
-                    fontFamily: 'JetBrains Mono, monospace',
-                    fontSize: 10,
-                    letterSpacing: '0.22em',
-                    textTransform: 'uppercase',
-                    color: '#D4FF3A',
-                  }}
-                >
-                  {m.filled}/{parseInt(m.format)} filled
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <MiniLineupGlowing filled={m.filled} total={parseInt(m.format)} />
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Dots below, in screen space */}
-      <div className="flex items-center gap-2">
-        {MATCHES.map((_, i) => (
-          <span
-            key={i}
-            className="block rounded-full transition-all duration-300"
-            style={{
-              width: i === idx ? 22 : 5,
-              height: 4,
-              background: i === idx ? '#D4FF3A' : 'rgba(245,245,240,0.25)',
-              boxShadow: i === idx ? '0 0 10px rgba(212,255,58,0.5)' : 'none',
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ===================================================================
-//  Visualization 03 — Isometric pitch with scan-line formation
-// ===================================================================
-
-function Viz03() {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const scanRef = useRef<SVGLineElement>(null);
-
-  useEffect(() => {
-    if (!rootRef.current) return;
-    const ctx = gsap.context(() => {
-      // Emerge from dark
-      gsap.from('.viz3-root', {
-        opacity: 0,
-        scale: 0.85,
-        filter: 'blur(18px)',
-        duration: 0.9,
-        ease: 'power3.out',
-      });
-
-      // Build master loop
-      const tl = gsap.timeline({ repeat: -1, repeatDelay: 0.6, delay: 0.3 });
-
-      tl.set('.viz3-dot', { opacity: 0, scale: 0, transformOrigin: 'center' });
-      tl.set('.viz3-counter', { innerText: '0/11' });
-      tl.set(scanRef.current, { attr: { y1: -12, y2: -12 }, opacity: 0 });
-
-      tl.to(scanRef.current, { opacity: 0.95, duration: 0.15 });
-      tl.to(
-        scanRef.current,
-        {
-          attr: { y1: 115, y2: 115 },
-          duration: 3,
-          ease: 'none',
-        },
-        '<'
-      );
-
-      const rows = [
-        { sel: '.dot-gk', atY: 92 },
-        { sel: '.dot-def', atY: 72 },
-        { sel: '.dot-mid', atY: 48 },
-        { sel: '.dot-fwd', atY: 25 },
-      ];
-      rows.forEach((r) => {
-        const atT = 0.15 + (r.atY / 115) * 3;
-        tl.to(
-          r.sel,
-          {
-            opacity: 1,
-            scale: 1,
-            duration: 0.45,
-            stagger: 0.08,
-            ease: 'back.out(2)',
-          },
-          atT
-        );
-      });
-
-      tl.to(scanRef.current, { opacity: 0, duration: 0.3 }, 3.2);
-
-      tl.to(
-        '.viz3-counter',
-        { innerText: '10/11', duration: 3, ease: 'none', snap: { innerText: 1 } },
-        0.2
-      );
-
-      tl.fromTo(
-        '.viz3-empty-ring',
-        { scale: 1, opacity: 0 },
-        {
-          scale: 1.5,
-          opacity: 1,
-          duration: 0.5,
-          ease: 'power2.out',
-          transformOrigin: 'center',
-        },
-        3.5
-      );
-      tl.to(
-        '.viz3-empty-ring',
-        { scale: 1, opacity: 0.6, duration: 0.5, ease: 'power2.inOut' },
-        4
-      );
-      tl.to({}, { duration: 0.6 });
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div ref={rootRef} className="viz3-root relative w-full h-full">
-      <IsoStage tilt={42} roll={-6} scale={1.05}>
-        <svg
-          viewBox="-10 -12 90 124"
-          width="620"
-          style={{
-            display: 'block',
-            overflow: 'visible',
-            filter: 'drop-shadow(0 40px 60px rgba(0,0,0,0.55))',
-          }}
-        >
-          <defs>
-            <linearGradient id="pitchFillV3" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0F2E1A" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#071a0e" stopOpacity="0.95" />
-            </linearGradient>
-            <radialGradient id="pitchGlow" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#D4FF3A" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#D4FF3A" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id="scanGradV3" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#D4FF3A" stopOpacity="0" />
-              <stop offset="50%" stopColor="#D4FF3A" stopOpacity="1" />
-              <stop offset="100%" stopColor="#D4FF3A" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-
-          {/* Hero-style pitch (white lines only, no green fill) */}
-          <HeroPitchSvg />
-
-          {/* Scan line */}
-          <line
-            ref={scanRef}
-            x1="-3"
-            y1="-12"
-            x2="73"
-            y2="-12"
-            stroke="#D4FF3A"
-            strokeWidth="1"
-            opacity="0"
-            style={{ filter: 'drop-shadow(0 0 3px rgba(212,255,58,0.8))' }}
-          />
-
-          {/* Empty slot — pulsing lime */}
-          <circle
-            className="viz3-empty-ring"
-            cx={POS433[CF_INDEX][0]}
-            cy={POS433[CF_INDEX][1]}
-            r="4"
-            fill="none"
-            stroke="#D4FF3A"
-            strokeWidth="0.5"
-            opacity="0"
-          />
-          <circle
-            cx={POS433[CF_INDEX][0]}
-            cy={POS433[CF_INDEX][1]}
-            r="2.8"
-            fill="none"
-            stroke="#D4FF3A"
-            strokeOpacity="0.7"
-            strokeWidth="0.4"
-          />
-
-          {/* Player dots — hero style, row-tagged for scan reveal */}
-          {POS433.map(([x, y], i) => {
-            if (i === CF_INDEX) return null;
-            const rowCls =
-              i === 0 ? 'dot-gk' : i <= 4 ? 'dot-def' : i <= 7 ? 'dot-mid' : 'dot-fwd';
-            return (
-              <g key={i} className={`viz3-dot ${rowCls}`}>
-                <HeroPlayerDot cx={x} cy={y} />
-              </g>
-            );
-          })}
-        </svg>
-      </IsoStage>
-
-      {/* Counter floating top-right */}
-      <div
-        className="absolute"
-        style={{
-          top: 24,
-          right: 24,
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 12,
-          letterSpacing: '0.22em',
-          color: '#D4FF3A',
-          padding: '6px 14px',
-          borderRadius: 100,
-          background: 'rgba(10,10,10,0.85)',
-          border: '1px solid rgba(212,255,58,0.4)',
-          backdropFilter: 'blur(6px)',
-          boxShadow: '0 0 24px rgba(212,255,58,0.18)',
-        }}
-      >
-        <span className="viz3-counter">0/11</span>
-      </div>
-    </div>
-  );
-}
-
-// ===================================================================
-//  Visualization 04 — Iso pitch with YOU drop-in
-// ===================================================================
-
-function Viz04({ active }: { active: boolean }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
-
-  useEffect(() => {
-    if (!rootRef.current) return;
-    if (tlRef.current) {
-      tlRef.current.kill();
-      tlRef.current = null;
-    }
-    const ctx = gsap.context(() => {
-      // Emerge
-      gsap.from('.viz4-root', {
-        opacity: 0,
-        scale: 0.85,
-        filter: 'blur(18px)',
-        duration: 0.9,
-        ease: 'power3.out',
-      });
-
-      gsap.set('.viz4-you', {
-        opacity: 0,
-        y: -28,
-        scale: 0.2,
-        transformOrigin: 'center',
-      });
-      gsap.set('.viz4-particle', { opacity: 0, x: 0, y: 0, scale: 1 });
-      gsap.set('.viz4-badge', { opacity: 0, scale: 0, transformOrigin: 'center' });
-      gsap.set('.viz4-counter', { innerText: '10/11' });
-
-      const pulse = gsap.to('.viz4-slot-pulse', {
-        scale: 1.4,
-        opacity: 0.25,
-        duration: 1,
-        repeat: -1,
-        yoyo: true,
-        ease: 'power2.inOut',
-        transformOrigin: 'center',
-      });
-
-      if (!active) return;
-
-      const tl = gsap.timeline({ delay: 0.6 });
-      tlRef.current = tl;
-
-      tl.to('.viz4-slot-pulse', { opacity: 0, duration: 0.2 }, 0.3);
-      tl.add(() => pulse.kill(), 0.3);
-
-      tl.to(
-        '.viz4-you',
-        { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: 'back.out(1.8)' },
-        0.4
-      );
-
-      tl.to('.viz4-particle', { opacity: 1, duration: 0.05 }, 0.65);
-      tl.to(
-        '.viz4-particle',
-        {
-          x: (i) => Math.cos((i / 14) * Math.PI * 2) * 46,
-          y: (i) => Math.sin((i / 14) * Math.PI * 2) * 46,
-          opacity: 0,
-          scale: 0.4,
-          duration: 0.8,
-          ease: 'power3.out',
-        },
-        0.7
-      );
-
-      tl.to(
-        '.viz4-counter',
-        {
-          innerText: '11/11',
-          duration: 0.4,
-          ease: 'power2.out',
-          snap: { innerText: 1 },
-        },
-        0.85
-      );
-
-      tl.to(
-        '.viz4-badge',
-        { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' },
-        1.0
-      );
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, [active]);
-
-  const [sx, sy] = POS433[CF_INDEX];
-
-  return (
-    <div ref={rootRef} className="viz4-root relative w-full h-full">
-      <IsoStage tilt={42} roll={-6} scale={1.05}>
-        <svg
-          viewBox="-10 -12 90 124"
-          width="620"
-          style={{
-            display: 'block',
-            overflow: 'visible',
-            filter: 'drop-shadow(0 40px 60px rgba(0,0,0,0.55))',
-          }}
-        >
-          <defs>
-            <linearGradient id="pitchFillV4" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0F2E1A" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#071a0e" stopOpacity="0.95" />
-            </linearGradient>
-            <radialGradient id="slotGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#D4FF3A" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="#D4FF3A" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-
-          {/* Hero-style pitch */}
-          <HeroPitchSvg />
-
-          {/* 10 pre-filled players — hero-style dots */}
-          {POS433.filter((_, i) => i !== CF_INDEX).map(([px, py], i) => (
-            <HeroPlayerDot key={i} cx={px} cy={py} />
-          ))}
-
-          {/* Slot pulse + ring */}
-          <circle cx={sx} cy={sy} r="10" fill="url(#slotGlow)" />
-          <circle
-            className="viz4-slot-pulse"
-            cx={sx}
-            cy={sy}
-            r="4"
-            fill="none"
-            stroke="#D4FF3A"
-            strokeWidth="0.6"
-          />
-          <circle cx={sx} cy={sy} r="2.8" fill="none" stroke="#D4FF3A" strokeOpacity="0.7" strokeWidth="0.5" />
-
-          {/* YOU drop — bigger dot + larger SVG text (scales crisply in
-              the parent iso transform). textRendering hint + Inter so
-              glyphs don't pixelate at this size. */}
-          <g className="viz4-you">
-            <circle cx={sx} cy={sy} r="4.4" fill="#D4FF3A" filter="url(#glow)" />
-            <text
-              x={sx}
-              y={sy}
-              textAnchor="middle"
-              dominantBaseline="central"
-              textRendering="optimizeLegibility"
-              style={{
-                fontFamily: 'Inter, system-ui, sans-serif',
-                fontSize: 2.8,
-                fontWeight: 800,
-                fill: '#050505',
-                letterSpacing: 0,
-              }}
-            >
-              YOU
-            </text>
-          </g>
-
-          {/* Particles */}
-          {Array.from({ length: 14 }).map((_, i) => (
-            <circle
-              key={i}
-              className="viz4-particle"
-              cx={sx}
-              cy={sy}
-              r="0.9"
-              fill="#D4FF3A"
-              opacity="0"
-            />
-          ))}
-        </svg>
-      </IsoStage>
-
-      {/* Counter */}
-      <div
-        className="absolute"
-        style={{
-          top: 24,
-          right: 24,
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 12,
-          letterSpacing: '0.22em',
-          color: '#D4FF3A',
-          padding: '6px 14px',
-          borderRadius: 100,
-          background: 'rgba(10,10,10,0.85)',
-          border: '1px solid rgba(212,255,58,0.4)',
-          backdropFilter: 'blur(6px)',
-          boxShadow: '0 0 24px rgba(212,255,58,0.18)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-        }}
-      >
-        <span className="viz4-counter">10/11</span>
-        <span
-          className="viz4-badge"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 18,
-            height: 18,
-            borderRadius: '50%',
-            background: '#D4FF3A',
-          }}
-        >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#050505" strokeWidth="3">
-            <path d="M20 6 L9 17 L4 12" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-      </div>
-
-    </div>
-  );
-}
-
-// ===================================================================
-//  Viz router
-// ===================================================================
-
-function VizFor({ index, active }: { index: number; active: boolean }) {
-  switch (index) {
-    case 0: return <Viz01 />;
-    case 1: return <Viz02 />;
-    case 2: return <Viz03 />;
-    case 3: return <Viz04 active={active} />;
-    default: return null;
-  }
-}
-
-// ===================================================================
-//  Step row
-// ===================================================================
-
-function StepRow({
-  step,
-  active,
-  onHover,
-  onLeave,
-  onClick,
-}: {
-  step: Step;
-  active: boolean;
-  onHover: () => void;
-  onLeave: () => void;
-  onClick: () => void;
-}) {
-  const dotRef = useRef<HTMLSpanElement>(null);
-  const wasActive = useRef(active);
-
-  useEffect(() => {
-    if (active && !wasActive.current && dotRef.current) {
-      gsap.fromTo(
-        dotRef.current,
-        { scale: 1 },
-        { scale: 1.3, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1 }
-      );
-    }
-    wasActive.current = active;
-  }, [active]);
-
-  return (
-    <div
-      className="group cursor-default"
-      data-cursor="hover"
-      onMouseEnter={onHover}
-      onMouseLeave={onLeave}
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-4 mb-3">
-        <span
-          ref={dotRef}
-          className="inline-block"
-          style={{
-            width: 12,
-            height: 12,
-            borderRadius: 2,
-            border: active ? 'none' : '1px solid rgba(245,245,240,0.3)',
-            background: active ? '#D4FF3A' : 'transparent',
-            transition: 'background 0.4s ease-out, border-color 0.4s ease-out',
-          }}
-        />
-        <span
-          className="font-mono"
-          style={{
-            fontSize: 12,
-            letterSpacing: '0.25em',
-            color: active ? '#D4FF3A' : 'rgba(245,245,240,0.35)',
-            transition: 'color 0.4s ease-out',
-          }}
-        >
-          {step.num}
-        </span>
-      </div>
-
-      <h3
-        className="headline-display uppercase leading-[0.95] mb-4"
-        style={{
-          fontSize: 'clamp(2.5rem, 4.5vw, 4rem)',
-          color: active ? '#F5F5F0' : 'rgba(245,245,240,0.28)',
-          transition: 'color 0.4s ease-out',
-        }}
-      >
-        {step.title}
-      </h3>
-
-      <p
-        className="font-body leading-relaxed max-w-[46ch]"
-        style={{
-          fontSize: 17,
-          color: active ? 'rgba(245,245,240,0.75)' : 'rgba(245,245,240,0.38)',
-          transition: 'color 0.4s ease-out',
-        }}
-      >
-        {step.body}
-      </p>
-    </div>
-  );
-}
-
-// ===================================================================
-//  Main section
+//  Component
 // ===================================================================
 
 export default function HowItWorks() {
   const sectionRef = useRef<HTMLElement>(null);
-  // Hover OR click sticks a step active. Default to 01 until the user
-  // engages. No scroll-driven auto-advance.
-  const [locked, setLocked] = useState<number>(0);
-  const [hovered, setHovered] = useState<number | null>(null);
-  const active = hovered ?? locked;
+  const stageRef = useRef<HTMLDivElement>(null);
+  const auroraRef = useRef<HTMLDivElement>(null);
+  const deviceRef = useRef<HTMLDivElement>(null);
+  const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const counterRef = useRef<HTMLSpanElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+  const stepLabelRef = useRef<HTMLSpanElement>(null);
+  const headingRefs = useRef<(HTMLHeadingElement | null)[]>([]);
+  const subRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mb = window.matchMedia('(max-width: 879px)');
+    const updateRm = () => setReducedMotion(rm.matches);
+    const updateMb = () => setIsMobile(mb.matches);
+    updateRm();
+    updateMb();
+    rm.addEventListener('change', updateRm);
+    mb.addEventListener('change', updateMb);
+    return () => {
+      rm.removeEventListener('change', updateRm);
+      mb.removeEventListener('change', updateMb);
+    };
+  }, []);
+
+  // ---------------- Desktop: pinned scrubbed timeline ----------------
+  useEffect(() => {
+    if (reducedMotion || isMobile) return;
+    const section = sectionRef.current;
+    const stage = stageRef.current;
+    const device = deviceRef.current;
+    if (!section || !stage || !device) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      // Initial state — step 1 visible, others hidden.
+      layerRefs.current.forEach((el, i) => {
+        if (!el) return;
+        gsap.set(el, { opacity: i === 0 ? 1 : 0 });
+      });
+      chipRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const chip = CHIPS[i];
+        // Establish the 3D pose via GSAP so it owns the transform matrix
+        // (avoids the inline-transform vs. .scale tween clash).
+        gsap.set(el, {
+          z: chip.z,
+          rotation: chip.rotate,
+          opacity: i === 0 ? 1 : 0,
+          scale: i === 0 ? 1 : 0.9,
+        });
+      });
+      gsap.set('.htw-avatar', { opacity: 0, scale: 0 });
+      gsap.set(headingRefs.current.filter(Boolean), { opacity: 0, y: 10 });
+      gsap.set(subRefs.current.filter(Boolean), { opacity: 0, y: 10 });
+      // Step 1 copy is visible at start.
+      if (headingRefs.current[0]) gsap.set(headingRefs.current[0], { opacity: 1, y: 0 });
+      if (subRefs.current[0]) gsap.set(subRefs.current[0], { opacity: 1, y: 0 });
+
+      gsap.set(device, {
+        rotateY: -16,
+        rotateX: 8,
+        scale: 0.94,
+        transformPerspective: 1700,
+      });
+      // Stage no longer paints its own bg — the global AmbientLayer
+      // (data-palette="how") handles section colour, so seams between
+      // sections are a single smooth ambient tween, not stacked paints.
+
+      // Counter proxy — driven by the timeline and written to DOM each tick.
+      const counter = { val: 0 };
+
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: stage,
+          start: 'top top',
+          end: '+=2600',
+          scrub: 1,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            const p = self.progress;
+            const step = p < 0.34 ? 0 : p < 0.68 ? 1 : 2;
+            if (railRef.current) {
+              const segments = railRef.current.querySelectorAll<HTMLDivElement>(
+                '[data-rail-fill]'
+              );
+              segments.forEach((seg, i) => {
+                let local: number;
+                if (i === 0) local = Math.min(1, p / 0.34);
+                else if (i === 1) local = Math.min(1, Math.max(0, (p - 0.34) / 0.34));
+                else local = Math.min(1, Math.max(0, (p - 0.68) / 0.32));
+                seg.style.transform = `scaleX(${local})`;
+              });
+            }
+            if (stepLabelRef.current) {
+              stepLabelRef.current.textContent = `step 0${step + 1} — 03`;
+            }
+            setActiveStep((prev) => (prev === step ? prev : step));
+          },
+        },
+      });
+
+      // Continuous camera drift across the full scrub window.
+      tl.to(
+        device,
+        {
+          rotateY: 10,
+          rotateX: 2,
+          scale: 1,
+          duration: 1,
+        },
+        0
+      );
+
+      // Aurora — gentle drift + opacity sigh across the scrub.
+      if (auroraRef.current) {
+        tl.fromTo(
+          auroraRef.current,
+          { xPercent: -4, opacity: 0.85 },
+          { xPercent: 6, opacity: 1, duration: 1 },
+          0
+        );
+      }
+
+      // ---- Step boundary transitions ----
+      const B1 = 0.32; // step 1 → 2
+      const B2 = 0.66; // step 2 → 3
+      const CROSSFADE = 0.05;
+
+      // Layer crossfade 1 → 2
+      tl.to(layerRefs.current[0]!, { opacity: 0, duration: CROSSFADE }, B1);
+      tl.to(layerRefs.current[1]!, { opacity: 1, duration: CROSSFADE }, B1);
+
+      // Layer crossfade 2 → 3
+      tl.to(layerRefs.current[1]!, { opacity: 0, duration: CROSSFADE }, B2);
+      tl.to(layerRefs.current[2]!, { opacity: 1, duration: CROSSFADE }, B2);
+
+      // Copy crossfades (left column)
+      // Step 1 → 2
+      tl.to(headingRefs.current[0]!, { opacity: 0, y: -8, duration: CROSSFADE }, B1);
+      tl.to(subRefs.current[0]!, { opacity: 0, y: -8, duration: CROSSFADE }, B1);
+      tl.fromTo(
+        headingRefs.current[1]!,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: CROSSFADE },
+        B1 + CROSSFADE
+      );
+      tl.fromTo(
+        subRefs.current[1]!,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: CROSSFADE },
+        B1 + CROSSFADE
+      );
+      // Step 2 → 3
+      tl.to(headingRefs.current[1]!, { opacity: 0, y: -8, duration: CROSSFADE }, B2);
+      tl.to(subRefs.current[1]!, { opacity: 0, y: -8, duration: CROSSFADE }, B2);
+      tl.fromTo(
+        headingRefs.current[2]!,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: CROSSFADE },
+        B2 + CROSSFADE
+      );
+      tl.fromTo(
+        subRefs.current[2]!,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: CROSSFADE },
+        B2 + CROSSFADE
+      );
+
+      // ---- Avatar stagger + counter (step 2 only) ----
+      tl.to('.htw-avatar', {
+        opacity: 1,
+        scale: 1,
+        ease: 'back.out(1.5)',
+        duration: 0.04,
+        stagger: 0.012,
+      }, B1 + CROSSFADE);
+
+      tl.to(
+        counter,
+        {
+          val: 11,
+          duration: 0.18,
+          ease: 'power1.out',
+          onUpdate: () => {
+            if (counterRef.current) {
+              counterRef.current.textContent = String(Math.round(counter.val));
+            }
+          },
+        },
+        B1 + CROSSFADE
+      );
+
+      // Avatars + counter fade out as step 3 takes over
+      tl.to('.htw-avatar', { opacity: 0, duration: CROSSFADE }, B2);
+
+      // ---- Depth chips per step ----
+      // Chip 1 — out at B1
+      tl.to(
+        chipRefs.current[0]!,
+        { opacity: 0, scale: 0.9, duration: CROSSFADE },
+        B1
+      );
+      // Chip 2 — in just after B1, out at B2
+      tl.fromTo(
+        chipRefs.current[1]!,
+        { opacity: 0, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: CROSSFADE },
+        B1 + CROSSFADE
+      );
+      tl.to(
+        chipRefs.current[1]!,
+        { opacity: 0, scale: 0.9, duration: CROSSFADE },
+        B2
+      );
+      // Chip 3 — in just after B2, hold to end
+      tl.fromTo(
+        chipRefs.current[2]!,
+        { opacity: 0, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: CROSSFADE },
+        B2 + CROSSFADE
+      );
+
+      // Manage will-change lifecycle — only on while the trigger is active.
+      ScrollTrigger.create({
+        trigger: stage,
+        start: 'top bottom',
+        end: 'bottom top',
+        onEnter: () => {
+          if (device) device.style.willChange = 'transform';
+          chipRefs.current.forEach((c) => {
+            if (c) c.style.willChange = 'transform, opacity';
+          });
+        },
+        onLeave: () => {
+          if (device) device.style.willChange = 'auto';
+          chipRefs.current.forEach((c) => {
+            if (c) c.style.willChange = 'auto';
+          });
+        },
+        onEnterBack: () => {
+          if (device) device.style.willChange = 'transform';
+        },
+        onLeaveBack: () => {
+          if (device) device.style.willChange = 'auto';
+        },
+      });
+    }, section);
+
+    return () => ctx.revert();
+  }, [reducedMotion, isMobile]);
+
+  // ---------------- Mobile: stacked blocks, IntersectionObserver ----------------
+  useEffect(() => {
+    if (!isMobile || reducedMotion) return;
+    const blocks = sectionRef.current?.querySelectorAll<HTMLElement>(
+      '[data-mobile-step]'
+    );
+    if (!blocks || blocks.length === 0) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            const idx = parseInt(
+              (e.target as HTMLElement).dataset.mobileStep || '0',
+              10
+            );
+            setActiveStep(idx);
+          }
+        });
+      },
+      { threshold: 0.55 }
+    );
+    blocks.forEach((b) => obs.observe(b));
+    return () => obs.disconnect();
+  }, [isMobile, reducedMotion]);
+
+  // ===================================================================
+  //  Render
+  // ===================================================================
+
+  // Reduced motion + mobile share simpler markup that skips pin/scrub.
+  if (reducedMotion) {
+    return <StaticConfirmedView />;
+  }
+
+  if (isMobile) {
+    return <MobileStack activeStep={activeStep} />;
+  }
 
   return (
     <section
       ref={sectionRef}
       id="how"
       data-progress-section
-      data-progress-label="03 · How It Works"
+      data-progress-label="How It Works"
       data-palette="how"
-      className="relative w-full"
-      style={{ minHeight: '220vh' }}
+      className="relative"
+      style={{
+        // Fully transparent — the global AmbientLayer paints the
+        // background and tweens between sections smoothly, eliminating
+        // the per-section seams we were creating with stage-local paints.
+        background: 'transparent',
+        overflow: 'visible',
+      }}
     >
-      <div className="grid-12 pt-[18vh] relative z-10">
-        <div className="col-span-12 md:col-start-2 md:col-span-10">
-          <div className="mono-eyebrow mb-5">
-            [ Chapter 03 · How it works ]
+      {/* Pinned cinematic stage (no bg, no bridges — ambient handles it) */}
+      <div
+        ref={stageRef}
+        className="htw-stage"
+      >
+        {/* Masked grid — subtle structural lines, radial-faded toward edges */}
+        <div aria-hidden className="htw-grid" />
+
+        {/* Aurora — soft lime radial glow, blur is STATIC */}
+        <div ref={auroraRef} aria-hidden className="htw-aurora" />
+
+        {/* Stage content — two columns */}
+        <div className="htw-stage-grid">
+          {/* LEFT — copy + progress rail */}
+          <div className="htw-copy">
+            <span ref={stepLabelRef} className="htw-step-label">
+              step 01 — 03
+            </span>
+
+            <div className="htw-headlines">
+              {STEPS.map((step, i) => (
+                <div
+                  key={step.num}
+                  className="htw-headline-slot"
+                  aria-hidden={activeStep !== i}
+                >
+                  <h2
+                    ref={(el) => {
+                      headingRefs.current[i] = el;
+                    }}
+                    className="htw-headline"
+                  >
+                    {step.head}
+                  </h2>
+                  <p
+                    ref={(el) => {
+                      subRefs.current[i] = el;
+                    }}
+                    className="htw-sub"
+                  >
+                    {step.sub}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div ref={railRef} className="htw-rail" aria-hidden>
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="htw-rail-seg">
+                  <div data-rail-fill className="htw-rail-fill" />
+                </div>
+              ))}
+            </div>
           </div>
-          <h2 className="headline-display uppercase text-ink text-[clamp(2.5rem,6vw,5rem)] leading-[0.95] max-w-[18ch]">
-            From discovery to kickoff.
+
+          {/* RIGHT — perspective scene with device + chips */}
+          <div className="htw-scene">
+            <div className="htw-perspective">
+              <div ref={deviceRef} className="htw-device">
+                {/* Screen layers — crossfaded by the timeline */}
+                {STEPS.map((step, i) => (
+                  <div
+                    key={step.num}
+                    ref={(el) => {
+                      layerRefs.current[i] = el;
+                    }}
+                    className="htw-layer"
+                  >
+                    <Image
+                      src={step.src}
+                      alt={step.alt}
+                      fill
+                      sizes="(max-width: 1100px) 30vw, 340px"
+                      priority={i === 0}
+                      className="htw-shot"
+                    />
+                    {/* Step 2 — formation overlay + counter */}
+                    {i === 1 && (
+                      <>
+                        <div className="htw-counter" aria-hidden>
+                          <span className="htw-counter-eyebrow">lineup</span>
+                          <span className="htw-counter-num">
+                            <span ref={counterRef}>0</span>
+                            <span className="htw-counter-of">/11</span>
+                          </span>
+                        </div>
+                        <div className="htw-pitch" aria-hidden>
+                          {FORMATION_433.map((p, idx) => (
+                            <div
+                              key={idx}
+                              className={`htw-avatar htw-avatar-${p.tone}`}
+                              style={{
+                                left: `${p.x}%`,
+                                top: `${p.y}%`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+
+                {/* Depth chips — parented to the device with translateZ */}
+                {CHIPS.map((chip, i) => (
+                  <div
+                    key={i}
+                    ref={(el) => {
+                      chipRefs.current[i] = el;
+                    }}
+                    className={`htw-chip htw-chip-${chip.tone}`}
+                    style={{
+                      top: chip.top,
+                      bottom: chip.bottom,
+                      left: chip.left,
+                      right: chip.right,
+                    }}
+                    aria-hidden
+                  >
+                    <span className="htw-chip-eyebrow">{chip.eyebrow}</span>
+                    <span className="htw-chip-title">{chip.title}</span>
+                    {chip.tone === 'lime' && (
+                      <span className="htw-chip-tick" aria-hidden>
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* SR-only semantic headings so the section is understandable
+                without motion. Visible headings are tracked by the timeline. */}
+            <div className="sr-only">
+              {STEPS.map((s) => (
+                <h2 key={s.num}>
+                  {s.num}. {s.head} {s.sub}
+                </h2>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Scoped styles. Keep all paint to transform/opacity/static-blur. */}
+      <style jsx>{`
+        .htw-stage {
+          position: relative;
+          height: 100vh;
+          width: 100%;
+          overflow: visible;
+          color: #F5F5F0;
+          isolation: isolate;
+        }
+
+        /* Masked grid lines */
+        .htw-grid {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(to right, rgba(245, 245, 240, 0.045) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(245, 245, 240, 0.045) 1px, transparent 1px);
+          background-size: 64px 64px;
+          -webkit-mask-image: radial-gradient(
+            ellipse 70% 60% at 60% 50%,
+            rgba(0, 0, 0, 1) 0%,
+            rgba(0, 0, 0, 0.5) 55%,
+            transparent 85%
+          );
+          mask-image: radial-gradient(
+            ellipse 70% 60% at 60% 50%,
+            rgba(0, 0, 0, 1) 0%,
+            rgba(0, 0, 0, 0.5) 55%,
+            transparent 85%
+          );
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* Aurora — soft lime glow, blurred once. NEVER animate the blur. */
+        .htw-aurora {
+          position: absolute;
+          top: -220px;          /* bleed up into the top bridge */
+          right: -10%;
+          width: 90%;
+          height: calc(100% + 440px); /* bleed down into the bottom bridge */
+          background: radial-gradient(
+            ellipse 55% 50% at 55% 45%,
+            rgba(212, 255, 58, 0.32) 0%,
+            rgba(150, 200, 80, 0.16) 40%,
+            transparent 70%
+          );
+          filter: blur(60px);
+          will-change: transform, opacity;
+          pointer-events: none;
+          mix-blend-mode: screen;
+          z-index: 2;
+        }
+
+        .htw-stage-grid {
+          position: relative;
+          z-index: 3;
+          width: 100%;
+          max-width: 1440px;
+          height: 100%;
+          margin: 0 auto;
+          padding: 0 clamp(24px, 4vw, 64px);
+          display: grid;
+          grid-template-columns: 1fr 1.15fr;
+          align-items: center;
+          gap: clamp(40px, 5vw, 96px);
+        }
+
+        /* ---- LEFT — copy ---- */
+        .htw-copy {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          gap: clamp(20px, 3vh, 36px);
+          max-width: 540px;
+        }
+
+        .htw-step-label {
+          font-family: var(--font-mono), 'JetBrains Mono', monospace;
+          font-size: 12px;
+          letter-spacing: 0.28em;
+          text-transform: lowercase;
+          color: var(--lime);
+        }
+
+        .htw-headlines {
+          position: relative;
+          min-height: 280px;
+        }
+        .htw-headline-slot {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+        }
+        .htw-headline {
+          font-family: var(--font-display), 'Inter', system-ui, sans-serif;
+          font-weight: 900;
+          font-size: clamp(2.25rem, 4.8vw, 4rem);
+          line-height: 1;
+          letter-spacing: -0.035em;
+          color: #F5F5F0;
+          margin: 0 0 24px;
+          max-width: 14ch;
+          will-change: transform, opacity;
+        }
+        .htw-sub {
+          font-family: var(--font-body), Inter, system-ui, sans-serif;
+          font-size: 17px;
+          line-height: 1.55;
+          color: rgba(245, 245, 240, 0.7);
+          max-width: 40ch;
+          margin: 0;
+          will-change: transform, opacity;
+        }
+
+        .htw-rail {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+          max-width: 360px;
+        }
+        .htw-rail-seg {
+          position: relative;
+          height: 2px;
+          background: rgba(245, 245, 240, 0.08);
+          overflow: hidden;
+          border-radius: 1px;
+        }
+        .htw-rail-fill {
+          position: absolute;
+          inset: 0;
+          background: var(--lime);
+          transform-origin: left center;
+          transform: scaleX(0);
+        }
+
+        /* ---- RIGHT — perspective scene ---- */
+        .htw-scene {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+        }
+        .htw-perspective {
+          perspective: 1700px;
+          perspective-origin: 50% 50%;
+          width: clamp(260px, 28vw, 340px);
+        }
+        .htw-device {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 9 / 19.5;
+          transform-style: preserve-3d;
+          will-change: transform;
+          border-radius: 36px;
+          background: #060707;
+          box-shadow:
+            0 30px 80px rgba(0, 0, 0, 0.55),
+            0 0 0 1px rgba(212, 255, 58, 0.08),
+            inset 0 0 0 1px rgba(245, 245, 240, 0.04);
+        }
+
+        .htw-layer {
+          position: absolute;
+          inset: 0;
+          border-radius: 32px;
+          overflow: hidden;
+          backface-visibility: hidden;
+          transform: translateZ(0.1px); /* avoid Z-fighting with bezel */
+        }
+        .htw-shot {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          user-select: none;
+          -webkit-user-drag: none;
+        }
+
+        /* Step 2 — formation overlay. A subtle dark wash sits between the
+           screenshot and the animated dots so the fill reads as the
+           foreground action, not noise on top of the existing UI dots. */
+        .htw-pitch {
+          position: absolute;
+          left: 6%;
+          right: 6%;
+          top: 22%;
+          bottom: 16%;
+          pointer-events: none;
+          background: radial-gradient(
+            ellipse 80% 70% at 50% 50%,
+            rgba(8, 9, 10, 0.62) 0%,
+            rgba(8, 9, 10, 0.45) 60%,
+            transparent 100%
+          );
+          border-radius: 18px;
+        }
+        .htw-avatar {
+          position: absolute;
+          width: 22px;
+          height: 22px;
+          margin-left: -11px;
+          margin-top: -11px;
+          border-radius: 50%;
+          transform: scale(0);
+          opacity: 0;
+          box-shadow:
+            0 0 0 2px #0E1110,
+            0 6px 14px rgba(0, 0, 0, 0.55);
+        }
+        .htw-avatar-lime {
+          background: linear-gradient(180deg, var(--lime) 0%, #b3da30 100%);
+        }
+        .htw-avatar-paper {
+          background: linear-gradient(180deg, #F5F5F0 0%, #c8c9c0 100%);
+        }
+
+        .htw-counter {
+          position: absolute;
+          top: 6%;
+          left: 50%;
+          transform: translateX(-50%);
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 6px 14px;
+          background: rgba(8, 9, 10, 0.78);
+          border: 1px solid rgba(212, 255, 58, 0.25);
+          border-radius: 999px;
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+        }
+        .htw-counter-eyebrow {
+          font-family: var(--font-mono), monospace;
+          font-size: 8px;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: rgba(245, 245, 240, 0.55);
+        }
+        .htw-counter-num {
+          font-family: var(--font-display), Inter, sans-serif;
+          font-weight: 800;
+          font-size: 16px;
+          color: var(--lime);
+          letter-spacing: -0.02em;
+        }
+        .htw-counter-of {
+          color: rgba(245, 245, 240, 0.6);
+          font-weight: 700;
+          margin-left: 1px;
+        }
+
+        /* ---- Depth chips ---- */
+        .htw-chip {
+          position: absolute;
+          min-width: 140px;
+          padding: 10px 14px;
+          border-radius: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          will-change: transform, opacity;
+          backface-visibility: hidden;
+        }
+        .htw-chip-paper {
+          background: #F5F5F0;
+          color: #0B0D10;
+          box-shadow:
+            0 24px 60px rgba(0, 0, 0, 0.45),
+            0 0 0 1px rgba(0, 0, 0, 0.04);
+        }
+        .htw-chip-lime {
+          background: var(--lime);
+          color: #0A0A0A;
+          box-shadow:
+            0 24px 60px rgba(212, 255, 58, 0.28),
+            0 24px 60px rgba(0, 0, 0, 0.35);
+        }
+        .htw-chip-eyebrow {
+          font-family: var(--font-mono), monospace;
+          font-size: 9px;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          opacity: 0.6;
+        }
+        .htw-chip-title {
+          font-family: var(--font-display), Inter, sans-serif;
+          font-weight: 800;
+          font-size: 15px;
+          letter-spacing: -0.01em;
+          line-height: 1.15;
+        }
+        .htw-chip-tick {
+          position: absolute;
+          top: 8px;
+          right: 10px;
+          font-size: 12px;
+          font-weight: 900;
+        }
+
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
+        @media (max-width: 1100px) {
+          .htw-stage-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+          }
+          .htw-headline { font-size: clamp(2rem, 4.4vw, 3rem); }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+// ===================================================================
+//  Mobile fallback — stacked blocks, swapped by IntersectionObserver.
+//  No pin, no 3D, no scrub. Chips become flat badges.
+// ===================================================================
+
+function MobileStack({ activeStep }: { activeStep: number }) {
+  void activeStep; // observer drives section state in parent (reserved for future)
+  return (
+    <section
+      id="how"
+      data-progress-section
+      data-progress-label="How It Works"
+      data-palette="how"
+      className="relative"
+      style={{
+        padding: 'clamp(5rem, 12vh, 9rem) 0',
+        background: 'transparent',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        className="grid-12"
+        style={{ position: 'relative', zIndex: 2, marginBottom: '3rem' }}
+      >
+        <div className="col-span-12">
+          <div
+            style={{
+              fontFamily: 'var(--font-mono), monospace',
+              fontSize: 11,
+              letterSpacing: '0.28em',
+              color: 'var(--lime)',
+              marginBottom: 16,
+              textTransform: 'lowercase',
+            }}
+          >
+            how it works
+          </div>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display), Inter, sans-serif',
+              fontWeight: 900,
+              fontSize: 'clamp(2rem, 8vw, 3rem)',
+              lineHeight: 1,
+              letterSpacing: '-0.035em',
+              color: '#F5F5F0',
+              margin: 0,
+              maxWidth: '16ch',
+            }}
+          >
+            From group chat to a confirmed 11.
           </h2>
         </div>
       </div>
 
-      <div className="grid-12 mt-24 relative z-10">
-        {/* LEFT — step list */}
-        <div className="col-span-12 xl:col-start-2 xl:col-span-5 flex flex-col gap-16 pb-[30vh]">
-          {STEPS.map((step, i) => (
-            <StepRow
-              key={i}
-              step={step}
-              active={active === i}
-              onHover={() => setHovered(i)}
-              onLeave={() => setHovered(null)}
-              onClick={() => setLocked(i)}
-            />
-          ))}
-        </div>
-
-        {/* RIGHT — sticky big glowing visual, no border, fills space */}
-        <div className="hidden xl:block xl:col-start-7 xl:col-span-6 relative">
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'clamp(3rem, 8vh, 5rem)',
+        }}
+      >
+        {STEPS.map((step, i) => (
           <div
-            className="sticky"
-            style={{
-              top: 0,
-              height: '100vh',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'sticky',
-              pointerEvents: 'none',
-            }}
+            key={step.num}
+            data-mobile-step={i}
+            className="grid-12"
+            style={{ alignItems: 'center' }}
           >
             <div
+              className="col-span-12"
               style={{
-                width: '100%',
-                height: '72vh',
-                maxHeight: 720,
-                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 20,
+                alignItems: 'flex-start',
               }}
             >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={active}
-                  className="absolute inset-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <VizFor index={active} active={active === 3} />
-                </motion.div>
-              </AnimatePresence>
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono), monospace',
+                  fontSize: 10,
+                  letterSpacing: '0.28em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(212, 255, 58, 0.8)',
+                }}
+              >
+                step 0{i + 1} — 03
+              </span>
+
+              <div
+                style={{
+                  position: 'relative',
+                  width: '70%',
+                  maxWidth: 260,
+                  aspectRatio: '9 / 19.5',
+                  borderRadius: 28,
+                  overflow: 'hidden',
+                  background: '#060707',
+                  border: '1px solid rgba(245, 245, 240, 0.06)',
+                  boxShadow: '0 28px 60px rgba(0, 0, 0, 0.55)',
+                  alignSelf: 'center',
+                }}
+              >
+                <Image
+                  src={step.src}
+                  alt={step.alt}
+                  fill
+                  sizes="(max-width: 879px) 70vw, 260px"
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 12px',
+                  borderRadius: 999,
+                  background:
+                    CHIPS[i].tone === 'lime' ? 'var(--lime)' : '#F5F5F0',
+                  color: '#0A0A0A',
+                  fontFamily: 'var(--font-display), Inter, sans-serif',
+                  fontWeight: 800,
+                  fontSize: 12,
+                  alignSelf: 'center',
+                }}
+              >
+                {CHIPS[i].title}
+                {CHIPS[i].tone === 'lime' ? ' ✓' : ''}
+              </span>
+
+              <h3
+                style={{
+                  fontFamily: 'var(--font-display), Inter, sans-serif',
+                  fontWeight: 900,
+                  fontSize: 'clamp(1.6rem, 6vw, 2rem)',
+                  lineHeight: 1.05,
+                  letterSpacing: '-0.03em',
+                  color: '#F5F5F0',
+                  margin: 0,
+                  maxWidth: '14ch',
+                  alignSelf: 'flex-start',
+                }}
+              >
+                {step.head}
+              </h3>
+              <p
+                style={{
+                  fontFamily: 'var(--font-body), Inter, sans-serif',
+                  fontSize: 16,
+                  lineHeight: 1.55,
+                  color: 'rgba(245, 245, 240, 0.7)',
+                  maxWidth: '36ch',
+                  margin: 0,
+                }}
+              >
+                {step.sub}
+              </p>
             </div>
           </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ===================================================================
+//  Reduced-motion fallback — render step 3 (confirmed) statically.
+//  No pin, no scrub, no 3D rotation. Source of truth for content.
+// ===================================================================
+
+function StaticConfirmedView() {
+  return (
+    <section
+      id="how"
+      data-progress-section
+      data-progress-label="How It Works"
+      data-palette="how"
+      className="relative"
+      style={{
+        background: 'transparent',
+        padding: 'clamp(6rem, 14vh, 10rem) 0',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        className="grid-12 items-center"
+        style={{ position: 'relative', zIndex: 2 }}
+      >
+        <div className="col-span-12 xl:col-start-2 xl:col-span-5">
+          <div
+            style={{
+              fontFamily: 'var(--font-mono), monospace',
+              fontSize: 12,
+              letterSpacing: '0.28em',
+              color: 'var(--lime)',
+              marginBottom: 18,
+              textTransform: 'lowercase',
+            }}
+          >
+            step 03 — 03
+          </div>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display), Inter, sans-serif',
+              fontWeight: 900,
+              fontSize: 'clamp(2.25rem, 4.8vw, 4rem)',
+              lineHeight: 1,
+              letterSpacing: '-0.035em',
+              color: '#F5F5F0',
+              margin: '0 0 24px',
+              maxWidth: '14ch',
+            }}
+          >
+            You&apos;re in the lineup.
+          </h2>
+          <p
+            style={{
+              fontFamily: 'var(--font-body), Inter, sans-serif',
+              fontSize: 17,
+              lineHeight: 1.55,
+              color: 'rgba(245, 245, 240, 0.7)',
+              maxWidth: '40ch',
+              margin: 0,
+            }}
+          >
+            One tap. Captain approves. Your face appears in the lineup and you
+            show up ready to play.
+          </p>
+        </div>
+        <div
+          className="col-span-12 xl:col-start-8 xl:col-span-4"
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            position: 'relative',
+            marginTop: 'clamp(3rem, 6vh, 4rem)',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: 320,
+              aspectRatio: '9 / 19.5',
+              borderRadius: 32,
+              overflow: 'hidden',
+              background: '#060707',
+              boxShadow: '0 30px 70px rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            <Image
+              src={STEPS[2].src}
+              alt={STEPS[2].alt}
+              fill
+              sizes="(max-width: 1280px) 60vw, 320px"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
+          <span
+            style={{
+              position: 'absolute',
+              top: '38%',
+              right: '-2%',
+              padding: '10px 14px',
+              borderRadius: 12,
+              background: 'var(--lime)',
+              color: '#0A0A0A',
+              fontFamily: 'var(--font-display), Inter, sans-serif',
+              fontWeight: 800,
+              fontSize: 14,
+              boxShadow: '0 20px 50px rgba(212, 255, 58, 0.3)',
+            }}
+          >
+            Confirmed ✓
+          </span>
         </div>
       </div>
     </section>
