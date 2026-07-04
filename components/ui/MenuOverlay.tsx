@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CHAPTERS, APP_NAME_DISPLAY } from '@/lib/constants';
 import { getLenis } from '@/hooks/useLenis';
-import CornerBrackets from './CornerBrackets';
 
 export default function MenuOverlay({
   open,
@@ -65,13 +65,17 @@ export default function MenuOverlay({
             }}
           />
 
-          {/* Corner brackets */}
-          <CornerBrackets />
-
           {/* Header row */}
           <div className="relative z-10 flex items-center justify-between px-6 md:px-10 pt-7">
-            <div className="flex items-center gap-4">
-              <span className="font-display text-lg uppercase">
+            <div className="flex items-center gap-3 md:gap-4">
+              <Image
+                src="/screens/logo.png"
+                alt=""
+                width={32}
+                height={32}
+                className="h-7 w-7 md:h-8 md:w-8 rounded-md object-contain"
+              />
+              <span className="font-display text-lg uppercase leading-none">
                 {APP_NAME_DISPLAY}
               </span>
               <span className="hidden md:inline-block w-8 h-px bg-lime/50" />
@@ -164,7 +168,7 @@ export default function MenuOverlay({
                 <div className="h-px w-full bg-ink/10" />
                 <div className="flex items-baseline justify-between font-mono text-[10px] tracking-[0.2em] uppercase text-ink/45">
                   <span>Made in Ben Guerir</span>
-                  <span className="text-lime/70">v0.1 · Pre-launch</span>
+                  <span className="text-lime/70">Summer 2026 · Waitlist open</span>
                 </div>
               </div>
             </aside>

@@ -6,7 +6,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import MagneticButton from '@/components/ui/MagneticButton';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
-import CornerBrackets from '@/components/ui/CornerBrackets';
 import { getLenis } from '@/hooks/useLenis';
 import { scrollState } from '@/lib/scrollState';
 
@@ -225,13 +224,13 @@ export default function Hero() {
           </h1>
 
           <p className="hero-fade font-body text-ink/65 text-base md:text-lg leading-snug max-w-[46ch] mb-9">
-            Every game is won before kickoff. See the lineup, claim your
-            spot, show up ready to play.
+            See who&apos;s playing before you commit. Claim your spot. Show
+            up ready.
           </p>
 
           <div className="hero-fade flex flex-col xl:flex-row xl:flex-wrap items-stretch xl:items-center gap-3 w-full xl:w-auto">
             <MagneticButton href="#download" variant="primary">
-              Download the app ↗
+              Get notified ↗
             </MagneticButton>
             <MagneticButton variant="ghost" onClick={scrollToHow}>
               See how it works
@@ -244,9 +243,6 @@ export default function Hero() {
       <div className="hidden xl:block absolute z-20 bottom-6 xl:bottom-10 right-6 xl:right-10 hero-fade pointer-events-none">
         <ScrollIndicator />
       </div>
-
-      {/* E — corner brackets (HUD frame) */}
-      <CornerBrackets />
     </section>
   );
 }

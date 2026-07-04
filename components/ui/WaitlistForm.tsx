@@ -1,20 +1,31 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+} from 'react';
 
 type Source = 'hero' | 'download' | 'footer' | 'sticky' | 'inline';
 type Variant = 'dark' | 'paper';
 type State = 'idle' | 'loading' | 'success' | 'error' | 'invalid';
 
-const FORMSUBMIT_EMAIL = process.env.NEXT_PUBLIC_FORMSUBMIT_EMAIL ?? '';
+// Env config — set these in .env.local. See .env.example for docs.
+const GOOGLE_FORM_URL = process.env.NEXT_PUBLIC_GOOGLE_FORM_URL ?? '';
+const EMAIL_ENTRY = process.env.NEXT_PUBLIC_GOOGLE_FORM_EMAIL_ENTRY ?? '';
+const SOURCE_ENTRY = process.env.NEXT_PUBLIC_GOOGLE_FORM_SOURCE_ENTRY ?? '';
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Props = {
-  /** Where on the page this form lives — included as a hidden field for inbox segmentation. */
+  /** Where on the page this form lives — sent as a hidden field so Google
+   *  Form responses can be segmented by placement. */
   source: Source;
   /** Auto-derive from nearest data-palette ancestor by default. Pass to override. */
   variant?: Variant;
-  /** Optional override for the submit button label in the idle state. */
+  /** Optional override for the submit button label. */
   cta?: string;
   /** Optional override for the success message. */
   successMessage?: string;
@@ -23,23 +34,25 @@ type Props = {
 };
 
 /**
- * Waitlist: reusable email-capture form.
+ * Waitlist: reusable inline email form that POSTs to a Google Form.
  *
- * Submits via fetch (no page redirect) to Formsubmit.co's AJAX endpoint.
- * Six designed states (idle / loading / success / error / invalid + a silent
- * honeypot drop). No backend required — the email lives in the inbox of
- * whoever owns NEXT_PUBLIC_FORMSUBMIT_EMAIL.
+ * Submits via fetch with `mode: 'no-cors'` so the user stays on the app.
+ * Google's formResponse endpoint doesn't return CORS headers, so we
+ * can't read the response — we assume success if the request doesn't
+ * throw. In practice this is reliable: Google accepts anything and
+ * writes it to the responses spreadsheet.
  *
- * Spam mitigation:
- * - Hidden _honey text field (bots fill it; we silently show success).
- * - Client-side rate limit: 1 submit per 5s.
+ * Config: set these three env vars in .env.local:
+ *   NEXT_PUBLIC_GOOGLE_FORM_URL          — the /formResponse URL
+ *   NEXT_PUBLIC_GOOGLE_FORM_EMAIL_ENTRY  — the email field's entry.XXXXXXX ID
+ *   NEXT_PUBLIC_GOOGLE_FORM_SOURCE_ENTRY — (optional) source field entry ID
  *
- * Accessibility:
- * - <label> linked to input via htmlFor (visually hidden).
- * - aria-live="polite" wrapper announces state changes.
- * - Focus moves to the success message on submit success.
+ * Getting the entry IDs:
+ *   1. In the Google Forms editor: ⋮ menu → "Get pre-filled link".
+ *   2. Fill any dummy values, then click "Get link".
+ *   3. The URL contains &entry.NNNNNN=DUMMY — copy each entry.NNNNNN.
  */
-export default function Waitlist({
+export default function WaitlistForm({
   source,
   variant,
   cta = 'Join the waitlist',
@@ -51,10 +64,9 @@ export default function Waitlist({
   const [resolvedVariant, setResolvedVariant] = useState<Variant>(variant ?? 'dark');
   const formRef = useRef<HTMLFormElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
-  const honeyRef = useRef<HTMLInputElement>(null);
   const lastSubmitRef = useRef(0);
 
-  // Auto-derive variant from the nearest data-palette ancestor unless caller forces one.
+  // Auto-derive variant from nearest data-palette ancestor.
   useEffect(() => {
     if (variant) {
       setResolvedVariant(variant);
@@ -66,22 +78,36 @@ export default function Waitlist({
     setResolvedVariant(palette === 'paper' ? 'paper' : 'dark');
   }, [variant]);
 
-  // Focus the success message once when it appears (not on every render).
+  // Move focus to the success message when it appears.
   useEffect(() => {
     if (state === 'success') successRef.current?.focus();
   }, [state]);
+
+  // Dev warnings if the form isn't wired up.
+  useEffect(() => {
+    if (
+      typeof window === 'undefined' ||
+      process.env.NODE_ENV === 'production'
+    ) return;
+    if (!GOOGLE_FORM_URL) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Waitlist: NEXT_PUBLIC_GOOGLE_FORM_URL is not set. Submissions will error.'
+      );
+    }
+    if (!EMAIL_ENTRY) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Waitlist: NEXT_PUBLIC_GOOGLE_FORM_EMAIL_ENTRY is not set. Submissions will error.'
+      );
+    }
+  }, []);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (state === 'loading') return;
 
-    // Honeypot — bots fill this; we pretend success to avoid leaking detection.
-    if (honeyRef.current?.value) {
-      setState('success');
-      return;
-    }
-
-    // Rate limit
+    // 5-second rate limit.
     const now = Date.now();
     if (now - lastSubmitRef.current < 5000) return;
     lastSubmitRef.current = now;
@@ -90,32 +116,31 @@ export default function Waitlist({
       setState('invalid');
       return;
     }
-
-    if (!FORMSUBMIT_EMAIL) {
-      // Config not set — fail loudly in dev, generically in prod.
-      if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.error(
-          'Waitlist: NEXT_PUBLIC_FORMSUBMIT_EMAIL is not configured. Set it in .env.local.'
-        );
-      }
+    if (!GOOGLE_FORM_URL || !EMAIL_ENTRY) {
       setState('error');
       return;
     }
 
     setState('loading');
+
+    // Convert viewform → formResponse if the user pasted the viewform URL.
+    const submitUrl = GOOGLE_FORM_URL.includes('/formResponse')
+      ? GOOGLE_FORM_URL
+      : GOOGLE_FORM_URL.replace('/viewform', '/formResponse');
+
+    const formData = new FormData();
+    formData.append(EMAIL_ENTRY, email);
+    if (SOURCE_ENTRY) formData.append(SOURCE_ENTRY, source);
+
     try {
-      const res = await fetch(`https://formsubmit.co/ajax/${FORMSUBMIT_EMAIL}`, {
+      // Google's formResponse endpoint doesn't return CORS headers, so
+      // we submit with `no-cors` and treat any non-throwing response as
+      // success. Google accepts the write regardless.
+      await fetch(submitUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          email,
-          source,
-          _subject: `SportTimes waitlist · ${source}`,
-          _captcha: 'false',
-        }),
+        mode: 'no-cors',
+        body: formData,
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setState('success');
     } catch {
       setState('error');
@@ -229,18 +254,8 @@ export default function Waitlist({
           style={{
             ...inputStyle,
             flex: '1 1 220px',
-            borderColor: state === 'invalid' ? '#FF6B6B' : inputStyle.border as string,
+            borderColor: state === 'invalid' ? '#FF6B6B' : (inputStyle.border as string),
           }}
-        />
-        {/* Honeypot — invisible to humans, attractive to bots */}
-        <input
-          ref={honeyRef}
-          type="text"
-          name="_honey"
-          tabIndex={-1}
-          aria-hidden
-          autoComplete="off"
-          style={{ display: 'none' }}
         />
         <button type="submit" disabled={state === 'loading'} style={buttonStyle}>
           {state === 'loading' ? 'Submitting…' : cta}

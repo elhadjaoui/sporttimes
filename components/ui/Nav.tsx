@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { APP_NAME_DISPLAY } from '@/lib/constants';
 import MenuOverlay from './MenuOverlay';
 
@@ -15,9 +16,20 @@ export default function Nav() {
           {/* Logo — always returns home */}
           <Link
             href="/"
-            className="font-display text-base md:text-lg tracking-tightest uppercase leading-none hover:text-lime transition-colors"
+            aria-label={`${APP_NAME_DISPLAY} — home`}
+            className="group flex items-center gap-2 md:gap-3 leading-none hover:text-lime transition-colors"
           >
-            {APP_NAME_DISPLAY}
+            <Image
+              src="/screens/logo.png"
+              alt=""
+              width={32}
+              height={32}
+              priority
+              className="h-7 w-7 md:h-8 md:w-8 rounded-md object-contain"
+            />
+            <span className="font-display text-base md:text-lg tracking-tightest uppercase">
+              {APP_NAME_DISPLAY}
+            </span>
           </Link>
 
           {/* Menu */}

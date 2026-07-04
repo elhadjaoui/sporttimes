@@ -280,11 +280,11 @@ export default function Footer() {
           {([
             {
               name: 'Instagram',
-              href: 'https://www.instagram.com/sporttimesapp/',
+              href: 'https://www.instagram.com/sporttimes.app/',
             },
             {
               name: 'TikTok',
-              href: 'https://www.tiktok.com/@sporttimesapp?lang=en-GB',
+              href: 'https://www.tiktok.com/@sporttimes.app',
             },
             {
               name: 'YouTube',
@@ -414,7 +414,7 @@ export default function Footer() {
 
                 className="footer-play-cta"
               >
-                Open the app ↗
+                Get notified ↗
               </a>
             </div>
           </div>
