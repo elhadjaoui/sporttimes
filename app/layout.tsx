@@ -13,6 +13,7 @@ import Nav from '@/components/ui/Nav';
 import ProgressScrubber from '@/components/ui/ProgressScrubber';
 import AmbientLayer from '@/components/ui/AmbientLayer';
 import RevealObserver from '@/components/ui/RevealObserver';
+import { Analytics } from '@vercel/analytics/next';
 
 const display = Inter({
   subsets: ['latin'],
@@ -88,6 +89,7 @@ export default function RootLayout({
         </LenisProvider>
         <GrainOverlay />
         <RevealObserver />
+        <Analytics />
       </body>
     </html>
   );
