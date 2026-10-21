@@ -74,6 +74,25 @@ const PALETTES: Record<string, Palette> = {
     sunbeam: 0,
     ledStreaks: 0,
   },
+  film: {
+    // Screening room — a step darker than the problem / how slates so the
+    // frame reads as the only light source. Low lime spill sits behind it,
+    // dust is thinned out so nothing competes with the picture.
+    lit: false,
+    base: '#070908',
+    amb1: { color: 'rgba(212, 255, 58, 0.08)', pos: '50% 60%' },
+    amb2: { color: 'rgba(180, 220, 200, 0.04)', pos: '15% 15%' },
+    cursorColor: 'rgba(212, 255, 58, 0.16)',
+    particleColor: 'rgba(212, 255, 58, 0.45)',
+    particleMinOp: 0.08,
+    particleMaxOp: 0.18,
+    vignette: 'rgba(0, 0, 0, 0.6)',
+    vignettePx: 200,
+    grainOp: 0.035,
+    broadcastSweep: 0,
+    sunbeam: 0,
+    ledStreaks: 0,
+  },
   how: {
     // Dark slate-green — turf at dusk. NOT lit; the section is its own
     // dark immersive stage now, the ambient should match in tone.

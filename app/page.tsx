@@ -5,6 +5,9 @@ import Problem from '@/components/sections/Problem';
 // Below-the-fold sections — code-split so the initial JS payload
 // stays lean. Each has a height-preserving fallback to avoid layout
 // shift while its chunk loads on approach.
+const Film = dynamic(() => import('@/components/sections/Film'), {
+  loading: () => <SectionFallback minH="100vh" />,
+});
 const HowItWorks = dynamic(
   () => import('@/components/sections/HowItWorks'),
   {
@@ -44,6 +47,7 @@ export default function Page() {
     <main className="relative">
       <Hero />
       <Problem />
+      <Film />
       <HowItWorks />
       <Sports />
       <LockerRoom />
