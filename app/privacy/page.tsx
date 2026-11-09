@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { CONTACT_EMAIL } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — SPORTTIMES',
@@ -125,11 +126,11 @@ export default function PrivacyPage() {
             <p>
               Questions, data requests, or complaints? Write to{' '}
               <a
-                href="mailto:contact@sporttimes.app"
+                href={`mailto:${CONTACT_EMAIL}`}
 
                 style={{ color: 'var(--lime)', textDecoration: 'underline' }}
               >
-                contact@sporttimes.app
+                {CONTACT_EMAIL}
               </a>
               . We answer within 2 business days.
             </p>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { CONTACT_EMAIL } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Terms of Service — SPORTTIMES',
@@ -139,11 +140,11 @@ export default function TermsPage() {
             <p>
               Legal questions, disputes, or account issues? Write to{' '}
               <a
-                href="mailto:contact@sporttimes.app"
+                href={`mailto:${CONTACT_EMAIL}`}
 
                 style={{ color: 'var(--lime)', textDecoration: 'underline' }}
               >
-                contact@sporttimes.app
+                {CONTACT_EMAIL}
               </a>
               .
             </p>

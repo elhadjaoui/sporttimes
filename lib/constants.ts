@@ -47,15 +47,3 @@ export const CHAPTERS = [
     tagline: 'Be first on the pitch.',
   },
 ] as const;
-
-export const SOCIAL = {
-  instagram: '#',
-  tiktok: '#',
-  x: '#',
-  youtube: '#',
-} as const;
-
-export const STORE_LINKS = {
-  appStore: '#',
-  playStore: '#',
-} as const;

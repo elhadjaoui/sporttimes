@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { CONTACT_EMAIL, INSTAGRAM_URL, TIKTOK_URL } from '@/lib/site';
 
 // ===================================================================
 //  Copyable email — click to copy, shows a brief "copied" confirmation
@@ -280,11 +281,11 @@ export default function Footer() {
           {([
             {
               name: 'Instagram',
-              href: 'https://www.instagram.com/sporttimes.app/',
+              href: INSTAGRAM_URL,
             },
             {
               name: 'TikTok',
-              href: 'https://www.tiktok.com/@sporttimes.app',
+              href: TIKTOK_URL,
             },
             {
               name: 'YouTube',
@@ -471,7 +472,7 @@ export default function Footer() {
               </a>
             ))}
           </div>
-          <CopyableEmail email="contact@sporttimes.app" />
+          <CopyableEmail email={CONTACT_EMAIL} />
         </div>
       </div>
 
