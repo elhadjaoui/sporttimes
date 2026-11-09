@@ -14,6 +14,7 @@ Fix the site's indexing problems and make it accurate for the iOS TestFlight bet
 | Sign-in described in the policy | Apple, Google, and a one-time code sent by email |
 | Features that are not built | Legal pages describe only what exists today; features are added when they ship |
 | Google Play tile | "Coming soon", no date |
+| Sports | Only football is live. Basketball, volleyball, handball, padel, futsal and rugby stay on the page, each labelled "Soon" |
 | `/beta` | A route handler, not a `next.config.mjs` redirect (see task 1.2) |
 | Social image | `app/opengraph-image.tsx`, using `next/og`, which ships with Next |
 
@@ -69,6 +70,7 @@ export const CONTACT_EMAIL = 'contact@sporttimes.app';
 | Footer CTA | `Join the beta ↗` | `BETA_PATH` |
 | Footer copyright | `© {current year} SportTimes · Made in Ben Guerir` | |
 | Footer eyebrow | `The match before the match · {current year}` | |
+| Footer stats | `01 Sport live`, `06 Coming soon`, `∞ Matches ahead` (third unchanged) | |
 | Menu overlay (`MenuOverlay.tsx:171`) | `Public launch Q1 2027 · iOS beta open` (date from `LAUNCH_LABEL`) | |
 
 Details:
@@ -79,6 +81,8 @@ Details:
 - The current year comes from a new `hooks/useCurrentYear.ts`: state starts at `2026` and an effect sets the real year after mount. This avoids a hydration mismatch and stays correct without a redeploy.
 - Rename the section id from `how` to `how-it-works` at `HowItWorks.tsx:444`, `:937` and `:1105`, `Hero.tsx:153`, and `lib/constants.ts:28`.
 - The `Get notified` eyebrow and progress label in `Download.tsx` stay. The section is still the waitlist.
+- Add `status: 'live' | 'soon'` to the `Sport` type in `components/sections/Sports.tsx`. Football is `live`; the other six are `soon`. Show `Live` or `Soon` next to the formats line in all three layouts (`Sports.tsx:449`, `:858`, `:1099`), using the section's existing type styles.
+- The `Built for football. Engineered for every team sport.` headline stays. It describes the product's direction, and the labels show what is available today.
 
 ### 1.4 Metadata and social image
 
@@ -161,7 +165,6 @@ These claims could not be verified. Each stays as written until the founder conf
 - Privacy, Security: `Data at rest is encrypted. Data in transit is TLS 1.3.`
 - Privacy, Who sees what: the extended admin view of joined date and match history.
 - Privacy, Who sees what: whether individual player ratings are visible to others, and to whom.
-- Footer stats strip (`03 Sports live`, `07+ Coming soon`) and the sports grid, handled in Phase 2.3.
 
 ## Out of scope
 
