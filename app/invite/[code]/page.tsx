@@ -1,16 +1,10 @@
-import type { Metadata } from 'next';
 import InviteFallback from '@/components/sections/InviteFallback';
+import { inviteMetadata } from '@/lib/metadata';
 
-export const metadata: Metadata = {
-  title: "You've been invited — SPORTTIMES",
+export const metadata = inviteMetadata({
+  title: "You've been invited",
   description: 'Open your invite in the SPORTTIMES app.',
-  openGraph: {
-    title: "You've been invited",
-    description: 'Open your invite in the SPORTTIMES app.',
-    type: 'website',
-  },
-  robots: { index: false, follow: false },
-};
+});
 
 export default function InviteCodePage() {
   return <InviteFallback kind="invite" />;

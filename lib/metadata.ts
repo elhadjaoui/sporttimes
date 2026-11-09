@@ -64,3 +64,32 @@ export function pageMetadata({
     },
   };
 }
+
+// Invite links are personal and differ per invite: no canonical, not
+// indexed, but they still need the shared image for chat previews.
+export function inviteMetadata({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}): Metadata {
+  return {
+    title: `${title} — SPORTTIMES`,
+    description,
+    robots: { index: false, follow: false },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      siteName: 'SPORTTIMES',
+      images: [OG_IMAGE_PATH],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [OG_IMAGE_PATH],
+    },
+  };
+}
