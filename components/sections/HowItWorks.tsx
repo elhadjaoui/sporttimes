@@ -441,7 +441,7 @@ export default function HowItWorks() {
   return (
     <section
       ref={sectionRef}
-      id="how"
+      id="how-it-works"
       data-progress-section
       data-progress-label="How It Works"
       data-palette="how"
@@ -934,7 +934,7 @@ function MobileStack({ activeStep }: { activeStep: number }) {
   void activeStep; // observer drives section state in parent (reserved for future)
   return (
     <section
-      id="how"
+      id="how-it-works"
       data-progress-section
       data-progress-label="How It Works"
       data-palette="how"
@@ -1102,7 +1102,7 @@ function MobileStack({ activeStep }: { activeStep: number }) {
 function StaticConfirmedView() {
   return (
     <section
-      id="how"
+      id="how-it-works"
       data-progress-section
       data-progress-label="How It Works"
       data-palette="how"

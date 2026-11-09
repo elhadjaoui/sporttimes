@@ -3,35 +3,11 @@
 
 import WaitlistForm from '@/components/ui/WaitlistForm';
 import { Component as EtherealShadow } from '@/components/ui/etheral-shadow';
+import { LAUNCH_LABEL } from '@/lib/site';
 
 // ===================================================================
-//  Store badges — both greyed with "soon" label. No dead links.
+//  Store badges — greyed, status label only. No dead links.
 // ===================================================================
-
-function SoonPill() {
-  return (
-    <span
-      style={{
-        position: 'absolute',
-        top: -8,
-        right: -6,
-        fontFamily: 'var(--font-mono), monospace',
-        fontSize: 8,
-        letterSpacing: '0.22em',
-        textTransform: 'uppercase',
-        color: 'var(--lime)',
-        background: 'rgba(212, 255, 58, 0.10)',
-        border: '1px solid rgba(212, 255, 58, 0.45)',
-        padding: '2px 6px',
-        borderRadius: 100,
-        lineHeight: 1,
-        pointerEvents: 'none',
-      }}
-    >
-      Soon
-    </span>
-  );
-}
 
 function StoreBadge({
   ariaLabel,
@@ -47,7 +23,7 @@ function StoreBadge({
   return (
     <span
       aria-label={ariaLabel}
-      title={`${ariaLabel} — coming soon`}
+      title={ariaLabel}
       style={{
         position: 'relative',
         display: 'inline-flex',
@@ -87,7 +63,6 @@ function StoreBadge({
           {bottomLabel}
         </span>
       </span>
-      <SoonPill />
     </span>
   );
 }
@@ -274,11 +249,23 @@ export default function Download() {
               marginBottom: 28,
             }}
           >
-            We&apos;re putting the finishing touches on it. Drop your email
-            and we&apos;ll send one note: the day the first match goes live.
+            The iOS beta is open now. Public launch is planned for{' '}
+            {LAUNCH_LABEL}. Drop your email and we&apos;ll send one note on
+            launch day.
           </p>
 
           <WaitlistForm source="download" />
+
+          <p
+            style={{
+              marginTop: 10,
+              fontFamily: 'var(--font-body), Inter, system-ui, sans-serif',
+              fontSize: 13,
+              color: 'var(--muted)',
+            }}
+          >
+            We&apos;ll only email you about the launch.
+          </p>
 
           <div
             className="mono-eyebrow"
@@ -288,10 +275,10 @@ export default function Download() {
               letterSpacing: '0.22em',
             }}
           >
-            Launching summer 2026
+            Public launch · {LAUNCH_LABEL}
           </div>
 
-          {/* Store badges — greyed, "soon" pill, no links */}
+          {/* Store badges — greyed, no links */}
           <div
             style={{
               marginTop: 36,
@@ -301,14 +288,14 @@ export default function Download() {
             }}
           >
             <StoreBadge
-              ariaLabel="App Store — coming soon"
-              topLabel="Coming to the"
+              ariaLabel={`App Store — ${LAUNCH_LABEL}`}
+              topLabel={LAUNCH_LABEL}
               bottomLabel="App Store"
               Icon={AppleIcon}
             />
             <StoreBadge
               ariaLabel="Google Play — coming soon"
-              topLabel="Coming to"
+              topLabel="Coming soon"
               bottomLabel="Google Play"
               Icon={PlayIcon}
             />

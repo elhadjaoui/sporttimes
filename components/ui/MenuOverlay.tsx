@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CHAPTERS, APP_NAME_DISPLAY } from '@/lib/constants';
 import { getLenis } from '@/hooks/useLenis';
+import { LAUNCH_LABEL } from '@/lib/site';
 
 export default function MenuOverlay({
   open,
@@ -168,7 +169,7 @@ export default function MenuOverlay({
                 <div className="h-px w-full bg-ink/10" />
                 <div className="flex items-baseline justify-between font-mono text-[10px] tracking-[0.2em] uppercase text-ink/45">
                   <span>Made in Ben Guerir</span>
-                  <span className="text-lime/70">Summer 2026 · Waitlist open</span>
+                  <span className="text-lime/70">Public launch {LAUNCH_LABEL} · iOS beta open</span>
                 </div>
               </div>
             </aside>

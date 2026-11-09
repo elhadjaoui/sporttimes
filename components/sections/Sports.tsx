@@ -50,20 +50,23 @@ type Sport = {
   id: string;
   name: string;
   formats: string;
+  status: 'live' | 'soon';
   Icon: IconType;
 };
+
+const STATUS_LABEL = { live: 'Live', soon: 'Soon' } as const;
 
 // Material Design Outlined sports icons — consistent single-stroke
 // style, library-quality. Padel uses the tennis icon (racquet sport
 // family); Futsal uses the soccer icon (it IS indoor football).
 const SPORTS: Sport[] = [
-  { id: 'football',   name: 'Football',   formats: '5v5 · 7v7 · 9v9 · 11v11', Icon: MdOutlineSportsSoccer     },
-  { id: 'basketball', name: 'Basketball', formats: '3v3 · 5v5',               Icon: MdOutlineSportsBasketball },
-  { id: 'volleyball', name: 'Volleyball', formats: '4v4 · 6v6',               Icon: MdOutlineSportsVolleyball },
-  { id: 'handball',   name: 'Handball',   formats: '7v7',                     Icon: MdOutlineSportsHandball   },
-  { id: 'padel',      name: 'Padel',      formats: '2v2',                     Icon: MdOutlineSportsTennis     },
-  { id: 'futsal',     name: 'Futsal',     formats: '5v5',                     Icon: MdOutlineSportsSoccer     },
-  { id: 'rugby',      name: 'Rugby',      formats: '7s · 15s',                Icon: MdOutlineSportsRugby      },
+  { id: 'football',   name: 'Football',   formats: '5v5 · 7v7 · 9v9 · 11v11', status: 'live', Icon: MdOutlineSportsSoccer     },
+  { id: 'basketball', name: 'Basketball', formats: '3v3 · 5v5',               status: 'soon', Icon: MdOutlineSportsBasketball },
+  { id: 'volleyball', name: 'Volleyball', formats: '4v4 · 6v6',               status: 'soon', Icon: MdOutlineSportsVolleyball },
+  { id: 'handball',   name: 'Handball',   formats: '7v7',                     status: 'soon', Icon: MdOutlineSportsHandball   },
+  { id: 'padel',      name: 'Padel',      formats: '2v2',                     status: 'soon', Icon: MdOutlineSportsTennis     },
+  { id: 'futsal',     name: 'Futsal',     formats: '5v5',                     status: 'soon', Icon: MdOutlineSportsSoccer     },
+  { id: 'rugby',      name: 'Rugby',      formats: '7s · 15s',                status: 'soon', Icon: MdOutlineSportsRugby      },
 ];
 
 // Polar layout in SVG-px on a 600 viewBox. Football at 12 o'clock.
@@ -448,6 +451,11 @@ export default function Sports() {
                       >
                         {sport.formats}
                       </div>
+                      <div
+                        className={`sports-node-format ${sport.status === 'live' ? 'sports-node-status-live' : ''}`}
+                      >
+                        {STATUS_LABEL[sport.status]}
+                      </div>
                     </div>
                   </div>
                 );
@@ -649,6 +657,9 @@ export default function Sports() {
           text-transform: uppercase;
           color: ${DIM};
           white-space: nowrap;
+        }
+        .sports-node-status-live {
+          color: ${LIME};
         }
 
         .sports-core {
@@ -856,6 +867,17 @@ function MobileSports() {
                   }}
                 >
                   {sport.formats}
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: 9,
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color: sport.status === 'live' ? LIME : DIM,
+                  }}
+                >
+                  {STATUS_LABEL[sport.status]}
                 </span>
               </div>
             );
@@ -1097,6 +1119,17 @@ function StaticConstellation() {
                   }}
                 >
                   {sport.formats}
+                </span>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: 10,
+                    letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color: sport.status === 'live' ? LIME : DIM,
+                  }}
+                >
+                  {STATUS_LABEL[sport.status]}
                 </span>
               </div>
             );

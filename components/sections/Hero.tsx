@@ -8,6 +8,7 @@ import MagneticButton from '@/components/ui/MagneticButton';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 import { getLenis } from '@/hooks/useLenis';
 import { scrollState } from '@/lib/scrollState';
+import { BETA_PATH } from '@/lib/site';
 
 const HeroScene = dynamic(() => import('@/components/three/HeroScene'), {
   ssr: false,
@@ -150,7 +151,7 @@ export default function Hero() {
   }, []);
 
   const scrollToHow = () => {
-    const target = document.getElementById('how');
+    const target = document.getElementById('how-it-works');
     if (!target) return;
     const lenis = getLenis();
     if (lenis) lenis.scrollTo(target, { duration: 1.4 });
@@ -229,13 +230,28 @@ export default function Hero() {
           </p>
 
           <div className="hero-fade flex flex-col xl:flex-row xl:flex-wrap items-stretch xl:items-center gap-3 w-full xl:w-auto">
-            <MagneticButton href="#download" variant="primary">
-              Get notified ↗
+            <MagneticButton href={BETA_PATH} variant="primary">
+              Join the iOS beta ↗
             </MagneticButton>
-            <MagneticButton variant="ghost" onClick={scrollToHow}>
+            <MagneticButton
+              variant="ghost"
+              href="#how-it-works"
+              onClick={scrollToHow}
+            >
               See how it works
             </MagneticButton>
           </div>
+
+          <p className="hero-fade font-body text-ink/65 text-sm mt-4">
+            iOS only for now. On Android?{' '}
+            <a
+              href="#download"
+              className="text-lime underline underline-offset-2"
+            >
+              Join the waitlist
+            </a>
+            .
+          </p>
         </div>
       </div>
 

@@ -25,7 +25,7 @@ export const CHAPTERS = [
   {
     num: '02',
     name: 'HOW IT WORKS',
-    anchor: 'how',
+    anchor: 'how-it-works',
     tagline: 'Open. See. Confirmed.',
   },
   {

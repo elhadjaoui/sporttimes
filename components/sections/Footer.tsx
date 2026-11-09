@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import { CONTACT_EMAIL, INSTAGRAM_URL, TIKTOK_URL } from '@/lib/site';
+import { useCurrentYear } from '@/hooks/useCurrentYear';
+import {
+  BETA_PATH,
+  CONTACT_EMAIL,
+  INSTAGRAM_URL,
+  TIKTOK_URL,
+} from '@/lib/site';
 
 // ===================================================================
 //  Copyable email — click to copy, shows a brief "copied" confirmation
@@ -109,6 +115,7 @@ function SocialIcon({ name }: { name: 'Instagram' | 'TikTok' | 'YouTube' }) {
 // ===================================================================
 
 export default function Footer() {
+  const year = useCurrentYear();
   const rootRef = useRef<HTMLElement>(null);
   const playMoreRef = useRef<HTMLDivElement>(null);
 
@@ -394,15 +401,15 @@ export default function Footer() {
 
             <div className="footer-play-accent">
               <div className="footer-play-eyebrow">
-                The match before the match · 2026
+                The match before the match · {year}
               </div>
               <div className="footer-play-stats">
                 <div className="footer-play-stat">
-                  <span className="footer-play-stat-num">03</span>
-                  <span className="footer-play-stat-label">Sports live</span>
+                  <span className="footer-play-stat-num">01</span>
+                  <span className="footer-play-stat-label">Sport live</span>
                 </div>
                 <div className="footer-play-stat">
-                  <span className="footer-play-stat-num">07+</span>
+                  <span className="footer-play-stat-num">06</span>
                   <span className="footer-play-stat-label">Coming soon</span>
                 </div>
                 <div className="footer-play-stat">
@@ -411,11 +418,11 @@ export default function Footer() {
                 </div>
               </div>
               <a
-                href="#download"
+                href={BETA_PATH}
 
                 className="footer-play-cta"
               >
-                Get notified ↗
+                Join the beta ↗
               </a>
             </div>
           </div>
@@ -440,7 +447,7 @@ export default function Footer() {
             color: 'rgba(245,245,240,0.45)',
           }}
         >
-          © 2026 SPORTTIMES · Made in Ben Guerir
+          © {year} SPORTTIMES · Made in Ben Guerir
         </div>
         <div
           className="col-span-12 xl:col-span-4 xl:col-start-8 mt-4 xl:mt-0 flex flex-col xl:items-end gap-3"
