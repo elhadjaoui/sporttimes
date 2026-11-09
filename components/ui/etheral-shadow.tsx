@@ -53,6 +53,8 @@ interface EtherealShadowProps {
   className?: string;
 }
 
+const SCROLL_REST_MS = 200;
+
 function mapRange(
   value: number,
   fromLow: number,
@@ -80,6 +82,7 @@ export function Component({
   className,
 }: EtherealShadowProps) {
   const id = useInstanceId();
+  const rootRef = useRef<HTMLDivElement>(null);
   const animationEnabled = animation && animation.scale > 0;
   const feColorMatrixRef = useRef<SVGFEColorMatrixElement>(null);
   const hueRotateMotionValue = useMotionValue(180);
@@ -93,35 +96,72 @@ export function Component({
     : 1;
 
   useEffect(() => {
-    if (feColorMatrixRef.current && animationEnabled) {
+    const root = rootRef.current;
+    if (feColorMatrixRef.current && animationEnabled && root) {
       if (hueRotateAnimation.current) {
         hueRotateAnimation.current.stop();
       }
       hueRotateMotionValue.set(0);
-      hueRotateAnimation.current = animate(hueRotateMotionValue, 360, {
+      let lastHue: number | undefined;
+      const controls = animate(hueRotateMotionValue, 360, {
         duration: animationDuration / 25,
         repeat: Infinity,
         repeatType: 'loop',
         repeatDelay: 0,
         ease: 'linear',
         delay: 0,
+        // A paused animation still calls this every frame, and rewriting
+        // even the same value makes the browser re-render the filter.
         onUpdate: (value: number) => {
+          if (value === lastHue) return;
+          lastHue = value;
           if (feColorMatrixRef.current) {
             feColorMatrixRef.current.setAttribute('values', String(value));
           }
         },
       });
+      hueRotateAnimation.current = controls;
+      controls.pause();
+
+      // Every hue change re-renders the whole filter chain, so only animate
+      // while the section is on screen and the page is at rest.
+      let onScreen = false;
+      let scrolling = false;
+      let resumeTimer: number | undefined;
+      const sync = () => {
+        if (onScreen && !scrolling) controls.play();
+        else controls.pause();
+      };
+
+      const observer = new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting;
+        sync();
+      });
+      observer.observe(root);
+
+      const onScroll = () => {
+        scrolling = true;
+        sync();
+        window.clearTimeout(resumeTimer);
+        resumeTimer = window.setTimeout(() => {
+          scrolling = false;
+          sync();
+        }, SCROLL_REST_MS);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
 
       return () => {
-        if (hueRotateAnimation.current) {
-          hueRotateAnimation.current.stop();
-        }
+        observer.disconnect();
+        window.removeEventListener('scroll', onScroll);
+        window.clearTimeout(resumeTimer);
+        controls.stop();
       };
     }
   }, [animationEnabled, animationDuration, hueRotateMotionValue]);
 
   return (
     <div
+      ref={rootRef}
       className={className}
       style={{
         overflow: 'hidden',
