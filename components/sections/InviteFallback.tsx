@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { AppStoreBadge, PlayStoreBadge } from '@/components/ui/StoreBadges';
+import MagneticButton from '@/components/ui/MagneticButton';
+import { BETA_PATH, LAUNCH_LABEL } from '@/lib/site';
 
 type Kind = 'match' | 'team' | 'invite' | 'community';
 
@@ -28,8 +29,7 @@ const COPY: Record<Kind, { eyebrow: string; headline: string }> = {
   },
 };
 
-const SUB_COPY =
-  'SPORTTIMES is launching in Ben Guerir this summer. Grab the app when it drops and this invite will open right up.';
+const SUB_COPY = `SPORTTIMES is in beta on iOS, and the public launch is planned for ${LAUNCH_LABEL}. Join the beta, install the app, then open this link again to see your invite.`;
 
 export default function InviteFallback({ kind }: InviteFallbackProps) {
   const { eyebrow, headline } = COPY[kind];
@@ -48,9 +48,17 @@ export default function InviteFallback({ kind }: InviteFallbackProps) {
 
         <p className="invite-subcopy">{SUB_COPY}</p>
 
-        <div className="invite-badges">
-          <AppStoreBadge soon />
-          <PlayStoreBadge />
+        <div className="invite-cta">
+          <MagneticButton href={BETA_PATH} variant="primary">
+            Join the iOS beta ↗
+          </MagneticButton>
+          <p className="invite-android">
+            iOS only for now. On Android?{' '}
+            <Link href="/#download" className="invite-android-link">
+              Join the waitlist
+            </Link>
+            .
+          </p>
         </div>
 
         <button
@@ -107,11 +115,24 @@ export default function InviteFallback({ kind }: InviteFallbackProps) {
           margin: 0 0 36px;
           max-width: 48ch;
         }
-        .invite-badges {
+        .invite-cta {
           display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
           margin-bottom: 28px;
+        }
+        .invite-android {
+          font-family: var(--font-body), Inter, sans-serif;
+          font-size: 14px;
+          line-height: 1.5;
+          color: rgba(245, 245, 240, 0.65);
+          margin: 0;
+        }
+        .invite-cta :global(.invite-android-link) {
+          color: var(--lime, #d4ff3a);
+          text-decoration: underline;
+          text-underline-offset: 2px;
         }
         .invite-open-link {
           background: transparent;
