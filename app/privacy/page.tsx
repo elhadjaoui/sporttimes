@@ -52,7 +52,7 @@ export default function PrivacyPage() {
               maxWidth: '62ch',
             }}
           >
-            Last updated · 21 April 2026. This page describes what SPORTTIMES
+            Last updated · 9 November 2026. This page describes what SPORTTIMES
             collects, why, how it&rsquo;s stored, and the rights you have over
             your data.
           </p>
@@ -60,9 +60,22 @@ export default function PrivacyPage() {
           <Section title="1 · What we collect">
             <p>
               When you create a SPORTTIMES account we store the minimum needed
-              to run a match: display name, phone number or email, the
-              communities you join, and the matches you RSVP to. We never ask
-              for anything we don&rsquo;t need to put you on a pitch.
+              to run a match: your display name, your email address, the
+              communities you join, and the matches you RSVP to. You sign in
+              with Apple, Google, or a one-time code sent to your email. If
+              you use Sign in with Apple and hide your email, we only see
+              Apple&rsquo;s private relay address. We never ask for anything
+              we don&rsquo;t need to put you on a pitch.
+            </p>
+            <p style={{ marginTop: '0.75rem' }}>
+              We also store a profile photo if you add one, your preferred
+              sport, your notification settings, a device token so we can send
+              push notifications, and the ratings players give each other
+              after a match.
+            </p>
+            <p style={{ marginTop: '0.75rem' }}>
+              If you join the waitlist on our website, your email goes into a
+              Google Form. We only use it to email you about the launch.
             </p>
           </Section>
 
@@ -82,41 +95,42 @@ export default function PrivacyPage() {
               inside that community). You can leave a community at any time
               to revoke that view.
             </p>
-          </Section>
-
-          <Section title="4 · Messages + match chat">
-            <p>
-              Match-chat threads are scoped to a single match and archived
-              after full time. We keep a 30-day rolling window for dispute
-              resolution (no-shows, scheduling conflicts) and then delete.
+            <p style={{ marginTop: '0.75rem' }}>
+              We use a few service providers to run SPORTTIMES: Supabase
+              (sign-in and file storage), Firebase (push notifications),
+              PostHog (product analytics, linked to your account ID), Render
+              (app servers), and Vercel (website hosting and visitor
+              analytics). Apple and Google handle sign-in if you choose them.
             </p>
           </Section>
 
-          <Section title="5 · Your controls">
+          <Section title="4 · Your controls">
             <p>
-              Export your data from Settings → Data. Delete your account at
-              any time — we purge your profile within 30 days, keeping only
-              anonymized match stats so community averages stay accurate.
+              Email{' '}
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                style={{ color: 'var(--lime)', textDecoration: 'underline' }}
+              >
+                {CONTACT_EMAIL}
+              </a>{' '}
+              to request a copy of your data. Delete your account at any time
+              — we purge your profile within 30 days, keeping only anonymized
+              match stats so community averages stay accurate.
             </p>
           </Section>
 
-          <Section title="6 · Security">
+          <Section title="5 · Security">
+            <p>Data at rest is encrypted. Data in transit is TLS 1.3.</p>
+          </Section>
+
+          <Section title="6 · Kids">
             <p>
-              Data at rest is encrypted. Data in transit is TLS 1.3. Phone
-              numbers and emails are stored with one-way salted hashes where
-              the app doesn&rsquo;t need the plaintext.
+              SPORTTIMES is 13+. We do not knowingly collect data from
+              children under 13.
             </p>
           </Section>
 
-          <Section title="7 · Kids">
-            <p>
-              SPORTTIMES is 13+. School-team communities require an admin who
-              is 18+ to vouch for younger members. We do not knowingly
-              collect data from children under 13.
-            </p>
-          </Section>
-
-          <Section title="8 · Changes">
+          <Section title="7 · Changes">
             <p>
               We&rsquo;ll post changes here and notify you in-app if something
               substantive shifts. Small edits (typos, clarifications) happen
@@ -124,7 +138,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="9 · Contact">
+          <Section title="8 · Contact">
             <p>
               Questions, data requests, or complaints? Write to{' '}
               <a

@@ -52,13 +52,17 @@ export default function TermsPage() {
               maxWidth: '62ch',
             }}
           >
-            Last updated · 21 April 2026. By creating an account, joining a
+            Last updated · 9 November 2026. By creating an account, joining a
             community, or RSVPing to a match on SPORTTIMES, you agree to the
             terms below.
           </p>
 
           <Section title="1 · The app">
             <p>
+              SPORTTIMES is currently in beta. Features may change and data
+              may be reset.
+            </p>
+            <p style={{ marginTop: '0.75rem' }}>
               SPORTTIMES helps communities organize matches, visualize
               lineups, and coordinate players. We provide the software;
               communities run their own matches. We are not a party to any
@@ -104,11 +108,7 @@ export default function TermsPage() {
           </Section>
 
           <Section title="6 · Payments">
-            <p>
-              The core app is free. Optional extras (venue booking, team kit
-              store, tournament hosting) may carry fees. Fees, refund terms,
-              and supplier contact are shown at checkout.
-            </p>
+            <p>The core app is free.</p>
           </Section>
 
           <Section title="7 · Content you post">
