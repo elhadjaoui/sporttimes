@@ -207,7 +207,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className="hero-headline headline-display uppercase text-ink text-[clamp(1.5rem,9.2vw,4.5rem)] xl:text-[clamp(2.25rem,5vw,4.5rem)] mb-7 xl:mb-9">
+          <h1 className="hero-headline headline-display uppercase text-ink text-[clamp(1.5rem,9.2vw,4.5rem)] xl:text-[clamp(2.25rem,5vw,4.5rem)] mb-5 xl:mb-6">
             {HEADLINE.map((line, i) => (
               <span
                 key={i}
@@ -223,6 +223,10 @@ export default function Hero() {
               </span>
             ))}
           </h1>
+
+          <p className="hero-fade font-body font-semibold text-ink text-lg md:text-xl leading-snug max-w-[46ch] mb-3">
+            Find and join football matches near you in Morocco.
+          </p>
 
           <p className="hero-fade font-body text-ink/65 text-base md:text-lg leading-snug max-w-[46ch] mb-9">
             See who&apos;s playing before you commit. Claim your spot. Show

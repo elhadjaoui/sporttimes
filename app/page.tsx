@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import Hero from '@/components/sections/Hero';
 import Problem from '@/components/sections/Problem';
+import FAQ from '@/components/sections/FAQ';
 import { HOME_DESCRIPTION, HOME_TITLE, pageMetadata } from '@/lib/metadata';
 
 export const metadata: Metadata = pageMetadata({
@@ -59,6 +60,7 @@ export default function Page() {
       <HowItWorks />
       <Sports />
       <LockerRoom />
+      <FAQ />
       <Download />
       <Footer />
     </main>
