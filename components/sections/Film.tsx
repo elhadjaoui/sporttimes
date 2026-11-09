@@ -471,7 +471,7 @@ export default function Film() {
                   alt=""
                   fill
                   sizes="(max-width: 1240px) 100vw, 1200px"
-                  quality={85}
+                  quality={80}
                   style={{ objectFit: 'cover' }}
                 />
               </span>

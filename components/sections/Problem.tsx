@@ -324,8 +324,7 @@ export default function Problem() {
                   alt=""
                   fill
                   sizes="(max-width: 880px) 220px, 360px"
-                  quality={92}
-                  priority
+                  quality={80}
                   style={{ objectFit: 'cover', objectPosition: 'center' }}
                 />
               </div>

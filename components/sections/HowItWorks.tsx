@@ -527,7 +527,6 @@ export default function HowItWorks() {
                       alt={step.alt}
                       fill
                       sizes="(max-width: 1100px) 30vw, 340px"
-                      priority={i === 0}
                       className="htw-shot"
                     />
                     {/* Step 2 — formation overlay + counter */}

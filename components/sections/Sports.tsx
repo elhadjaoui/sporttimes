@@ -470,7 +470,6 @@ export default function Sports() {
                     alt="SPORTTIMES"
                     width={150}
                     height={150}
-                    priority
                     className="sports-core-logo"
                   />
                 </div>
