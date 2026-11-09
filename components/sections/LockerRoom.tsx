@@ -20,24 +20,22 @@ const RoadmapPitch = dynamic(() => import('@/components/three/RoadmapPitch'), {
 });
 
 // ===================================================================
-//  Data — 7 features × 4 bullets, regrouped per the new phase plan.
+//  Data — 3 features × 4 bullets, then one "Later" line for the rest.
 //
-//  NOW   (building):   Tournaments · More sports
-//  NEXT  (in design):  Match chat · AI Match Builder · AI Captain
-//  LATER (roadmap):    SPORTTIMES Store · Venue booking
+//  More sports (coming soon) · Tournaments (planned) · Match chat (planned)
+//  Later: AI Match Builder · AI Captain · SPORTTIMES Store · Venue booking
 //
-//  `pos` = initial percentage position on the 100×100 board viewBox.
-//  Magnets are placed with intent (cluster per phase) and connected
-//  by a single chalk thread in build order (NOW → NEXT → LATER).
+//  No dates: nothing here may promise a release the app hasn't scheduled.
+//
+//  `pos` = initial percentage position on the 100×60 board viewBox.
+//  Magnets are connected by a single chalk thread in list order.
 // ===================================================================
-
-type Phase = 'now' | 'next' | 'later';
 
 type Feature = {
   id: string;
   seq: string;
   name: string;
-  phase: Phase;
+  status: string;
   summary: string;
   bullets: string[];
   statusNote: string;
@@ -45,14 +43,25 @@ type Feature = {
 };
 
 // Positions live in the board's viewBox space: 100 wide × 60 tall (horizontal
-// pitch). Magnets flow LEFT → RIGHT in build order, with vertical undulation
-// so the connecting curve reads as a wave.
+// pitch). Magnets flow LEFT → RIGHT, with vertical undulation so the
+// connecting curve reads as a wave.
 
 const FEATURES: Feature[] = [
-  // NOW (left)
   {
-    id: 'tournaments', seq: '01', name: 'Tournaments', phase: 'now',
-    pos: { x: 10, y: 38 },
+    id: 'more-sports', seq: '01', name: 'More sports', status: 'Coming soon',
+    pos: { x: 18, y: 38 },
+    summary: 'The catalog keeps growing with the community.',
+    bullets: [
+      'Football is live today',
+      'Six more sports listed as coming soon',
+      'Basketball, Volleyball, Handball, Padel, Futsal, Rugby',
+      'Same lineup engine, any format',
+    ],
+    statusNote: 'No dates yet.',
+  },
+  {
+    id: 'tournaments', seq: '02', name: 'Tournaments', status: 'Planned',
+    pos: { x: 50, y: 22 },
     summary: 'Run complete tournament brackets inside your community — no spreadsheets.',
     bullets: [
       'Single-elim, double-elim, round-robin',
@@ -60,25 +69,11 @@ const FEATURES: Feature[] = [
       'Live bracket everyone can watch',
       'Shareable finals poster',
     ],
-    statusNote: 'Building now — expected in the next release.',
+    statusNote: 'No date yet.',
   },
   {
-    id: 'more-sports', seq: '02', name: 'More sports', phase: 'now',
-    pos: { x: 23, y: 22 },
-    summary: 'The catalog keeps growing with the community.',
-    bullets: [
-      'Sports adopted quarterly by demand',
-      'Players vote for their sport in-app',
-      'Padel, Volleyball, Futsal, Tennis shortlisted',
-      'Same lineup engine, any format',
-    ],
-    statusNote: 'Rolling adoption — quarterly review cycle.',
-  },
-
-  // NEXT
-  {
-    id: 'match-chat', seq: '03', name: 'Match chat', phase: 'next',
-    pos: { x: 37, y: 42 },
+    id: 'match-chat', seq: '03', name: 'Match chat', status: 'Planned',
+    pos: { x: 82, y: 40 },
     summary: 'A chat thread scoped to one match — goes quiet when the whistle blows.',
     bullets: [
       'Auto-opens when a match is set',
@@ -86,66 +81,11 @@ const FEATURES: Feature[] = [
       'Drop-outs + confirmations live inline',
       'No group-chat bleed into your life',
     ],
-    statusNote: 'In design — shipping with the new match card.',
-  },
-  {
-    id: 'ai-match-builder', seq: '04', name: 'AI Match Builder', phase: 'next',
-    pos: { x: 50, y: 24 },
-    summary: 'Describe your match, we line it up.',
-    bullets: [
-      'Suggests a pitch from community venues',
-      'Invites players who match the slot',
-      'Balances sides on arrival',
-      'Sends a ready-to-confirm match card',
-    ],
-    statusNote: 'Sketching the flows — design review in progress.',
-  },
-  {
-    id: 'ai-captain', seq: '05', name: 'AI Captain', phase: 'next',
-    pos: { x: 63, y: 42 },
-    summary: 'The captain that keeps the match together for you.',
-    bullets: [
-      'Sends reminders before kickoff',
-      'Handles drop-outs and subs',
-      'Rebalances sides automatically',
-      'Suggests positions by skill',
-    ],
-    statusNote: 'Sketching the decision logic right now.',
-  },
-
-  // LATER (rendered as dim/muted dots — futureward)
-  {
-    id: 'store', seq: '06', name: 'SPORTTIMES Store', phase: 'later',
-    pos: { x: 77, y: 24 },
-    summary: 'Kits, gear, and community merch — ordered from the same app.',
-    bullets: [
-      'Team jerseys, scarves, shorts, bags',
-      'Community-branded merch drops',
-      'Local supplier network',
-      'Pooled orders, no middle-man markups',
-    ],
-    statusNote: 'On the roadmap — partner discussions underway.',
-  },
-  {
-    id: 'venue-booking', seq: '07', name: 'Venue booking', phase: 'later',
-    pos: { x: 90, y: 40 },
-    summary: 'Book the pitch straight from the match card.',
-    bullets: [
-      'Live availability across venues',
-      'One-tap booking confirmations',
-      'Auto-split cost across the roster',
-      'Calendar + email confirmations',
-    ],
-    statusNote: 'On the roadmap — venue integrations in scoping.',
+    statusNote: 'No date yet.',
   },
 ];
 
-// Kept as data only for the modal phase label string; no global UI for these.
-const PHASES = [
-  { id: 'now',   label: 'Now',   note: 'Building'  },
-  { id: 'next',  label: 'Next',  note: 'In design' },
-  { id: 'later', label: 'Later', note: 'Roadmap'   },
-] as const;
+const LATER = ['AI Match Builder', 'AI Captain', 'SPORTTIMES Store', 'Venue booking'];
 
 // Build a SMOOTH curve through the magnets in build order using
 // Catmull-Rom-style cubic Bezier interpolation. Tension 0.5 gives a
@@ -228,6 +168,31 @@ export default function LockerRoom() {
 
       <DesktopBoard />
       <MobileList />
+
+      <div className="grid-12" data-reveal>
+        <p
+          className="col-span-12"
+          data-reveal-child
+          style={{
+            marginTop: 'clamp(2.5rem, 5vh, 4rem)',
+            textAlign: 'center',
+            fontFamily: 'var(--font-mono), monospace',
+            fontSize: 11,
+            lineHeight: 1.9,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'var(--muted)',
+          }}
+        >
+          <span style={{ color: 'var(--ink)' }}>Later</span>
+          {LATER.map((name) => (
+            <span key={name}>
+              {' · '}
+              <span style={{ whiteSpace: 'nowrap' }}>{name}</span>
+            </span>
+          ))}
+        </p>
+      </div>
     </section>
   );
 }
@@ -512,10 +477,6 @@ function Magnet({
   onHover: () => void;
   onUnhover: () => void;
 }) {
-  const isDim = feature.phase === 'later';
-  const phaseLabel =
-    feature.phase === 'now' ? 'NOW' : feature.phase === 'next' ? 'NEXT' : 'LATER';
-
   return (
     <div
       role="button"
@@ -552,16 +513,12 @@ function Magnet({
           width: 24,
           height: 24,
           borderRadius: '50%',
-          background: isDim
-            ? 'rgba(150, 160, 170, 0.55)'
-            : 'var(--lime)',
-          boxShadow: isDim
-            ? 'none'
-            : '0 0 0 6px rgba(212, 255, 58, 0.14), 0 0 32px rgba(212, 255, 58, 0.45)',
+          background: 'var(--lime)',
+          boxShadow: '0 0 0 6px rgba(212, 255, 58, 0.14), 0 0 32px rgba(212, 255, 58, 0.45)',
         }}
       />
 
-      {/* Per-dot phase eyebrow */}
+      {/* Per-dot status eyebrow */}
       <span
         style={{
           marginTop: 14,
@@ -569,10 +526,11 @@ function Magnet({
           fontSize: 13,
           letterSpacing: '0.24em',
           fontWeight: 700,
-          color: isDim ? 'rgba(245, 245, 240, 0.55)' : 'var(--lime)',
+          textTransform: 'uppercase',
+          color: 'var(--lime)',
         }}
       >
-        {phaseLabel}
+        {feature.status}
       </span>
 
       {/* Feature name */}
@@ -584,7 +542,7 @@ function Magnet({
           fontWeight: 900,
           letterSpacing: '0.02em',
           textTransform: 'uppercase',
-          color: isDim ? 'rgba(245, 245, 240, 0.7)' : 'var(--ink)',
+          color: 'var(--ink)',
         }}
       >
         {feature.name}
@@ -641,13 +599,6 @@ function HoverTooltip({
     ? `translate3d(${(xPx - offsetX).toFixed(2)}px, ${yPx.toFixed(2)}px, 0) translate(-100%, ${goUp ? '-100%' : '0%'})`
     : `translate3d(${(xPx + offsetX).toFixed(2)}px, ${yPx.toFixed(2)}px, 0) translate(0%, ${goUp ? '-100%' : '0%'})`;
 
-  const phaseLabel =
-    feature.phase === 'now'
-      ? 'Now · Building'
-      : feature.phase === 'next'
-      ? 'Next · In design'
-      : 'Later · Roadmap';
-
   return (
     <div
       role="tooltip"
@@ -677,7 +628,7 @@ function HoverTooltip({
           marginBottom: 8,
         }}
       >
-        {feature.seq} · {phaseLabel}
+        {feature.seq} · {feature.status}
       </div>
       <h3
         className="headline-display"
@@ -760,8 +711,8 @@ function HoverTooltip({
 }
 
 // ===================================================================
-//  Mobile list — labelled stacked groups, tap-to-open vertical list
-//  Shown only < 768px. Tap a magnet → inline expand its bullets.
+//  Mobile list — tap-to-open vertical list
+//  Shown only < 768px. Tap a card → inline expand its bullets.
 // ===================================================================
 
 function MobileList() {
@@ -775,51 +726,15 @@ function MobileList() {
       <div
         className="col-span-12"
         data-reveal-child
-        style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}
+        style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
       >
-        {PHASES.map((p) => (
-          <div key={p.id}>
-            <div
-              style={{
-                fontFamily: 'var(--font-mono), monospace',
-                fontSize: 11,
-                letterSpacing: '0.28em',
-                color: 'var(--muted)',
-                textTransform: 'uppercase',
-                marginBottom: 6,
-              }}
-            >
-              {p.label}
-            </div>
-            <div
-              style={{
-                fontFamily: 'var(--font-body), Inter, sans-serif',
-                fontSize: 13,
-                color: 'var(--muted)',
-                marginBottom: 14,
-              }}
-            >
-              {p.note}
-            </div>
-            <div
-              aria-hidden
-              style={{
-                height: 1,
-                background: 'rgba(245, 245, 240, 0.08)',
-                marginBottom: 16,
-              }}
-            />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {FEATURES.filter((f) => f.phase === p.id).map((f) => (
-                <MobileCard
-                  key={f.id}
-                  feature={f}
-                  open={openId === f.id}
-                  onToggle={() => setOpenId(openId === f.id ? null : f.id)}
-                />
-              ))}
-            </div>
-          </div>
+        {FEATURES.map((f) => (
+          <MobileCard
+            key={f.id}
+            feature={f}
+            open={openId === f.id}
+            onToggle={() => setOpenId(openId === f.id ? null : f.id)}
+          />
         ))}
       </div>
 
@@ -876,10 +791,11 @@ function MobileCard({
               fontFamily: 'var(--font-mono), monospace',
               fontSize: 10,
               letterSpacing: '0.22em',
+              textTransform: 'uppercase',
               color: 'var(--muted)',
             }}
           >
-            {feature.seq}
+            {feature.seq} · <span style={{ color: 'var(--lime)' }}>{feature.status}</span>
           </span>
           <span
             aria-hidden
