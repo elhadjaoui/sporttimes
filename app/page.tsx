@@ -3,7 +3,12 @@ import dynamic from 'next/dynamic';
 import Hero from '@/components/sections/Hero';
 import Problem from '@/components/sections/Problem';
 import FAQ from '@/components/sections/FAQ';
-import { HOME_DESCRIPTION, HOME_TITLE, pageMetadata } from '@/lib/metadata';
+import {
+  HOME_DESCRIPTION,
+  HOME_STRUCTURED_DATA,
+  HOME_TITLE,
+  pageMetadata,
+} from '@/lib/metadata';
 
 export const metadata: Metadata = pageMetadata({
   path: '/',
@@ -54,6 +59,12 @@ function SectionFallback({ minH }: { minH: string }) {
 export default function Page() {
   return (
     <main className="relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(HOME_STRUCTURED_DATA),
+        }}
+      />
       <Hero />
       <Problem />
       <Film />
