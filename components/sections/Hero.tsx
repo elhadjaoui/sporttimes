@@ -207,7 +207,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className="hero-headline headline-display uppercase text-ink text-[clamp(2rem,10vw,4.5rem)] xl:text-[clamp(2.25rem,5vw,4.5rem)] mb-7 xl:mb-9">
+          <h1 className="hero-headline headline-display uppercase text-ink text-[clamp(1.5rem,9.2vw,4.5rem)] xl:text-[clamp(2.25rem,5vw,4.5rem)] mb-7 xl:mb-9">
             {HEADLINE.map((line, i) => (
               <span
                 key={i}
