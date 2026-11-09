@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/metadata';
 import { CONTACT_EMAIL } from '@/lib/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: '/terms',
   title: 'Terms of Service — SPORTTIMES',
   description:
     'Terms of use for SPORTTIMES — communities, matches, conduct, and liability.',
-};
+});
 
 export default function TermsPage() {
   return (

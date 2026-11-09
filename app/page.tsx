@@ -1,6 +1,14 @@
+import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import Hero from '@/components/sections/Hero';
 import Problem from '@/components/sections/Problem';
+import { HOME_DESCRIPTION, HOME_TITLE, pageMetadata } from '@/lib/metadata';
+
+export const metadata: Metadata = pageMetadata({
+  path: '/',
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+});
 
 // Below-the-fold sections — code-split so the initial JS payload
 // stays lean. Each has a height-preserving fallback to avoid layout

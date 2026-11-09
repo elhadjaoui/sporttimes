@@ -14,6 +14,8 @@ import ProgressScrubber from '@/components/ui/ProgressScrubber';
 import AmbientLayer from '@/components/ui/AmbientLayer';
 import RevealObserver from '@/components/ui/RevealObserver';
 import { Analytics } from '@vercel/analytics/next';
+import { HOME_DESCRIPTION, HOME_TITLE } from '@/lib/metadata';
+import { SITE_URL } from '@/lib/site';
 
 const display = Inter({
   subsets: ['latin'],
@@ -56,17 +58,14 @@ const kalam = Kalam({
 });
 
 export const metadata: Metadata = {
-  title: 'SPORTTIMES — See the lineup. Join the match.',
-  description:
-    'Stop chasing group chats. See exactly who is playing, what position, and how the team is shaping up — before you commit. Football, basketball, handball.',
-  metadataBase: new URL('https://sporttimes.app'),
+  title: HOME_TITLE,
+  description: HOME_DESCRIPTION,
+  metadataBase: new URL(SITE_URL),
   // Favicon + apple-touch icon are auto-wired via app/icon.png and
   // app/apple-icon.png — Next.js App Router detects them by filename.
   openGraph: {
-    title: 'SPORTTIMES — See the lineup. Join the match.',
-    description: 'Sports coordination, reimagined.',
     type: 'website',
-    images: ['/screens/logo.png'],
+    siteName: 'SPORTTIMES',
   },
 };
 

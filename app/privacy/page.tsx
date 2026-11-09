@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/metadata';
 import { CONTACT_EMAIL } from '@/lib/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: '/privacy',
   title: 'Privacy Policy — SPORTTIMES',
   description:
-    'How SPORTTIMES handles your data — communities, matches, lineups, and messages.',
-};
+    'How SPORTTIMES handles your data — communities, matches, and lineups.',
+});
 
 export default function PrivacyPage() {
   return (
