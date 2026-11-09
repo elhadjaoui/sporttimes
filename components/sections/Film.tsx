@@ -662,7 +662,7 @@ export default function Film() {
           font-size: 10.5px;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(245, 245, 240, 0.45);
+          color: rgba(245, 245, 240, 0.55);
         }
         .film-meta-val {
           color: var(--ink);
@@ -676,6 +676,16 @@ export default function Film() {
           position: relative;
           color: var(--lime);
           text-decoration: none;
+        }
+        /* 44px hit area; ::after is taken by the underline. */
+        .film-meta-link::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          right: 0;
+          height: 44px;
+          transform: translateY(-50%);
         }
         .film-meta-link::after {
           content: '';
@@ -1085,7 +1095,7 @@ export default function Film() {
           font-size: 10px;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(245, 245, 240, 0.4);
+          color: rgba(245, 245, 240, 0.55);
         }
         .film-chapter-num {
           transition: color 240ms ease;

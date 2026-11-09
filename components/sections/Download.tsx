@@ -46,7 +46,7 @@ function StoreBadge({
             display: 'block',
             fontSize: 9,
             letterSpacing: '0.08em',
-            color: 'rgba(245, 245, 240, 0.4)',
+            color: 'rgba(245, 245, 240, 0.55)',
           }}
         >
           {topLabel}
@@ -271,7 +271,7 @@ export default function Download() {
             className="mono-eyebrow"
             style={{
               marginTop: 18,
-              color: 'rgba(245, 245, 240, 0.4)',
+              color: 'rgba(245, 245, 240, 0.55)',
               letterSpacing: '0.22em',
             }}
           >

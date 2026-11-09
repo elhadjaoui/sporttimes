@@ -17,7 +17,7 @@ export default function Nav() {
           <Link
             href="/"
             aria-label={`${APP_NAME_DISPLAY} — home`}
-            className="group flex items-center gap-2 md:gap-3 leading-none hover:text-lime transition-colors"
+            className="tap-target group flex items-center gap-2 md:gap-3 leading-none hover:text-lime transition-colors"
           >
             <Image
               src="/screens/logo.png"
@@ -36,7 +36,7 @@ export default function Nav() {
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
-            className="group relative font-mono text-[11px] tracking-[0.2em] uppercase text-ink/80 hover:text-lime transition-colors"
+            className="tap-target group font-mono text-[11px] tracking-[0.2em] uppercase text-ink/80 hover:text-lime transition-colors"
           >
             Menu
             <span className="absolute left-0 -bottom-1 h-px w-full bg-lime origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />

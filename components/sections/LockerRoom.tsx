@@ -750,7 +750,7 @@ function HoverTooltip({
           fontSize: 9,
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
-          color: 'rgba(245, 245, 240, 0.45)',
+          color: 'rgba(245, 245, 240, 0.55)',
         }}
       >
         {feature.statusNote}

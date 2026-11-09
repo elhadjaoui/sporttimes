@@ -151,7 +151,7 @@ export default function MenuOverlay({
             {/* Right column — live tagline + meta info */}
             <aside className="hidden md:flex md:col-span-4 flex-col justify-between min-h-[360px] pt-2">
               <div>
-                <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-ink/40 mb-3">
+                <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-ink/55 mb-3">
                   Now showing
                 </div>
                 <motion.p
@@ -167,7 +167,7 @@ export default function MenuOverlay({
 
               <div className="space-y-3">
                 <div className="h-px w-full bg-ink/10" />
-                <div className="flex items-baseline justify-between font-mono text-[10px] tracking-[0.2em] uppercase text-ink/45">
+                <div className="flex items-baseline justify-between font-mono text-[10px] tracking-[0.2em] uppercase text-ink/55">
                   <span>Made in Ben Guerir</span>
                   <span className="text-lime/70">Public launch {LAUNCH_LABEL} · iOS beta open</span>
                 </div>
@@ -176,7 +176,7 @@ export default function MenuOverlay({
           </nav>
 
           {/* Footer hint */}
-          <div className="absolute z-10 bottom-6 left-6 md:left-10 right-6 md:right-10 flex items-center justify-between font-mono text-[10px] tracking-[0.25em] uppercase text-ink/40">
+          <div className="absolute z-10 bottom-6 left-6 md:left-10 right-6 md:right-10 flex items-center justify-between font-mono text-[10px] tracking-[0.25em] uppercase text-ink/55">
             <span>
               Chapters · 01 — {CHAPTERS.length.toString().padStart(2, '0')}
             </span>

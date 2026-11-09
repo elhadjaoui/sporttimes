@@ -478,7 +478,7 @@ export default function HowItWorks() {
                 <div
                   key={step.num}
                   className="htw-headline-slot"
-                  aria-hidden={activeStep !== i}
+                  aria-hidden
                 >
                   <h2
                     ref={(el) => {

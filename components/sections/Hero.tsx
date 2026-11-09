@@ -219,7 +219,7 @@ export default function Hero() {
                       {char === ' ' ? '\u00A0' : char}
                     </span>
                   ))}
-                </span>
+                </span>{' '}
               </span>
             ))}
           </h1>

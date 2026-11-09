@@ -36,6 +36,7 @@ function CopyableEmail({ email }: { email: string }) {
     <button
       type="button"
       onClick={handleCopy}
+      className="tap-target"
 
       aria-label={`Copy ${email} to clipboard`}
       title={copied ? 'Copied!' : 'Click to copy'}
@@ -307,7 +308,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label={s.name}
 
-                className="social-link"
+                className="social-link tap-target"
                 style={{
                   color: 'rgba(245,245,240,0.6)',
                   display: 'inline-flex',
@@ -324,7 +325,7 @@ export default function Footer() {
                 aria-label={`${s.name} — coming soon`}
                 className="social-soon"
                 style={{
-                  color: 'rgba(245,245,240,0.35)',
+                  color: 'rgba(245,245,240,0.5)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   padding: 6,
@@ -420,7 +421,7 @@ export default function Footer() {
               <a
                 href={BETA_PATH}
 
-                className="footer-play-cta"
+                className="footer-play-cta tap-target"
               >
                 Join the beta ↗
               </a>
@@ -444,13 +445,13 @@ export default function Footer() {
             fontSize: 11,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
-            color: 'rgba(245,245,240,0.45)',
+            color: 'rgba(245,245,240,0.55)',
           }}
         >
           © {year} SPORTTIMES · Made in Ben Guerir
         </div>
         <div
-          className="col-span-12 xl:col-span-4 xl:col-start-8 mt-4 xl:mt-0 flex flex-col xl:items-end gap-3"
+          className="col-span-12 xl:col-span-4 xl:col-start-8 mt-4 xl:mt-0 flex flex-col xl:items-end gap-7"
         >
           <div
             className="flex gap-5 flex-wrap md:justify-end"
@@ -469,7 +470,7 @@ export default function Footer() {
                 key={l.label}
                 href={l.href}
 
-                className="footer-link"
+                className="footer-link tap-target"
                 style={{
                   color: 'rgba(245,245,240,0.55)',
                   transition: 'color 220ms ease',

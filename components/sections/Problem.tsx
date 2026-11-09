@@ -321,7 +321,7 @@ export default function Problem() {
               <div className="calm-phone">
                 <Image
                   src="/screens/problem-lineup.png"
-                  alt=""
+                  alt="A SPORTTIMES match screen showing the host, kick-off details and a lineup with 19 of 22 players."
                   fill
                   sizes="(max-width: 880px) 220px, 360px"
                   quality={80}
@@ -605,7 +605,7 @@ export default function Problem() {
           font-size: 10px;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(245, 245, 240, 0.4);
+          color: rgba(245, 245, 240, 0.55);
           min-width: 56px;
         }
         .calm-info-val {
@@ -974,7 +974,7 @@ export default function Problem() {
           font-size: 10px;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(245, 245, 240, 0.45);
+          color: rgba(245, 245, 240, 0.55);
           margin-bottom: 8px;
         }
         .problem-stat-values {
