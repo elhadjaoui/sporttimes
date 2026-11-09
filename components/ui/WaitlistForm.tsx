@@ -7,6 +7,7 @@ import {
   type CSSProperties,
   type FormEvent,
 } from 'react';
+import { trackWaitlistSubmit } from '@/lib/analytics';
 
 type Source = 'hero' | 'download' | 'footer' | 'sticky' | 'inline';
 type Variant = 'dark' | 'paper';
@@ -142,6 +143,7 @@ export default function WaitlistForm({
         body: formData,
       });
       setState('success');
+      trackWaitlistSubmit(source);
     } catch {
       setState('error');
     }

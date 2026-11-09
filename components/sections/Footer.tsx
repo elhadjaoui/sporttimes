@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { useCurrentYear } from '@/hooks/useCurrentYear';
+import { trackBetaClick } from '@/lib/analytics';
 import {
   BETA_PATH,
   CONTACT_EMAIL,
@@ -420,7 +421,7 @@ export default function Footer() {
               </div>
               <a
                 href={BETA_PATH}
-
+                onClick={() => trackBetaClick('footer')}
                 className="footer-play-cta tap-target"
               >
                 Join the beta ↗

@@ -4,11 +4,11 @@ import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import BetaButton from '@/components/ui/BetaButton';
 import MagneticButton from '@/components/ui/MagneticButton';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 import { getLenis } from '@/hooks/useLenis';
 import { scrollState } from '@/lib/scrollState';
-import { BETA_PATH } from '@/lib/site';
 
 const HeroScene = dynamic(() => import('@/components/three/HeroScene'), {
   ssr: false,
@@ -234,9 +234,7 @@ export default function Hero() {
           </p>
 
           <div className="hero-fade flex flex-col xl:flex-row xl:flex-wrap items-stretch xl:items-center gap-3 w-full xl:w-auto">
-            <MagneticButton href={BETA_PATH} variant="primary">
-              Join the iOS beta ↗
-            </MagneticButton>
+            <BetaButton location="hero" />
             <MagneticButton
               variant="ghost"
               href="#how-it-works"

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
+import BetaButton from '@/components/ui/BetaButton';
 import MagneticButton from '@/components/ui/MagneticButton';
-import { BETA_PATH } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Page not found — SPORTTIMES',
@@ -46,9 +46,7 @@ export default function NotFound() {
             <MagneticButton href="/" variant="primary">
               Back to home
             </MagneticButton>
-            <MagneticButton href={BETA_PATH} variant="ghost">
-              Join the iOS beta ↗
-            </MagneticButton>
+            <BetaButton location="not_found" variant="ghost" />
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import MagneticButton from '@/components/ui/MagneticButton';
-import { BETA_PATH, LAUNCH_LABEL } from '@/lib/site';
+import BetaButton from '@/components/ui/BetaButton';
+import { LAUNCH_LABEL } from '@/lib/site';
 
 type Kind = 'match' | 'team' | 'invite' | 'community';
 
@@ -49,9 +49,7 @@ export default function InviteFallback({ kind }: InviteFallbackProps) {
         <p className="invite-subcopy">{SUB_COPY}</p>
 
         <div className="invite-cta">
-          <MagneticButton href={BETA_PATH} variant="primary">
-            Join the iOS beta ↗
-          </MagneticButton>
+          <BetaButton location="invite" />
           <p className="invite-android">
             iOS only for now. On Android?{' '}
             <Link href="/#download" className="invite-android-link">
