@@ -292,7 +292,7 @@ export default function Problem() {
                 11/11 in seconds.
               </div>
               <div className="side-banner-sub">
-                See who's playing. See the lineup fill. Show up.
+                See who&apos;s playing. See the lineup fill. Show up.
               </div>
             </div>
 
