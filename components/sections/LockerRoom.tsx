@@ -24,7 +24,7 @@ const RoadmapPitch = dynamic(() => import('@/components/three/RoadmapPitch'), {
 //
 //  NOW   (building):   Tournaments · More sports
 //  NEXT  (in design):  Match chat · AI Match Builder · AI Captain
-//  LATER (roadmap):    SportTimes Store · Venue booking
+//  LATER (roadmap):    SPORTTIMES Store · Venue booking
 //
 //  `pos` = initial percentage position on the 100×100 board viewBox.
 //  Magnets are placed with intent (cluster per phase) and connected
@@ -115,7 +115,7 @@ const FEATURES: Feature[] = [
 
   // LATER (rendered as dim/muted dots — futureward)
   {
-    id: 'store', seq: '06', name: 'SportTimes Store', phase: 'later',
+    id: 'store', seq: '06', name: 'SPORTTIMES Store', phase: 'later',
     pos: { x: 77, y: 24 },
     summary: 'Kits, gear, and community merch — ordered from the same app.',
     bullets: [

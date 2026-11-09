@@ -156,7 +156,7 @@ function PhoneFrame() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/screens/download-app.png"
-        alt="A SportTimes match-day view showing your confirmed lineup"
+        alt="A SPORTTIMES match-day view showing your confirmed lineup"
         style={{
           width: '100%',
           height: '100%',

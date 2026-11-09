@@ -2,9 +2,9 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — SportTimes',
+  title: 'Terms of Service — SPORTTIMES',
   description:
-    'Terms of use for SportTimes — communities, matches, conduct, and liability.',
+    'Terms of use for SPORTTIMES — communities, matches, conduct, and liability.',
 };
 
 export default function TermsPage() {
@@ -50,13 +50,13 @@ export default function TermsPage() {
             }}
           >
             Last updated · 21 April 2026. By creating an account, joining a
-            community, or RSVPing to a match on SportTimes, you agree to the
+            community, or RSVPing to a match on SPORTTIMES, you agree to the
             terms below.
           </p>
 
           <Section title="1 · The app">
             <p>
-              SportTimes helps communities organize matches, visualize
+              SPORTTIMES helps communities organize matches, visualize
               lineups, and coordinate players. We provide the software;
               communities run their own matches. We are not a party to any
               agreement you make with a community or its members.
@@ -93,7 +93,7 @@ export default function TermsPage() {
 
           <Section title="5 · Safety + liability">
             <p>
-              Playing sports carries inherent risk. SportTimes is not
+              Playing sports carries inherent risk. SPORTTIMES is not
               responsible for injuries, disputes between players, venue
               issues, or the quality of any community-organized match. Bring
               the right gear and play smart.
@@ -111,7 +111,7 @@ export default function TermsPage() {
           <Section title="7 · Content you post">
             <p>
               You own what you post — match notes, community descriptions,
-              photos. You grant SportTimes a limited license to display and
+              photos. You grant SPORTTIMES a limited license to display and
               distribute that content to the community you shared it with.
               We don&rsquo;t use it outside the app.
             </p>

@@ -1,4 +1,4 @@
-# SportTimes Landing Page Implementation Plan
+# SPORTTIMES Landing Page Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -218,7 +218,7 @@ function App() {
   return (
     <main>
       <section className="section" style={{ background: 'var(--bg)' }}>
-        <h1 style={{ color: 'var(--accent)' }}>SportTimes</h1>
+        <h1 style={{ color: 'var(--accent)' }}>SPORTTIMES</h1>
       </section>
     </main>
   )
@@ -237,7 +237,7 @@ Write this to `src/App.jsx`.
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SportTimes — Find Your Game</title>
+  <title>SPORTTIMES — Find Your Game</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -260,7 +260,7 @@ Expected: Dependencies installed successfully, node_modules created.
 
 Run: `npm run dev`
 
-Expected: Vite dev server starts, shows "SportTimes" heading in browser at localhost:5173.
+Expected: Vite dev server starts, shows "SPORTTIMES" heading in browser at localhost:5173.
 
 - [ ] **Step 9: Commit**
 
@@ -813,7 +813,7 @@ export default function Hero() {
           textTransform: 'uppercase',
         }}
       >
-        SportTimes
+        SPORTTIMES
       </motion.h2>
 
       {/* Headline */}
@@ -1719,7 +1719,7 @@ export default function ComingSoon() {
           </a>
         </div>
         <p style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>
-          © 2026 SportTimes. All rights reserved.
+          © 2026 SPORTTIMES. All rights reserved.
         </p>
       </motion.footer>
     </section>
@@ -1872,7 +1872,7 @@ Expected: Production build serves at localhost:4173, all animations work.
 
 ```bash
 git add -A
-git commit -m "feat: complete SportTimes landing page with all 6 sections"
+git commit -m "feat: complete SPORTTIMES landing page with all 6 sections"
 ```
 
 ---

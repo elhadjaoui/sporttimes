@@ -29,7 +29,7 @@ const COPY: Record<Kind, { eyebrow: string; headline: string }> = {
 };
 
 const SUB_COPY =
-  'SportTimes is launching in Ben Guerir this summer. Grab the app when it drops and this invite will open right up.';
+  'SPORTTIMES is launching in Ben Guerir this summer. Grab the app when it drops and this invite will open right up.';
 
 export default function InviteFallback({ kind }: InviteFallbackProps) {
   const { eyebrow, headline } = COPY[kind];

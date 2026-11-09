@@ -2,9 +2,9 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — SportTimes',
+  title: 'Privacy Policy — SPORTTIMES',
   description:
-    'How SportTimes handles your data — communities, matches, lineups, and messages.',
+    'How SPORTTIMES handles your data — communities, matches, lineups, and messages.',
 };
 
 export default function PrivacyPage() {
@@ -49,14 +49,14 @@ export default function PrivacyPage() {
               maxWidth: '62ch',
             }}
           >
-            Last updated · 21 April 2026. This page describes what SportTimes
+            Last updated · 21 April 2026. This page describes what SPORTTIMES
             collects, why, how it&rsquo;s stored, and the rights you have over
             your data.
           </p>
 
           <Section title="1 · What we collect">
             <p>
-              When you create a SportTimes account we store the minimum needed
+              When you create a SPORTTIMES account we store the minimum needed
               to run a match: display name, phone number or email, the
               communities you join, and the matches you RSVP to. We never ask
               for anything we don&rsquo;t need to put you on a pitch.
@@ -107,7 +107,7 @@ export default function PrivacyPage() {
 
           <Section title="7 · Kids">
             <p>
-              SportTimes is 13+. School-team communities require an admin who
+              SPORTTIMES is 13+. School-team communities require an admin who
               is 18+ to vouch for younger members. We do not knowingly
               collect data from children under 13.
             </p>

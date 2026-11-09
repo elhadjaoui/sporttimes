@@ -438,7 +438,7 @@ export default function Film() {
               src={SRC}
               preload="none"
               playsInline
-              aria-label="SportTimes launch film"
+              aria-label="SPORTTIMES launch film"
               onClick={() => {
                 toggle();
                 wake();
@@ -462,7 +462,7 @@ export default function Film() {
               aria-hidden={!posterVisible}
               aria-label={`${
                 status === 'ended' ? 'Replay' : 'Play'
-              } the SportTimes launch film, ${spoken(Math.ceil(duration))}`}
+              } the SPORTTIMES launch film, ${spoken(Math.ceil(duration))}`}
               onClick={() => play(status === 'ended' ? 0 : undefined)}
             >
               <span className="film-poster-img" aria-hidden>

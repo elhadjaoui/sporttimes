@@ -68,7 +68,7 @@ export const CONTACT_EMAIL = 'contact@sporttimes.app';
 | App Store tile | Top label `Q1 2027`, bottom label `App Store` | No link |
 | Google Play tile | Top label `Coming soon`, bottom label `Google Play` | No link |
 | Footer CTA | `Join the beta ↗` | `BETA_PATH` |
-| Footer copyright | `© {current year} SportTimes · Made in Ben Guerir` | |
+| Footer copyright | `© {current year} SPORTTIMES · Made in Ben Guerir` | |
 | Footer eyebrow | `The match before the match · {current year}` | |
 | Footer stats | `01 Sport live`, `06 Coming soon`, `∞ Matches ahead` (third unchanged) | |
 | Menu overlay (`MenuOverlay.tsx:171`) | `Public launch Q1 2027 · iOS beta open` (date from `LAUNCH_LABEL`) | |
@@ -90,22 +90,22 @@ Root layout (`app/layout.tsx`):
 
 - `metadataBase: new URL(SITE_URL)`.
 - `title` and `description` use the homepage values below.
-- `openGraph` keeps only `type: 'website'` and `siteName: 'SportTimes'`.
+- `openGraph` keeps only `type: 'website'` and `siteName: 'SPORTTIMES'`.
 - No canonical in the root layout; children would inherit it.
 
-Per page, each with its own `alternates.canonical`, `openGraph.title`, `openGraph.description`, `openGraph.url`, and `twitter` (`card: 'summary_large_image'`, title, description):
+Per page, built by a shared `pageMetadata` helper in `lib/metadata.ts`, each with its own `alternates.canonical`, `openGraph.title`, `openGraph.description`, `openGraph.url`, and `twitter` (`card: 'summary_large_image'`, title, description). A page that sets its own `openGraph` or `twitter` object replaces the parent's and loses the shared image, so the helper also lists `/opengraph-image` in `images` for both:
 
 | Page | Canonical | Title | Description |
 |---|---|---|---|
-| `app/page.tsx` | `/` | `SportTimes — Find and join football matches near you` | `See who's playing before you commit. SportTimes shows live lineups for football matches in your campus, city or club. iOS beta open now.` |
-| `app/privacy/page.tsx` | `/privacy` | `Privacy Policy — SportTimes` | `How SportTimes handles your data — communities, matches, and lineups.` |
-| `app/terms/page.tsx` | `/terms` | `Terms of Service — SportTimes` | `Terms of use for SportTimes — communities, matches, conduct, and liability.` |
+| `app/page.tsx` | `/` | `SPORTTIMES — Find and join football matches near you` | `See who's playing before you commit. SPORTTIMES shows live lineups for football matches in your campus, city or club. iOS beta open now.` |
+| `app/privacy/page.tsx` | `/privacy` | `Privacy Policy — SPORTTIMES` | `How SPORTTIMES handles your data — communities, matches, and lineups.` |
+| `app/terms/page.tsx` | `/terms` | `Terms of Service — SPORTTIMES` | `Terms of use for SPORTTIMES — communities, matches, conduct, and liability.` |
 
 `app/opengraph-image.tsx`:
 
 - 1200x630 PNG, background `#050505`, accent `#D4FF3A`.
 - Tagline `See the lineup. Join the match.`
-- `public/screens/howitworks-lineup.png`, read from disk and embedded as a data URL.
+- `public/screens/howitworks-lineup.png`, read from disk and embedded as a data URL. Rendered at 370x777 with a `-104` top margin, which crops the placeholder "Additional notes" text out of the preview.
 - Uses the default `next/og` font, so no font file is added.
 - Done when `og:image` starts with `https://www.sporttimes.app/` on each page.
 
@@ -125,7 +125,7 @@ Sections are renumbered 1 to 8 after section 4 is removed.
 
 Section 1, What we collect, replaced with three paragraphs:
 
-> When you create a SportTimes account we store the minimum needed to run a match: your display name, your email address, the communities you join, and the matches you RSVP to. You sign in with Apple, Google, or a one-time code sent to your email. If you use Sign in with Apple and hide your email, we only see Apple's private relay address. We never ask for anything we don't need to put you on a pitch.
+> When you create a SPORTTIMES account we store the minimum needed to run a match: your display name, your email address, the communities you join, and the matches you RSVP to. You sign in with Apple, Google, or a one-time code sent to your email. If you use Sign in with Apple and hide your email, we only see Apple's private relay address. We never ask for anything we don't need to put you on a pitch.
 >
 > We also store a profile photo if you add one, your preferred sport, your notification settings, a device token so we can send push notifications, and the ratings players give each other after a match.
 >
@@ -133,7 +133,7 @@ Section 1, What we collect, replaced with three paragraphs:
 
 Section 3, Who sees what: keep the existing paragraph and add:
 
-> We use a few service providers to run SportTimes: Supabase (sign-in and file storage), Firebase (push notifications), PostHog (product analytics, linked to your account ID), Render (app servers), and Vercel (website hosting and visitor analytics). Apple and Google handle sign-in if you choose them.
+> We use a few service providers to run SPORTTIMES: Supabase (sign-in and file storage), Firebase (push notifications), PostHog (product analytics, linked to your account ID), Render (app servers), and Vercel (website hosting and visitor analytics). Apple and Google handle sign-in if you choose them.
 
 Remove section 4, Messages + match chat.
 
@@ -149,7 +149,7 @@ Kids: remove the sentence about school-team admins vouching for younger members.
 
 **`app/terms/page.tsx`**
 
-- Section 1, The app: begin with `SportTimes is currently in beta. Features may change and data may be reset.`
+- Section 1, The app: begin with `SPORTTIMES is currently in beta. Features may change and data may be reset.`
 - Section 6, Payments: replace the whole text with `The core app is free.`
 
 ## Founder actions
@@ -169,7 +169,7 @@ These claims could not be verified. Each stays as written until the founder conf
 ## Out of scope
 
 - Phases 2 to 4.
-- Invite fallback pages (`/invite`, `/matches`, `/teams`, `/community`), which keep their current store badges. They do pick up the new social image.
+- Invite fallback pages (`/invite`, `/matches`, `/teams`, `/community`), which keep their current store badges and social tags.
 - Mobile app and backend code.
 
 ## Verification

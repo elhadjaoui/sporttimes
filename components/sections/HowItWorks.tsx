@@ -42,7 +42,7 @@ const STEPS: Step[] = [
       'Campus, city, club, workplace — find the squad you actually play with.',
     src: '/screens/howitworks-community.png',
     alt:
-      'A SportTimes community page showing nearby squads with public and private badges.',
+      'A SPORTTIMES community page showing nearby squads with public and private badges.',
   },
   {
     num: '02',
@@ -51,7 +51,7 @@ const STEPS: Step[] = [
       "Positions claim themselves in real time — who's playing, and where.",
     src: '/screens/howitworks-lineup.png',
     alt:
-      'A live lineup view in the SportTimes app filling into a 4-3-3 formation.',
+      'A live lineup view in the SPORTTIMES app filling into a 4-3-3 formation.',
   },
   {
     num: '03',
@@ -60,7 +60,7 @@ const STEPS: Step[] = [
       'One tap. Captain approves. Show up at the right field at the right time.',
     src: '/screens/howitworks-jumpin.png',
     alt:
-      'A player profile in the SportTimes app showing the confirmed slot and match details.',
+      'A player profile in the SPORTTIMES app showing the confirmed slot and match details.',
   },
 ];
 

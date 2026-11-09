@@ -256,7 +256,7 @@ export default function Footer() {
               textTransform: 'uppercase',
             }}
           >
-            SportTimes
+            SPORTTIMES
           </div>
           <div
             style={{
@@ -439,7 +439,7 @@ export default function Footer() {
             color: 'rgba(245,245,240,0.45)',
           }}
         >
-          © 2026 SportTimes · Made in Ben Guerir
+          © 2026 SPORTTIMES · Made in Ben Guerir
         </div>
         <div
           className="col-span-12 xl:col-span-4 xl:col-start-8 mt-4 xl:mt-0 flex flex-col xl:items-end gap-3"

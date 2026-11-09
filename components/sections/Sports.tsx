@@ -459,7 +459,7 @@ export default function Sports() {
                 <div className="sports-core-disc">
                   <Image
                     src="/screens/logo.png"
-                    alt="SportTimes"
+                    alt="SPORTTIMES"
                     width={150}
                     height={150}
                     priority
@@ -880,7 +880,7 @@ function MobileSports() {
           >
             <Image
               src="/screens/logo.png"
-              alt="SportTimes"
+              alt="SPORTTIMES"
               width={90}
               height={90}
               style={{ objectFit: 'contain' }}
@@ -1121,7 +1121,7 @@ function StaticConstellation() {
           >
             <Image
               src="/screens/logo.png"
-              alt="SportTimes"
+              alt="SPORTTIMES"
               width={130}
               height={130}
               style={{ objectFit: 'contain' }}

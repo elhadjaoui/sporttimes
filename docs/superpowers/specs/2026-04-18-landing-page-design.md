@@ -1,8 +1,8 @@
-# SportTimes Landing Page Design
+# SPORTTIMES Landing Page Design
 
 ## Overview
 
-Pre-launch landing page for SportTimes — a mobile-first app that replaces WhatsApp/Discord chaos for amateur sports coordination with visual lineups.
+Pre-launch landing page for SPORTTIMES — a mobile-first app that replaces WhatsApp/Discord chaos for amateur sports coordination with visual lineups.
 
 **Goal:** Build hype, showcase the concept, drive social follows and app store anticipation.
 
@@ -173,7 +173,7 @@ Full story scroll with **mixed horizontal + vertical scrolling**.
 - "Follow for updates" text
 
 **Footer:**
-- Minimal: Privacy | Terms | © SportTimes 2026
+- Minimal: Privacy | Terms | © SPORTTIMES 2026
 - Dark, unobtrusive
 
 ---

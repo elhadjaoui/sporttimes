@@ -56,14 +56,14 @@ const kalam = Kalam({
 });
 
 export const metadata: Metadata = {
-  title: 'SportTimes — See the lineup. Join the match.',
+  title: 'SPORTTIMES — See the lineup. Join the match.',
   description:
     'Stop chasing group chats. See exactly who is playing, what position, and how the team is shaping up — before you commit. Football, basketball, handball.',
   metadataBase: new URL('https://sporttimes.app'),
   // Favicon + apple-touch icon are auto-wired via app/icon.png and
   // app/apple-icon.png — Next.js App Router detects them by filename.
   openGraph: {
-    title: 'SportTimes — See the lineup. Join the match.',
+    title: 'SPORTTIMES — See the lineup. Join the match.',
     description: 'Sports coordination, reimagined.',
     type: 'website',
     images: ['/screens/logo.png'],

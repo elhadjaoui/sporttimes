@@ -70,7 +70,7 @@ const COPY: Record<Kind, { eyebrow: string; headline: string }> = {
 ```
 
 Sub-copy is identical across all four kinds:
-> "SportTimes is launching in Ben Guerir this summer. Grab the app when it drops and this invite will open right up."
+> "SPORTTIMES is launching in Ben Guerir this summer. Grab the app when it drops and this invite will open right up."
 
 ### Store badges
 
@@ -102,11 +102,11 @@ Per-route metadata so shared links in messaging apps render nicely:
 
 ```ts
 export const metadata = {
-  title: "You've been invited — SportTimes",
-  description: 'Open your invite in the SportTimes app.',
+  title: "You've been invited — SPORTTIMES",
+  description: 'Open your invite in the SPORTTIMES app.',
   openGraph: {
     title: "You've been invited",
-    description: 'Open your invite in the SportTimes app.',
+    description: 'Open your invite in the SPORTTIMES app.',
     type: 'website',
   },
   robots: { index: false, follow: false }, // invite URLs shouldn't be indexed
