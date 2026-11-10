@@ -4,6 +4,7 @@ import React, {
   useRef,
   useId,
   useEffect,
+  useState,
   type CSSProperties,
 } from 'react';
 import {
@@ -54,6 +55,7 @@ interface EtherealShadowProps {
 }
 
 const SCROLL_REST_MS = 200;
+const NEAR_MARGIN = '100% 0px';
 
 function mapRange(
   value: number,
@@ -83,6 +85,7 @@ export function Component({
 }: EtherealShadowProps) {
   const id = useInstanceId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
   const animationEnabled = animation && animation.scale > 0;
   const feColorMatrixRef = useRef<SVGFEColorMatrixElement>(null);
   const hueRotateMotionValue = useMotionValue(180);
@@ -95,9 +98,25 @@ export function Component({
     ? mapRange(animation.speed, 1, 100, 1000, 50)
     : 1;
 
+  // The mask and noise images download as soon as their layers render,
+  // even far off screen, so render the layers only once the section is
+  // within a screen of the viewport.
   useEffect(() => {
     const root = rootRef.current;
-    if (feColorMatrixRef.current && animationEnabled && root) {
+    if (!root || near) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setNear(true);
+      },
+      { rootMargin: NEAR_MARGIN }
+    );
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [near]);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (near && feColorMatrixRef.current && animationEnabled && root) {
       if (hueRotateAnimation.current) {
         hueRotateAnimation.current.stop();
       }
@@ -157,7 +176,7 @@ export function Component({
         controls.stop();
       };
     }
-  }, [animationEnabled, animationDuration, hueRotateMotionValue]);
+  }, [near, animationEnabled, animationDuration, hueRotateMotionValue]);
 
   return (
     <div
@@ -171,76 +190,78 @@ export function Component({
         ...style,
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          inset: -displacementScale,
-          filter: animationEnabled ? `url(#${id}) blur(4px)` : 'none',
-        }}
-      >
-        {animationEnabled && (
-          <svg style={{ position: 'absolute' }}>
-            <defs>
-              <filter id={id}>
-                <feTurbulence
-                  result="undulation"
-                  numOctaves="2"
-                  baseFrequency={`${mapRange(
-                    animation.scale,
-                    0,
-                    100,
-                    0.001,
-                    0.0005
-                  )},${mapRange(animation.scale, 0, 100, 0.004, 0.002)}`}
-                  seed="0"
-                  type="turbulence"
-                />
-                <feColorMatrix
-                  ref={feColorMatrixRef}
-                  in="undulation"
-                  type="hueRotate"
-                  values="180"
-                />
-                <feColorMatrix
-                  in="dist"
-                  result="circulation"
-                  type="matrix"
-                  values="4 0 0 0 1  4 0 0 0 1  4 0 0 0 1  1 0 0 0 0"
-                />
-                <feDisplacementMap
-                  in="SourceGraphic"
-                  in2="circulation"
-                  scale={displacementScale}
-                  result="dist"
-                />
-                <feDisplacementMap
-                  in="dist"
-                  in2="undulation"
-                  scale={displacementScale}
-                  result="output"
-                />
-              </filter>
-            </defs>
-          </svg>
-        )}
+      {near && (
         <div
           style={{
-            backgroundColor: color,
-            maskImage: `url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png')`,
-            WebkitMaskImage: `url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png')`,
-            maskSize: sizing === 'stretch' ? '100% 100%' : 'cover',
-            WebkitMaskSize: sizing === 'stretch' ? '100% 100%' : 'cover',
-            maskRepeat: 'no-repeat',
-            WebkitMaskRepeat: 'no-repeat',
-            maskPosition: 'center',
-            WebkitMaskPosition: 'center',
-            width: '100%',
-            height: '100%',
+            position: 'absolute',
+            inset: -displacementScale,
+            filter: animationEnabled ? `url(#${id}) blur(4px)` : 'none',
           }}
-        />
-      </div>
+        >
+          {animationEnabled && (
+            <svg style={{ position: 'absolute' }}>
+              <defs>
+                <filter id={id}>
+                  <feTurbulence
+                    result="undulation"
+                    numOctaves="2"
+                    baseFrequency={`${mapRange(
+                      animation.scale,
+                      0,
+                      100,
+                      0.001,
+                      0.0005
+                    )},${mapRange(animation.scale, 0, 100, 0.004, 0.002)}`}
+                    seed="0"
+                    type="turbulence"
+                  />
+                  <feColorMatrix
+                    ref={feColorMatrixRef}
+                    in="undulation"
+                    type="hueRotate"
+                    values="180"
+                  />
+                  <feColorMatrix
+                    in="dist"
+                    result="circulation"
+                    type="matrix"
+                    values="4 0 0 0 1  4 0 0 0 1  4 0 0 0 1  1 0 0 0 0"
+                  />
+                  <feDisplacementMap
+                    in="SourceGraphic"
+                    in2="circulation"
+                    scale={displacementScale}
+                    result="dist"
+                  />
+                  <feDisplacementMap
+                    in="dist"
+                    in2="undulation"
+                    scale={displacementScale}
+                    result="output"
+                  />
+                </filter>
+              </defs>
+            </svg>
+          )}
+          <div
+            style={{
+              backgroundColor: color,
+              maskImage: `url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png')`,
+              WebkitMaskImage: `url('https://framerusercontent.com/images/ceBGguIpUU8luwByxuQz79t7To.png')`,
+              maskSize: sizing === 'stretch' ? '100% 100%' : 'cover',
+              WebkitMaskSize: sizing === 'stretch' ? '100% 100%' : 'cover',
+              maskRepeat: 'no-repeat',
+              WebkitMaskRepeat: 'no-repeat',
+              maskPosition: 'center',
+              WebkitMaskPosition: 'center',
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        </div>
+      )}
 
-      {noise && noise.opacity > 0 && (
+      {near && noise && noise.opacity > 0 && (
         <div
           style={{
             position: 'absolute',
