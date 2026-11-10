@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fallback faces with the metrics next/font/google generated, so the
+   symbols the self-hosted files don't cover (arrows, ∞, ✓) render the
+   same as before, not only while the fonts load. */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  ascent-override: 90.49%;
+  descent-override: 22.56%;
+  line-gap-override: 0%;
+  size-adjust: 107.06%;
+}
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('Arial');
+  ascent-override: 75.79%;
+  descent-override: 22.29%;
+  line-gap-override: 0%;
+  size-adjust: 134.59%;
+}
+
 /* ===== Dark palette (existing — page default) ===== */
 :root {
   --bg: #050505;
