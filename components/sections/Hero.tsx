@@ -21,6 +21,22 @@ const HeroScene = dynamic(() => import('@/components/three/HeroScene'), {
 
 const HEADLINE = ['The match before', 'the match.'];
 
+// The entrance hides the hero and plays it back in. On slow phones the
+// server-rendered hero has already been readable for over a second when
+// this script runs, so replaying it would make the text vanish and return.
+const ENTRANCE_GRACE_MS = 500;
+let heroMountedBefore = false;
+
+function heroAlreadyRead(): boolean {
+  const firstMount = !heroMountedBefore;
+  heroMountedBefore = true;
+  // After an in-app navigation the hero is new on screen, so animate it.
+  const nav = performance.getEntriesByType('navigation')[0];
+  if (!firstMount || !nav || new URL(nav.name).pathname !== '/') return false;
+  const fcp = performance.getEntriesByName('first-contentful-paint')[0];
+  return !!fcp && performance.now() - fcp.startTime > ENTRANCE_GRACE_MS;
+}
+
 // Interpolate between ink (F5F5F0) and lime (D4FF3A) based on proximity (0..1)
 function interpolateColor(t: number): string {
   const ink = [0xf5, 0xf5, 0xf0];
@@ -38,27 +54,30 @@ export default function Hero() {
   useEffect(() => {
     if (!rootRef.current) return;
     gsap.registerPlugin(ScrollTrigger);
+    const skipEntrance = heroAlreadyRead();
     const ctx = gsap.context(() => {
-      gsap.set('.hero-line .line-inner', { yPercent: 100 });
-      gsap.set('.hero-fade', { opacity: 0, y: 16 });
+      if (!skipEntrance) {
+        gsap.set('.hero-line .line-inner', { yPercent: 100 });
+        gsap.set('.hero-fade', { opacity: 0, y: 16 });
 
-      const tl = gsap.timeline({ delay: 0.2 });
-      tl.to('.hero-line .line-inner', {
-        yPercent: 0,
-        duration: 0.9,
-        ease: 'expo.out',
-        stagger: 0.08,
-      }).to(
-        '.hero-fade',
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: 'power3.out',
+        const tl = gsap.timeline({ delay: 0.2 });
+        tl.to('.hero-line .line-inner', {
+          yPercent: 0,
+          duration: 0.9,
+          ease: 'expo.out',
           stagger: 0.08,
-        },
-        '-=0.5'
-      );
+        }).to(
+          '.hero-fade',
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            ease: 'power3.out',
+            stagger: 0.08,
+          },
+          '-=0.5'
+        );
+      }
 
       // Scroll-scrubbed camera dolly — true desktop only (≥1280px).
       // Tablet + phone drop the scrub to avoid jank / pin lock-in.
