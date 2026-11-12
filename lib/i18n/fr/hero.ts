@@ -5,7 +5,7 @@ const hero: Dictionary['hero'] = {
   progressLabel: 'Bienvenue',
   eyebrow: 'Par des joueurs · pour les joueurs',
   headline: ['Le match avant', 'le match.'],
-  subheadline: 'Trouve et rejoins des matchs de foot près de chez toi, au Maroc.',
+  subheadline: 'Trouve et rejoins des matchs de foot près de chez toi.',
   lede: 'Vois qui joue avant de t’engager. Prends ta place. Arrive prêt.',
   joinBeta: 'Rejoins la bêta iOS ↗',
   seeHow: 'Voir comment ça marche',

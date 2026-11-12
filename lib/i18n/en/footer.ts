@@ -24,7 +24,7 @@ const footer = {
     ahead: 'Matches ahead',
   },
   joinBeta: 'Join the beta ↗',
-  copyright: '© {year} SPORTTIMES · Made in Ben Guerir',
+  copyright: '© {year} SPORTTIMES',
   links: {
     privacy: 'Privacy',
     terms: 'Terms',

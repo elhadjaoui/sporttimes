@@ -21,7 +21,7 @@ const footer: Dictionary['footer'] = {
     ahead: 'Matchs à venir',
   },
   joinBeta: 'Rejoins la bêta ↗',
-  copyright: '© {year} SPORTTIMES · Fait à Ben Guerir',
+  copyright: '© {year} SPORTTIMES',
   // Both pages exist in English only.
   links: {
     privacy: 'Confidentialité',

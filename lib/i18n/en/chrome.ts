@@ -9,7 +9,7 @@ const chrome = {
   navigation: 'Navigation · {count} chapters',
   defaultTagline: 'Pick a chapter to jump to.',
   nowShowing: 'Now showing',
-  madeIn: 'Made in Ben Guerir',
+  madeIn: 'Made for players',
   launchStatus: `Public launch ${LAUNCH_LABEL} · iOS beta open`,
   chapterRange: 'Chapters · 01 — {count}',
   pressEsc: { before: 'Press ', key: 'Esc', after: ' to close' },

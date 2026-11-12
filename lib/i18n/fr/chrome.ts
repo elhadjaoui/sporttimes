@@ -10,7 +10,7 @@ const chrome: Dictionary['chrome'] = {
   navigation: 'Navigation · {count} chapitres',
   defaultTagline: 'Choisis un chapitre.',
   nowShowing: 'À l’affiche',
-  madeIn: 'Fait à Ben Guerir',
+  madeIn: 'Pour les joueurs',
   launchStatus: `Lancement public ${LAUNCH_LABEL_FR} · bêta iOS ouverte`,
   chapterRange: 'Chapitres · 01 — {count}',
   pressEsc: { before: 'Appuie sur ', key: 'Échap', after: ' pour fermer' },
