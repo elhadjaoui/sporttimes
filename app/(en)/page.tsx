@@ -3,6 +3,7 @@ import HomePage from '@/components/HomePage';
 import { getDictionary } from '@/lib/i18n';
 import {
   HOME_DESCRIPTION,
+  HOME_LANGUAGES,
   HOME_STRUCTURED_DATA,
   HOME_TITLE,
   pageMetadata,
@@ -12,6 +13,7 @@ export const metadata: Metadata = pageMetadata({
   path: '/',
   title: HOME_TITLE,
   description: HOME_DESCRIPTION,
+  languages: HOME_LANGUAGES,
 });
 
 export default function Page() {

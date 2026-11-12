@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { HOME_PATH } from '@/lib/i18n';
 import {
   CONTACT_EMAIL,
   INSTAGRAM_URL,
@@ -38,6 +39,14 @@ export const HOME_STRUCTURED_DATA = {
   ],
 };
 
+// The homepage exists in both languages; each version lists both, and
+// English is the default for every other language.
+export const HOME_LANGUAGES = {
+  en: HOME_PATH.en,
+  fr: HOME_PATH.fr,
+  'x-default': HOME_PATH.en,
+};
+
 // A page that sets its own openGraph or twitter object replaces the
 // parent's entirely, so the shared image has to be listed on each page.
 export function pageMetadata({
@@ -45,16 +54,18 @@ export function pageMetadata({
   title,
   description,
   image = OG_IMAGE_PATH,
+  languages,
 }: {
   path: string;
   title: string;
   description: string;
   image?: string;
+  languages?: Record<string, string>;
 }): Metadata {
   return {
     title,
     description,
-    alternates: { canonical: path },
+    alternates: { canonical: path, languages },
     openGraph: {
       title,
       description,
