@@ -1,4 +1,3 @@
-// [REVIEW] Draft French copy: the founder reviews it before it ships.
 import type { Dictionary } from '@/lib/i18n';
 import { LAUNCH_LABEL_FR } from '@/lib/site';
 

@@ -1,4 +1,3 @@
-// [REVIEW] Draft French copy: the founder reviews it before it ships.
 // No dates: nothing here may promise a release the app hasn't scheduled.
 import type { Dictionary } from '@/lib/i18n';
 

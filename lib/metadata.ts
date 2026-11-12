@@ -14,7 +14,7 @@ export const HOME_TITLE =
 export const HOME_DESCRIPTION =
   "See who's playing before you commit. SPORTTIMES shows live lineups for football matches in your campus, city or club. iOS beta open now.";
 
-// [REVIEW] Draft French copy: the founder reviews it before it ships.
+// The French homepage (app/fr/page.tsx).
 export const HOME_TITLE_FR = 'SPORTTIMES — Trouve un match de foot près de chez toi';
 export const HOME_DESCRIPTION_FR =
   'Vois qui joue avant de t’engager. SPORTTIMES affiche les compos en direct des matchs de foot de ton campus, ta ville ou ton club. Bêta iOS ouverte.';

@@ -1,4 +1,3 @@
-// [REVIEW] Draft French copy: the founder reviews it before it ships.
 // The app itself is in English, so its labels (Join Match, Team vs Team,
 // +, Create Community, Public, Private) are quoted as the app shows them.
 import type { Dictionary } from '@/lib/i18n';
