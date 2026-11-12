@@ -3,7 +3,7 @@
 
 import WaitlistForm from '@/components/ui/WaitlistForm';
 import { Component as EtherealShadow } from '@/components/ui/etheral-shadow';
-import { LAUNCH_LABEL } from '@/lib/site';
+import type { Dictionary } from '@/lib/i18n';
 
 // ===================================================================
 //  Store badges — greyed, status label only. No dead links.
@@ -108,7 +108,7 @@ function PlayIcon() {
 //  Phone frame — hover lifts 1.5%
 // ===================================================================
 
-function PhoneFrame() {
+function PhoneFrame({ alt }: { alt: string }) {
   return (
     <div
       className="dl-phone"
@@ -131,7 +131,7 @@ function PhoneFrame() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/screens/download-app.png"
-        alt="A SPORTTIMES match-day view showing your confirmed lineup"
+        alt={alt}
         style={{
           width: '100%',
           height: '100%',
@@ -154,12 +154,12 @@ function PhoneFrame() {
 //  Section
 // ===================================================================
 
-export default function Download() {
+export default function Download({ t }: { t: Dictionary['download'] }) {
   return (
     <section
       id="download"
       data-progress-section
-      data-progress-label="Get notified"
+      data-progress-label={t.progressLabel}
       data-palette="hero"
       className="relative"
       style={{
@@ -205,7 +205,7 @@ export default function Download() {
             marginBottom: 'clamp(2.5rem, 6vh, 4rem)',
           }}
         >
-          <PhoneFrame />
+          <PhoneFrame alt={t.screenshotAlt} />
         </div>
 
         {/* ============================================================
@@ -221,7 +221,7 @@ export default function Download() {
           }}
         >
           <div className="mono-eyebrow" style={{ marginBottom: 24 }}>
-            Get notified
+            {t.eyebrow}
           </div>
 
           <h2
@@ -236,7 +236,7 @@ export default function Download() {
               maxWidth: '14ch',
             }}
           >
-            Be first on the pitch.
+            {t.headline}
           </h2>
 
           <p
@@ -249,12 +249,10 @@ export default function Download() {
               marginBottom: 28,
             }}
           >
-            The iOS beta is open now. Public launch is planned for{' '}
-            {LAUNCH_LABEL}. Drop your email and we&apos;ll send one note on
-            launch day.
+            {t.intro}
           </p>
 
-          <WaitlistForm source="download" />
+          <WaitlistForm source="download" t={t.waitlist} />
 
           <p
             style={{
@@ -264,7 +262,7 @@ export default function Download() {
               color: 'var(--muted)',
             }}
           >
-            We&apos;ll only email you about the launch.
+            {t.emailNote}
           </p>
 
           <div
@@ -275,7 +273,7 @@ export default function Download() {
               letterSpacing: '0.22em',
             }}
           >
-            Public launch · {LAUNCH_LABEL}
+            {t.launch}
           </div>
 
           {/* Store badges — greyed, no links */}
@@ -288,14 +286,14 @@ export default function Download() {
             }}
           >
             <StoreBadge
-              ariaLabel={`App Store — ${LAUNCH_LABEL}`}
-              topLabel={LAUNCH_LABEL}
+              ariaLabel={t.badges.appStore.label}
+              topLabel={t.badges.appStore.status}
               bottomLabel="App Store"
               Icon={AppleIcon}
             />
             <StoreBadge
-              ariaLabel="Google Play — coming soon"
-              topLabel="Coming soon"
+              ariaLabel={t.badges.googlePlay.label}
+              topLabel={t.badges.googlePlay.status}
               bottomLabel="Google Play"
               Icon={PlayIcon}
             />

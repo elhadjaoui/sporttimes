@@ -17,6 +17,7 @@ import {
   MdOutlineSportsRugby,
 } from 'react-icons/md';
 import type { IconType } from 'react-icons';
+import type { Dictionary } from '@/lib/i18n';
 
 // ===================================================================
 //  Sports — ONE engine, football first, then every team sport.
@@ -46,27 +47,26 @@ const DIM = 'rgba(245, 245, 240, 0.62)';
 const HAIRLINE = 'rgba(245, 245, 240, 0.10)';
 const LIME = '#D4FF3A';
 
+type SportsText = Dictionary['sports'];
+
 type Sport = {
-  id: string;
-  name: string;
-  formats: string;
+  // Joins to the sport's name and formats in t.items.
+  id: keyof SportsText['items'];
   status: 'live' | 'soon';
   Icon: IconType;
 };
-
-const STATUS_LABEL = { live: 'Live', soon: 'Soon' } as const;
 
 // Material Design Outlined sports icons — consistent single-stroke
 // style, library-quality. Padel uses the tennis icon (racquet sport
 // family); Futsal uses the soccer icon (it IS indoor football).
 const SPORTS: Sport[] = [
-  { id: 'football',   name: 'Football',   formats: '5v5 · 7v7 · 9v9 · 11v11', status: 'live', Icon: MdOutlineSportsSoccer     },
-  { id: 'basketball', name: 'Basketball', formats: '3v3 · 5v5',               status: 'soon', Icon: MdOutlineSportsBasketball },
-  { id: 'volleyball', name: 'Volleyball', formats: '4v4 · 6v6',               status: 'soon', Icon: MdOutlineSportsVolleyball },
-  { id: 'handball',   name: 'Handball',   formats: '7v7',                     status: 'soon', Icon: MdOutlineSportsHandball   },
-  { id: 'padel',      name: 'Padel',      formats: '2v2',                     status: 'soon', Icon: MdOutlineSportsTennis     },
-  { id: 'futsal',     name: 'Futsal',     formats: '5v5',                     status: 'soon', Icon: MdOutlineSportsSoccer     },
-  { id: 'rugby',      name: 'Rugby',      formats: '7s · 15s',                status: 'soon', Icon: MdOutlineSportsRugby      },
+  { id: 'football',   status: 'live', Icon: MdOutlineSportsSoccer     },
+  { id: 'basketball', status: 'soon', Icon: MdOutlineSportsBasketball },
+  { id: 'volleyball', status: 'soon', Icon: MdOutlineSportsVolleyball },
+  { id: 'handball',   status: 'soon', Icon: MdOutlineSportsHandball   },
+  { id: 'padel',      status: 'soon', Icon: MdOutlineSportsTennis     },
+  { id: 'futsal',     status: 'soon', Icon: MdOutlineSportsSoccer     },
+  { id: 'rugby',      status: 'soon', Icon: MdOutlineSportsRugby      },
 ];
 
 // Polar layout in SVG-px on a 600 viewBox. Football at 12 o'clock.
@@ -81,14 +81,11 @@ const NODE_POSITIONS = SPORTS.map((_, i) => {
   };
 });
 
-const HEADLINES = ['Built for football.', 'Engineered for every team sport.'];
-const ENGINE_SPEC = ['lineup builder', 'scheduling', 'check-in', 'real-time sync'];
-
 // ===================================================================
 //  Component
 // ===================================================================
 
-export default function Sports() {
+export default function Sports({ t }: { t: SportsText }) {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -317,15 +314,15 @@ export default function Sports() {
     };
   }, [reducedMotion, isMobile]);
 
-  if (isMobile) return <MobileSports />;
-  if (reducedMotion) return <StaticConstellation />;
+  if (isMobile) return <MobileSports t={t} />;
+  if (reducedMotion) return <StaticConstellation t={t} />;
 
   return (
     <section
       ref={sectionRef}
       id="sports"
       data-progress-section
-      data-progress-label="The Sports"
+      data-progress-label={t.progressLabel}
       data-palette="sports"
       className="relative"
       style={{ background: 'transparent', overflow: 'visible' }}
@@ -334,11 +331,11 @@ export default function Sports() {
         <div className="sports-stage-grid">
           {/* LEFT — copy + engine spec */}
           <div className="sports-copy">
-            <div className="sports-eyebrow">one engine</div>
+            <div className="sports-eyebrow">{t.eyebrow}</div>
             <div className="sports-headlines">
-              {HEADLINES.map((h, i) => (
+              {t.headlines.map((h, i) => (
                 <h2
-                  key={h}
+                  key={i}
                   ref={(el) => {
                     headlineRefs.current[i] = el;
                   }}
@@ -349,14 +346,13 @@ export default function Sports() {
               ))}
             </div>
             <p className="sports-sub">
-              From a five-a-side futsal to an 11v11 league. One engine adapts
-              to every team sport.
+              {t.sub}
             </p>
             <div ref={engineSpecRef} className="sports-spec" aria-hidden>
-              <span className="sports-spec-label">engine</span>
+              <span className="sports-spec-label">{t.engineLabel}</span>
               <div className="sports-spec-list">
-                {ENGINE_SPEC.map((s) => (
-                  <span key={s} className="sports-spec-item">{s}</span>
+                {t.engineSpec.map((s, i) => (
+                  <span key={i} className="sports-spec-item">{s}</span>
                 ))}
               </div>
             </div>
@@ -442,19 +438,19 @@ export default function Sports() {
                         <span aria-hidden className="sports-node-ring" />
                         <Icon size={34} aria-hidden />
                       </div>
-                      <div className="sports-node-label">{sport.name}</div>
+                      <div className="sports-node-label">{t.items[sport.id].name}</div>
                       <div
                         ref={(el) => {
                           formatRefs.current[i] = el;
                         }}
                         className="sports-node-format"
                       >
-                        {sport.formats}
+                        {t.items[sport.id].formats}
                       </div>
                       <div
                         className={`sports-node-format ${sport.status === 'live' ? 'sports-node-status-live' : ''}`}
                       >
-                        {STATUS_LABEL[sport.status]}
+                        {t.status[sport.status]}
                       </div>
                     </div>
                   </div>
@@ -467,7 +463,7 @@ export default function Sports() {
                 <div className="sports-core-disc">
                   <Image
                     src="/screens/logo.png"
-                    alt="SPORTTIMES"
+                    alt={t.logoAlt}
                     width={150}
                     height={150}
                     className="sports-core-logo"
@@ -726,13 +722,13 @@ export default function Sports() {
 // ===================================================================
 //  Mobile fallback — no pin, no infinite tweens. Static constellation.
 // ===================================================================
-function MobileSports() {
+function MobileSports({ t }: { t: SportsText }) {
   const radius = 138;
   return (
     <section
       id="sports"
       data-progress-section
-      data-progress-label="The Sports"
+      data-progress-label={t.progressLabel}
       data-palette="sports"
       className="relative"
       style={{
@@ -763,7 +759,7 @@ function MobileSports() {
             color: DIM,
           }}
         >
-          one engine
+          {t.eyebrow}
         </div>
         <h2
           style={{
@@ -777,7 +773,7 @@ function MobileSports() {
             maxWidth: '16ch',
           }}
         >
-          Built for football. Engineered for every team sport.
+          {t.headlineCombined}
         </h2>
         <div
           style={{
@@ -854,7 +850,7 @@ function MobileSports() {
                     color: INK,
                   }}
                 >
-                  {sport.name}
+                  {t.items[sport.id].name}
                 </span>
                 <span
                   style={{
@@ -865,7 +861,7 @@ function MobileSports() {
                     color: DIM,
                   }}
                 >
-                  {sport.formats}
+                  {t.items[sport.id].formats}
                 </span>
                 <span
                   style={{
@@ -876,7 +872,7 @@ function MobileSports() {
                     color: sport.status === 'live' ? LIME : DIM,
                   }}
                 >
-                  {STATUS_LABEL[sport.status]}
+                  {t.status[sport.status]}
                 </span>
               </div>
             );
@@ -901,7 +897,7 @@ function MobileSports() {
           >
             <Image
               src="/screens/logo.png"
-              alt="SPORTTIMES"
+              alt={t.logoAlt}
               width={90}
               height={90}
               style={{ objectFit: 'contain' }}
@@ -918,9 +914,9 @@ function MobileSports() {
             marginTop: 6,
           }}
         >
-          {ENGINE_SPEC.map((s) => (
+          {t.engineSpec.map((s, i) => (
             <span
-              key={s}
+              key={i}
               style={{
                 fontFamily: 'var(--font-mono), monospace',
                 fontSize: 10,
@@ -945,12 +941,12 @@ function MobileSports() {
 // ===================================================================
 //  Reduced-motion fallback — full expanded constellation, no motion.
 // ===================================================================
-function StaticConstellation() {
+function StaticConstellation({ t }: { t: SportsText }) {
   return (
     <section
       id="sports"
       data-progress-section
-      data-progress-label="The Sports"
+      data-progress-label={t.progressLabel}
       data-palette="sports"
       className="relative"
       style={{
@@ -983,7 +979,7 @@ function StaticConstellation() {
               color: DIM,
             }}
           >
-            one engine
+            {t.eyebrow}
           </div>
           <h2
             style={{
@@ -997,7 +993,7 @@ function StaticConstellation() {
               maxWidth: '18ch',
             }}
           >
-            Built for football. Engineered for every team sport.
+            {t.headlineCombined}
           </h2>
           <p
             style={{
@@ -1009,8 +1005,7 @@ function StaticConstellation() {
               maxWidth: '46ch',
             }}
           >
-            From a five-a-side futsal to an 11v11 league. One engine adapts
-            to every team sport.
+            {t.sub}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
             <span
@@ -1023,12 +1018,12 @@ function StaticConstellation() {
                 opacity: 0.85,
               }}
             >
-              engine
+              {t.engineLabel}
             </span>
             <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '6px 8px' }}>
-              {ENGINE_SPEC.map((s) => (
+              {t.engineSpec.map((s, i) => (
                 <span
-                  key={s}
+                  key={i}
                   style={{
                     fontFamily: 'var(--font-mono), monospace',
                     fontSize: 10.5,
@@ -1106,7 +1101,7 @@ function StaticConstellation() {
                     color: INK,
                   }}
                 >
-                  {sport.name}
+                  {t.items[sport.id].name}
                 </span>
                 <span
                   style={{
@@ -1117,7 +1112,7 @@ function StaticConstellation() {
                     color: DIM,
                   }}
                 >
-                  {sport.formats}
+                  {t.items[sport.id].formats}
                 </span>
                 <span
                   style={{
@@ -1128,7 +1123,7 @@ function StaticConstellation() {
                     color: sport.status === 'live' ? LIME : DIM,
                   }}
                 >
-                  {STATUS_LABEL[sport.status]}
+                  {t.status[sport.status]}
                 </span>
               </div>
             );
@@ -1153,7 +1148,7 @@ function StaticConstellation() {
           >
             <Image
               src="/screens/logo.png"
-              alt="SPORTTIMES"
+              alt={t.logoAlt}
               width={130}
               height={130}
               style={{ objectFit: 'contain' }}

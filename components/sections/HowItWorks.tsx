@@ -9,6 +9,8 @@ import {
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import type { Dictionary } from '@/lib/i18n';
+import { fill } from '@/lib/i18n/fill';
 
 // ===================================================================
 //  How It Works — ONE pinned, scroll-scrubbed cinematic stage.
@@ -26,41 +28,26 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 //  static. The stage-bg is the single full-bleed paint exception.
 // ===================================================================
 
+type HowItWorksText = Dictionary['howItWorks'];
+
 type Step = {
   num: string;
-  head: string;
-  sub: string;
   src: string;
-  alt: string;
 };
 
+// Text (head, sub, alt) lives in t.steps; the order must match.
 const STEPS: Step[] = [
   {
     num: '01',
-    head: 'Open your community.',
-    sub:
-      'Campus, city, club, workplace — find the squad you actually play with.',
     src: '/screens/howitworks-community.png',
-    alt:
-      'A SPORTTIMES community page showing nearby squads with public and private badges.',
   },
   {
     num: '02',
-    head: 'See the lineup form.',
-    sub:
-      "Positions claim themselves in real time — who's playing, and where.",
     src: '/screens/howitworks-lineup.png',
-    alt:
-      'A live lineup view in the SPORTTIMES app filling into a 4-3-3 formation.',
   },
   {
     num: '03',
-    head: 'Confirmed.',
-    sub:
-      'One tap. Captain approves. Show up at the right field at the right time.',
     src: '/screens/howitworks-jumpin.png',
-    alt:
-      'A player profile in the SPORTTIMES app showing the confirmed slot and match details.',
   },
 ];
 
@@ -86,9 +73,8 @@ const FORMATION_433: Array<{ x: number; y: number; tone: 'lime' | 'paper' }> = [
 
 // Three depth chips — anchored to the device, lifted on translateZ
 // so they hover in front of the glass when the device rotates.
+// Text (eyebrow, title) lives in t.chips; the order must match.
 type Chip = {
-  eyebrow: string;
-  title: string;
   tone: 'lime' | 'paper';
   top?: string;
   bottom?: string;
@@ -100,8 +86,6 @@ type Chip = {
 
 const CHIPS: Chip[] = [
   {
-    eyebrow: 'Join request',
-    title: 'Approved',
     tone: 'paper',
     top: '12%',
     right: '-22%',
@@ -109,8 +93,6 @@ const CHIPS: Chip[] = [
     rotate: 3,
   },
   {
-    eyebrow: 'Slot filled',
-    title: 'Karim · LB',
     tone: 'paper',
     bottom: '22%',
     left: '-22%',
@@ -118,8 +100,6 @@ const CHIPS: Chip[] = [
     rotate: -4,
   },
   {
-    eyebrow: "You're in",
-    title: 'Confirmed',
     tone: 'lime',
     top: '38%',
     right: '-26%',
@@ -136,7 +116,7 @@ const STAGE_BREAK = '#161C18'; // turf-at-dusk
 //  Component
 // ===================================================================
 
-export default function HowItWorks() {
+export default function HowItWorks({ t }: { t: HowItWorksText }) {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const auroraRef = useRef<HTMLDivElement>(null);
@@ -243,7 +223,9 @@ export default function HowItWorks() {
               });
             }
             if (stepLabelRef.current) {
-              stepLabelRef.current.textContent = `step 0${step + 1} — 03`;
+              stepLabelRef.current.textContent = fill(t.stepLabel, {
+                n: step + 1,
+              });
             }
             setActiveStep((prev) => (prev === step ? prev : step));
           },
@@ -398,7 +380,7 @@ export default function HowItWorks() {
     }, section);
 
     return () => ctx.revert();
-  }, [reducedMotion, isMobile]);
+  }, [reducedMotion, isMobile, t.stepLabel]);
 
   // ---------------- Mobile: stacked blocks, IntersectionObserver ----------------
   useEffect(() => {
@@ -431,11 +413,11 @@ export default function HowItWorks() {
 
   // Reduced motion + mobile share simpler markup that skips pin/scrub.
   if (reducedMotion) {
-    return <StaticConfirmedView />;
+    return <StaticConfirmedView t={t} />;
   }
 
   if (isMobile) {
-    return <MobileStack activeStep={activeStep} />;
+    return <MobileStack activeStep={activeStep} t={t} />;
   }
 
   return (
@@ -443,7 +425,7 @@ export default function HowItWorks() {
       ref={sectionRef}
       id="how-it-works"
       data-progress-section
-      data-progress-label="How It Works"
+      data-progress-label={t.progressLabel}
       data-palette="how"
       className="relative"
       style={{
@@ -470,7 +452,7 @@ export default function HowItWorks() {
           {/* LEFT — copy + progress rail */}
           <div className="htw-copy">
             <span ref={stepLabelRef} className="htw-step-label">
-              step 01 — 03
+              {fill(t.stepLabel, { n: 1 })}
             </span>
 
             <div className="htw-headlines">
@@ -486,7 +468,7 @@ export default function HowItWorks() {
                     }}
                     className="htw-headline"
                   >
-                    {step.head}
+                    {t.steps[i].head}
                   </h2>
                   <p
                     ref={(el) => {
@@ -494,7 +476,7 @@ export default function HowItWorks() {
                     }}
                     className="htw-sub"
                   >
-                    {step.sub}
+                    {t.steps[i].sub}
                   </p>
                 </div>
               ))}
@@ -524,7 +506,7 @@ export default function HowItWorks() {
                   >
                     <Image
                       src={step.src}
-                      alt={step.alt}
+                      alt={t.steps[i].alt}
                       fill
                       sizes="(max-width: 1100px) 30vw, 340px"
                       className="htw-shot"
@@ -533,10 +515,14 @@ export default function HowItWorks() {
                     {i === 1 && (
                       <>
                         <div className="htw-counter" aria-hidden>
-                          <span className="htw-counter-eyebrow">lineup</span>
+                          <span className="htw-counter-eyebrow">
+                            {t.counter.eyebrow}
+                          </span>
                           <span className="htw-counter-num">
                             <span ref={counterRef}>0</span>
-                            <span className="htw-counter-of">/11</span>
+                            <span className="htw-counter-of">
+                              {t.counter.of}
+                            </span>
                           </span>
                         </div>
                         <div className="htw-pitch" aria-hidden>
@@ -572,8 +558,10 @@ export default function HowItWorks() {
                     }}
                     aria-hidden
                   >
-                    <span className="htw-chip-eyebrow">{chip.eyebrow}</span>
-                    <span className="htw-chip-title">{chip.title}</span>
+                    <span className="htw-chip-eyebrow">
+                      {t.chips[i].eyebrow}
+                    </span>
+                    <span className="htw-chip-title">{t.chips[i].title}</span>
                     {chip.tone === 'lime' && (
                       <span className="htw-chip-tick" aria-hidden>
                         ✓
@@ -587,9 +575,13 @@ export default function HowItWorks() {
             {/* SR-only semantic headings so the section is understandable
                 without motion. Visible headings are tracked by the timeline. */}
             <div className="sr-only">
-              {STEPS.map((s) => (
+              {STEPS.map((s, i) => (
                 <h2 key={s.num}>
-                  {s.num}. {s.head} {s.sub}
+                  {fill(t.srHeading, {
+                    num: s.num,
+                    head: t.steps[i].head,
+                    sub: t.steps[i].sub,
+                  })}
                 </h2>
               ))}
             </div>
@@ -929,13 +921,19 @@ export default function HowItWorks() {
 //  No pin, no 3D, no scrub. Chips become flat badges.
 // ===================================================================
 
-function MobileStack({ activeStep }: { activeStep: number }) {
+function MobileStack({
+  activeStep,
+  t,
+}: {
+  activeStep: number;
+  t: HowItWorksText;
+}) {
   void activeStep; // observer drives section state in parent (reserved for future)
   return (
     <section
       id="how-it-works"
       data-progress-section
-      data-progress-label="How It Works"
+      data-progress-label={t.progressLabel}
       data-palette="how"
       className="relative"
       style={{
@@ -959,7 +957,7 @@ function MobileStack({ activeStep }: { activeStep: number }) {
               textTransform: 'lowercase',
             }}
           >
-            how it works
+            {t.mobile.eyebrow}
           </div>
           <h2
             style={{
@@ -973,7 +971,7 @@ function MobileStack({ activeStep }: { activeStep: number }) {
               maxWidth: '16ch',
             }}
           >
-            From group chat to a confirmed 11.
+            {t.mobile.heading}
           </h2>
         </div>
       </div>
@@ -1012,7 +1010,7 @@ function MobileStack({ activeStep }: { activeStep: number }) {
                   color: 'rgba(212, 255, 58, 0.8)',
                 }}
               >
-                step 0{i + 1} — 03
+                {fill(t.stepLabel, { n: i + 1 })}
               </span>
 
               <div
@@ -1031,7 +1029,7 @@ function MobileStack({ activeStep }: { activeStep: number }) {
               >
                 <Image
                   src={step.src}
-                  alt={step.alt}
+                  alt={t.steps[i].alt}
                   fill
                   sizes="(max-width: 879px) 70vw, 260px"
                   style={{ objectFit: 'cover' }}
@@ -1054,8 +1052,9 @@ function MobileStack({ activeStep }: { activeStep: number }) {
                   alignSelf: 'center',
                 }}
               >
-                {CHIPS[i].title}
-                {CHIPS[i].tone === 'lime' ? ' ✓' : ''}
+                {CHIPS[i].tone === 'lime'
+                  ? fill(t.ticked, { title: t.chips[i].title })
+                  : t.chips[i].title}
               </span>
 
               <h3
@@ -1071,7 +1070,7 @@ function MobileStack({ activeStep }: { activeStep: number }) {
                   alignSelf: 'flex-start',
                 }}
               >
-                {step.head}
+                {t.steps[i].head}
               </h3>
               <p
                 style={{
@@ -1083,7 +1082,7 @@ function MobileStack({ activeStep }: { activeStep: number }) {
                   margin: 0,
                 }}
               >
-                {step.sub}
+                {t.steps[i].sub}
               </p>
             </div>
           </div>
@@ -1098,12 +1097,12 @@ function MobileStack({ activeStep }: { activeStep: number }) {
 //  No pin, no scrub, no 3D rotation. Source of truth for content.
 // ===================================================================
 
-function StaticConfirmedView() {
+function StaticConfirmedView({ t }: { t: HowItWorksText }) {
   return (
     <section
       id="how-it-works"
       data-progress-section
-      data-progress-label="How It Works"
+      data-progress-label={t.progressLabel}
       data-palette="how"
       className="relative"
       style={{
@@ -1127,7 +1126,7 @@ function StaticConfirmedView() {
               textTransform: 'lowercase',
             }}
           >
-            step 03 — 03
+            {fill(t.stepLabel, { n: 3 })}
           </div>
           <h2
             style={{
@@ -1141,7 +1140,7 @@ function StaticConfirmedView() {
               maxWidth: '14ch',
             }}
           >
-            You&apos;re in the lineup.
+            {t.reducedMotion.heading}
           </h2>
           <p
             style={{
@@ -1153,8 +1152,7 @@ function StaticConfirmedView() {
               margin: 0,
             }}
           >
-            One tap. Captain approves. Your face appears in the lineup and you
-            show up ready to play.
+            {t.reducedMotion.body}
           </p>
         </div>
         <div
@@ -1180,7 +1178,7 @@ function StaticConfirmedView() {
           >
             <Image
               src={STEPS[2].src}
-              alt={STEPS[2].alt}
+              alt={t.steps[2].alt}
               fill
               sizes="(max-width: 1280px) 60vw, 320px"
               style={{ objectFit: 'cover' }}
@@ -1201,7 +1199,8 @@ function StaticConfirmedView() {
               boxShadow: '0 20px 50px rgba(212, 255, 58, 0.3)',
             }}
           >
-            Confirmed ✓
+            {/* Step 3's chip title, with its tick. */}
+            {fill(t.ticked, { title: t.chips[2].title })}
           </span>
         </div>
       </div>

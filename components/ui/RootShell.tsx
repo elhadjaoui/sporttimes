@@ -7,25 +7,26 @@ import Nav from '@/components/ui/Nav';
 import ProgressScrubber from '@/components/ui/ProgressScrubber';
 import AmbientLayer from '@/components/ui/AmbientLayer';
 import RevealObserver from '@/components/ui/RevealObserver';
+import { getDictionary, HOME_PATH, type Locale } from '@/lib/i18n';
 
 // The <html> and <body> every page shares. A nested layout can't change
 // <html lang>, so each layout renders this itself with its own language.
 export default function RootShell({
-  lang,
+  locale,
   children,
 }: {
-  lang: string;
+  locale: Locale;
   children: React.ReactNode;
 }) {
   return (
     <html
-      lang={lang}
+      lang={locale}
       className={`${display.variable} ${body.variable} ${mono.variable}`}
     >
       <body className="bg-bg text-ink antialiased">
         <AmbientLayer />
         <LenisProvider>
-          <Nav />
+          <Nav t={getDictionary(locale).chrome} homePath={HOME_PATH[locale]} />
           <ProgressScrubber />
           {children}
         </LenisProvider>

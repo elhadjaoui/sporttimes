@@ -8,6 +8,7 @@ import BetaButton from '@/components/ui/BetaButton';
 import MagneticButton from '@/components/ui/MagneticButton';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
 import { getLenis } from '@/hooks/useLenis';
+import type { Dictionary } from '@/lib/i18n';
 import { scrollState } from '@/lib/scrollState';
 
 const HeroScene = dynamic(() => import('@/components/three/HeroScene'), {
@@ -18,8 +19,6 @@ const HeroScene = dynamic(() => import('@/components/three/HeroScene'), {
     </div>
   ),
 });
-
-const HEADLINE = ['The match before', 'the match.'];
 
 // The entrance hides the hero and plays it back in. On slow phones the
 // server-rendered hero has already been readable for over a second when
@@ -47,7 +46,7 @@ function interpolateColor(t: number): string {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-export default function Hero() {
+export default function Hero({ t }: { t: Dictionary['hero'] }) {
   const rootRef = useRef<HTMLElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
 
@@ -182,7 +181,7 @@ export default function Hero() {
       ref={rootRef}
       id="top"
       data-progress-section
-      data-progress-label="Welcome"
+      data-progress-label={t.progressLabel}
       data-palette="hero"
       className="relative h-screen w-full overflow-hidden"
     >
@@ -222,12 +221,12 @@ export default function Hero() {
           >
             <span className="block h-px w-6 bg-lime/60 transition-all duration-500 group-hover:w-12 group-hover:bg-lime" />
             <span className="transition-colors duration-500 group-hover:text-lime">
-              Made for players · by players
+              {t.eyebrow}
             </span>
           </div>
 
           <h1 className="hero-headline headline-display uppercase text-ink text-[clamp(1.5rem,9.2vw,4.5rem)] xl:text-[clamp(2.25rem,5vw,4.5rem)] mb-5 xl:mb-6">
-            {HEADLINE.map((line, i) => (
+            {t.headline.map((line, i) => (
               <span
                 key={i}
                 className="mask-line hero-line line-hover cursor-default"
@@ -244,41 +243,40 @@ export default function Hero() {
           </h1>
 
           <p className="hero-fade font-body font-semibold text-ink text-lg md:text-xl leading-snug max-w-[46ch] mb-3">
-            Find and join football matches near you in Morocco.
+            {t.subheadline}
           </p>
 
           <p className="hero-fade font-body text-ink/65 text-base md:text-lg leading-snug max-w-[46ch] mb-9">
-            See who&apos;s playing before you commit. Claim your spot. Show
-            up ready.
+            {t.lede}
           </p>
 
           <div className="hero-fade flex flex-col xl:flex-row xl:flex-wrap items-stretch xl:items-center gap-3 w-full xl:w-auto">
-            <BetaButton location="hero" />
+            <BetaButton location="hero" label={t.joinBeta} />
             <MagneticButton
               variant="ghost"
               href="#how-it-works"
               onClick={scrollToHow}
             >
-              See how it works
+              {t.seeHow}
             </MagneticButton>
           </div>
 
           <p className="hero-fade font-body text-ink/65 text-sm mt-4">
-            iOS only for now. On Android?{' '}
+            {t.android.before}{' '}
             <a
               href="#download"
               className="text-lime underline underline-offset-2"
             >
-              Join the waitlist
+              {t.android.link}
             </a>
-            .
+            {t.android.after}
           </p>
         </div>
       </div>
 
       {/* Bottom-right scroll indicator — desktop only */}
       <div className="hidden xl:block absolute z-20 bottom-6 xl:bottom-10 right-6 xl:right-10 hero-fade pointer-events-none">
-        <ScrollIndicator />
+        <ScrollIndicator label={t.scroll} />
       </div>
     </section>
   );

@@ -1,54 +1,11 @@
-import type { ReactNode } from 'react';
+import type { Dictionary } from '@/lib/i18n';
 
-const QUESTIONS: { question: string; answer: ReactNode }[] = [
-  {
-    question: 'Is it free?',
-    answer: 'The core app is free.',
-  },
-  {
-    question: 'Which sports can I play?',
-    answer:
-      'Football is live today. Basketball, volleyball, handball, padel, futsal and rugby are coming soon.',
-  },
-  {
-    question: 'How do I join a match?',
-    answer:
-      "Join the community, open the match and see the lineup. Tap Join Match. Once the host accepts, you're in.",
-  },
-  {
-    question: 'How do captains approve players?',
-    answer:
-      "The match host gets your request and accepts or declines it. In Team vs Team matches, a team's captain challenges for the whole team, and the host accepts or declines the challenge.",
-  },
-  {
-    question: 'Is it on Android?',
-    answer: (
-      <>
-        Not yet. SPORTTIMES is iOS only for now, and Google Play is coming
-        soon.{' '}
-        <a
-          href="#download"
-          className="text-lime underline underline-offset-2"
-        >
-          Join the waitlist
-        </a>{' '}
-        and we&apos;ll email you about the launch.
-      </>
-    ),
-  },
-  {
-    question: 'How do I start a community?',
-    answer:
-      'Tap +, choose Create Community, give it a name and pick Public or Private. Anyone can join a Public community in one tap. Private communities need your approval.',
-  },
-];
-
-export default function FAQ() {
+export default function FAQ({ t }: { t: Dictionary['faq'] }) {
   return (
     <section
       id="faq"
       data-progress-section
-      data-progress-label="FAQ"
+      data-progress-label={t.progressLabel}
       data-palette="hero"
       className="relative"
       style={{ padding: 'clamp(6rem, 12vh, 9rem) 0' }}
@@ -56,7 +13,7 @@ export default function FAQ() {
       <div className="grid-12" data-reveal>
         <div className="col-span-12 xl:col-start-2 xl:col-span-4" data-reveal-child>
           <div className="mono-eyebrow" style={{ marginBottom: 24 }}>
-            FAQ
+            {t.eyebrow}
           </div>
           <h2
             className="headline-display"
@@ -69,12 +26,12 @@ export default function FAQ() {
               maxWidth: '12ch',
             }}
           >
-            Questions before kickoff.
+            {t.headline}
           </h2>
         </div>
 
         <div className="col-span-12 xl:col-span-6" data-reveal-child>
-          {QUESTIONS.map(({ question, answer }) => (
+          {t.questions.map(({ question, answer }) => (
             <div
               key={question}
               style={{
@@ -103,7 +60,21 @@ export default function FAQ() {
                   maxWidth: '58ch',
                 }}
               >
-                {answer}
+                {typeof answer === 'string' ? (
+                  answer
+                ) : (
+                  // The Android answer, split around its waitlist link.
+                  <>
+                    {answer.before}{' '}
+                    <a
+                      href="#download"
+                      className="text-lime underline underline-offset-2"
+                    >
+                      {answer.link}
+                    </a>{' '}
+                    {answer.after}
+                  </>
+                )}
               </p>
             </div>
           ))}

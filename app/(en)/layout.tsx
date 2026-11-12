@@ -5,5 +5,5 @@ export default function EnglishLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <RootShell lang="en">{children}</RootShell>;
+  return <RootShell locale="en">{children}</RootShell>;
 }

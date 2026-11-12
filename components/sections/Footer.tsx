@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { useCurrentYear } from '@/hooks/useCurrentYear';
 import { trackBetaClick } from '@/lib/analytics';
+import type { Dictionary } from '@/lib/i18n';
+import { fill } from '@/lib/i18n/fill';
 import {
   BETA_PATH,
   CONTACT_EMAIL,
@@ -15,7 +17,13 @@ import {
 //  Copyable email — click to copy, shows a brief "copied" confirmation
 // ===================================================================
 
-function CopyableEmail({ email }: { email: string }) {
+function CopyableEmail({
+  email,
+  t,
+}: {
+  email: string;
+  t: Dictionary['footer']['email'];
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -39,8 +47,8 @@ function CopyableEmail({ email }: { email: string }) {
       onClick={handleCopy}
       className="tap-target"
 
-      aria-label={`Copy ${email} to clipboard`}
-      title={copied ? 'Copied!' : 'Click to copy'}
+      aria-label={fill(t.copyLabel, { email })}
+      title={copied ? t.copied : t.clickToCopy}
       style={{
         background: 'transparent',
         border: 'none',
@@ -116,7 +124,7 @@ function SocialIcon({ name }: { name: 'Instagram' | 'TikTok' | 'YouTube' }) {
 //  Footer
 // ===================================================================
 
-export default function Footer() {
+export default function Footer({ t }: { t: Dictionary['footer'] }) {
   const year = useCurrentYear();
   const rootRef = useRef<HTMLElement>(null);
   const playMoreRef = useRef<HTMLDivElement>(null);
@@ -245,7 +253,7 @@ export default function Footer() {
       ref={rootRef}
       id="footer"
       data-progress-section
-      data-progress-label="Footer"
+      data-progress-label={t.progressLabel}
       data-palette="hero"
       className="relative w-full overflow-hidden"
       style={{
@@ -282,7 +290,7 @@ export default function Footer() {
               letterSpacing: '0.22em',
             }}
           >
-            See the lineup · Join the match
+            {t.tagline}
           </div>
         </div>
 
@@ -307,7 +315,7 @@ export default function Footer() {
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={s.name}
+                aria-label={t.social[s.name]}
 
                 className="social-link tap-target"
                 style={{
@@ -323,7 +331,7 @@ export default function Footer() {
             ) : (
               <span
                 key={s.name}
-                aria-label={`${s.name} — coming soon`}
+                aria-label={t.social[s.name]}
                 className="social-soon"
                 style={{
                   color: 'rgba(245,245,240,0.5)',
@@ -335,7 +343,7 @@ export default function Footer() {
                 }}
               >
                 <SocialIcon name={s.name} />
-                <span className="social-soon-label">soon</span>
+                <span className="social-soon-label">{t.soon}</span>
               </span>
             )
           )}
@@ -354,7 +362,7 @@ export default function Footer() {
         <div className="col-span-12 xl:col-start-2 xl:col-span-10">
           <div className="footer-play-wrap">
             <h3
-              aria-label="Play more."
+              aria-label={t.playMore.label}
               className="headline-display uppercase text-ink"
               style={{
                 fontSize: 'clamp(3.5rem, 14vw, 12rem)',
@@ -364,7 +372,7 @@ export default function Footer() {
                 display: 'inline-block',
               }}
             >
-              {['Play', 'more.'].map((line, i) => (
+              {t.playMore.lines.map((line, i) => (
                 <span
                   key={i}
                   className="footer-line cursor-default"
@@ -403,20 +411,20 @@ export default function Footer() {
 
             <div className="footer-play-accent">
               <div className="footer-play-eyebrow">
-                The match before the match · {year}
+                {fill(t.eyebrow, { year })}
               </div>
               <div className="footer-play-stats">
                 <div className="footer-play-stat">
                   <span className="footer-play-stat-num">01</span>
-                  <span className="footer-play-stat-label">Sport live</span>
+                  <span className="footer-play-stat-label">{t.stats.live}</span>
                 </div>
                 <div className="footer-play-stat">
                   <span className="footer-play-stat-num">06</span>
-                  <span className="footer-play-stat-label">Coming soon</span>
+                  <span className="footer-play-stat-label">{t.stats.soon}</span>
                 </div>
                 <div className="footer-play-stat">
                   <span className="footer-play-stat-num">∞</span>
-                  <span className="footer-play-stat-label">Matches ahead</span>
+                  <span className="footer-play-stat-label">{t.stats.ahead}</span>
                 </div>
               </div>
               <a
@@ -424,7 +432,7 @@ export default function Footer() {
                 onClick={() => trackBetaClick('footer')}
                 className="footer-play-cta tap-target"
               >
-                Join the beta ↗
+                {t.joinBeta}
               </a>
             </div>
           </div>
@@ -449,7 +457,7 @@ export default function Footer() {
             color: 'rgba(245,245,240,0.55)',
           }}
         >
-          © {year} SPORTTIMES · Made in Ben Guerir
+          {fill(t.copyright, { year })}
         </div>
         <div
           className="col-span-12 xl:col-span-4 xl:col-start-8 mt-4 xl:mt-0 flex flex-col xl:items-end gap-7"
@@ -464,11 +472,11 @@ export default function Footer() {
             }}
           >
             {[
-              { label: 'Privacy', href: '/privacy' },
-              { label: 'Terms', href: '/terms' },
+              { label: t.links.privacy, href: '/privacy' },
+              { label: t.links.terms, href: '/terms' },
             ].map((l) => (
               <a
-                key={l.label}
+                key={l.href}
                 href={l.href}
 
                 className="footer-link tap-target"
@@ -481,7 +489,7 @@ export default function Footer() {
               </a>
             ))}
           </div>
-          <CopyableEmail email={CONTACT_EMAIL} />
+          <CopyableEmail email={CONTACT_EMAIL} t={t.email} />
         </div>
       </div>
 

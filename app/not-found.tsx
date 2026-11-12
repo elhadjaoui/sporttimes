@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function NotFound() {
   // This page sits outside every layout, so it renders the shell itself.
   return (
-    <RootShell lang="en">
+    <RootShell locale="en">
       <main
         className="relative w-full flex items-center"
         data-palette="hero"

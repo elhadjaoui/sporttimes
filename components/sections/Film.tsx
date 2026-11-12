@@ -19,6 +19,8 @@ import {
   MdFullscreen,
   MdFullscreenExit,
 } from 'react-icons/md';
+import type { Dictionary } from '@/lib/i18n';
+import { fill } from '@/lib/i18n/fill';
 
 // ===================================================================
 //  Film — the launch cut, played natively.
@@ -46,16 +48,17 @@ const FALLBACK_DURATION = 92.5;
 const SEEK_STEP = 5;
 const CHROME_IDLE_MS = 2400;
 
-type Chapter = { num: string; title: string; start: number };
+type Chapter = { num: string; start: number };
 
-// Beat boundaries read off the cut itself.
+// Beat boundaries read off the cut itself. Titles are t.chapters, in
+// this same order.
 const CHAPTERS: Chapter[] = [
-  { num: '01', title: 'Kick-off', start: 0 },
-  { num: '02', title: 'Find a match', start: 11 },
-  { num: '03', title: 'Host or challenge', start: 33 },
-  { num: '04', title: 'Player ratings', start: 48 },
-  { num: '05', title: 'Your community', start: 57 },
-  { num: '06', title: 'What’s next', start: 79 },
+  { num: '01', start: 0 },
+  { num: '02', start: 11 },
+  { num: '03', start: 33 },
+  { num: '04', start: 48 },
+  { num: '05', start: 57 },
+  { num: '06', start: 79 },
 ];
 
 const chapterEnd = (i: number, duration: number) =>
@@ -78,11 +81,22 @@ function fmt(seconds: number) {
   ).padStart(2, '0')}`;
 }
 
-function spoken(seconds: number) {
+type DurationWords = Dictionary['film']['duration'];
+
+const countOf = (n: number, forms: DurationWords['minutes']) =>
+  fill(n === 1 ? forms.one : forms.other, { count: n });
+
+function spoken(seconds: number, words: DurationWords) {
   const s = Math.max(0, Math.round(seconds));
   const m = Math.floor(s / 60);
   const r = s % 60;
-  return m > 0 ? `${m} minute${m === 1 ? '' : 's'} ${r} seconds` : `${r} seconds`;
+  const secs = countOf(r, words.seconds);
+  return m > 0
+    ? fill(words.minutesAndSeconds, {
+        minutes: countOf(m, words.minutes),
+        seconds: secs,
+      })
+    : secs;
 }
 
 const RUNTIME_LABEL = fmt(Math.ceil(FALLBACK_DURATION));
@@ -93,7 +107,7 @@ type FullscreenVideo = HTMLVideoElement & { webkitEnterFullscreen?: () => void }
 //  Section
 // ===================================================================
 
-export default function Film() {
+export default function Film({ t }: { t: Dictionary['film'] }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const scrubRef = useRef<HTMLDivElement>(null);
@@ -114,6 +128,10 @@ export default function Film() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canFullscreen, setCanFullscreen] = useState(false);
 
+  // Read out here because inside paint, `t` is the playhead time.
+  const durationWords = t.duration;
+  const seekValue = t.controls.seekValue;
+
   // ---- Paint progress into CSS vars (no React render per frame) ----
   const paint = useCallback((t: number) => {
     const d = durationRef.current;
@@ -129,7 +147,13 @@ export default function Film() {
     if (scrub) {
       scrub.style.setProperty('--p', clamp01(t / d).toFixed(4));
       scrub.setAttribute('aria-valuenow', String(Math.floor(t)));
-      scrub.setAttribute('aria-valuetext', `${spoken(t)} of ${spoken(d)}`);
+      scrub.setAttribute(
+        'aria-valuetext',
+        fill(seekValue, {
+          current: spoken(t, durationWords),
+          total: spoken(d, durationWords),
+        })
+      );
     }
 
     const sec = Math.floor(t);
@@ -146,7 +170,7 @@ export default function Film() {
       activeRef.current = idx;
       setActive(idx);
     }
-  }, []);
+  }, [durationWords, seekValue]);
 
   // rAF loop only while the film is actually running.
   useEffect(() => {
@@ -360,7 +384,7 @@ export default function Film() {
     <section
       id="film"
       data-progress-section
-      data-progress-label="The Film"
+      data-progress-label={t.progressLabel}
       data-palette="film"
       className="relative"
       style={{
@@ -378,11 +402,12 @@ export default function Film() {
             so it never changes; the class is allowed to differ. */}
         <div className="film-head" data-reveal suppressHydrationWarning>
           <div data-reveal-child style={{ '--reveal-i': 0 } as CSSProperties}>
-            <div className="film-eyebrow">the launch film</div>
+            <div className="film-eyebrow">{t.eyebrow}</div>
             <h2 className="film-headline">
-              <span className="film-nowrap">Ninety-three</span> seconds to{' '}
+              <span className="film-nowrap">{t.headline.first}</span>
+              {t.headline.middle}{' '}
               <span className="film-nowrap" style={{ color: 'var(--lime)' }}>
-                kick-off.
+                {t.headline.accent}
               </span>
             </h2>
           </div>
@@ -391,13 +416,12 @@ export default function Film() {
             data-reveal-child
             style={{ '--reveal-i': 1 } as CSSProperties}
           >
-            <p className="film-sub">
-              Find a game. See who&apos;s playing. Host your own, or
-              challenge another team. The whole app, start to finish.
-            </p>
+            <p className="film-sub">{t.sub}</p>
             <div className="film-meta">
               <span>
-                Runtime <span className="film-meta-val">{RUNTIME_LABEL}</span>
+                {t.runtime.before}
+                <span className="film-meta-val">{RUNTIME_LABEL}</span>
+                {t.runtime.after}
               </span>
               <span className="film-meta-sep" aria-hidden />
               <a
@@ -406,7 +430,7 @@ export default function Film() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Watch on YouTube ↗
+                {t.youtube}
               </a>
             </div>
           </div>
@@ -438,7 +462,7 @@ export default function Film() {
               src={SRC}
               preload="none"
               playsInline
-              aria-label="SPORTTIMES launch film"
+              aria-label={t.videoLabel}
               onClick={() => {
                 toggle();
                 wake();
@@ -460,9 +484,10 @@ export default function Film() {
               data-loading={status === 'loading' ? 'true' : undefined}
               tabIndex={posterVisible ? 0 : -1}
               aria-hidden={!posterVisible}
-              aria-label={`${
-                status === 'ended' ? 'Replay' : 'Play'
-              } the SPORTTIMES launch film, ${spoken(Math.ceil(duration))}`}
+              aria-label={fill(
+                status === 'ended' ? t.poster.replay : t.poster.play,
+                { duration: spoken(Math.ceil(duration), t.duration) }
+              )}
               onClick={() => play(status === 'ended' ? 0 : undefined)}
             >
               <span className="film-poster-img" aria-hidden>
@@ -482,10 +507,10 @@ export default function Film() {
                 </span>
                 <span className="film-lt-copy">
                   <span className="film-lt-title">
-                    {status === 'ended' ? 'Watch again' : 'Watch the film'}
+                    {status === 'ended' ? t.poster.watchAgain : t.poster.watch}
                   </span>
                   <span className="film-lt-meta">
-                    {RUNTIME_LABEL} · Sound on
+                    {fill(t.poster.meta, { runtime: RUNTIME_LABEL })}
                   </span>
                 </span>
               </span>
@@ -498,7 +523,9 @@ export default function Film() {
                   type="button"
                   className="film-ctl"
                   onClick={toggle}
-                  aria-label={status === 'playing' ? 'Pause' : 'Play'}
+                  aria-label={
+                    status === 'playing' ? t.controls.pause : t.controls.play
+                  }
                 >
                   {status === 'playing' ? <MdPause /> : <MdPlayArrow />}
                 </button>
@@ -525,7 +552,7 @@ export default function Film() {
                   className="film-scrub"
                   role="slider"
                   tabIndex={0}
-                  aria-label="Seek"
+                  aria-label={t.controls.seek}
                   aria-valuemin={0}
                   aria-valuemax={Math.floor(duration)}
                   aria-valuenow={0}
@@ -545,7 +572,7 @@ export default function Film() {
                   type="button"
                   className="film-ctl"
                   onClick={toggleMute}
-                  aria-label={muted ? 'Unmute' : 'Mute'}
+                  aria-label={muted ? t.controls.unmute : t.controls.mute}
                   aria-pressed={muted}
                 >
                   {muted ? <MdVolumeOff /> : <MdVolumeUp />}
@@ -556,7 +583,11 @@ export default function Film() {
                     type="button"
                     className="film-ctl"
                     onClick={toggleFullscreen}
-                    aria-label={isFullscreen ? 'Exit full screen' : 'Full screen'}
+                    aria-label={
+                      isFullscreen
+                        ? t.controls.exitFullScreen
+                        : t.controls.fullScreen
+                    }
                   >
                     {isFullscreen ? <MdFullscreenExit /> : <MdFullscreen />}
                   </button>
@@ -568,7 +599,7 @@ export default function Film() {
           {/* CHAPTER RAIL — a match timeline under the frame */}
           <ol
             className="film-rail"
-            aria-label="Film chapters"
+            aria-label={t.chaptersLabel}
             style={{ '--film-cols': RAIL_COLUMNS } as CSSProperties}
           >
             {CHAPTERS.map((c, i) => (
@@ -581,7 +612,10 @@ export default function Film() {
                   className="film-chapter"
                   data-active={started && active === i ? 'true' : undefined}
                   aria-current={started && active === i ? 'step' : undefined}
-                  aria-label={`Play from ${fmt(c.start)}: ${c.title}`}
+                  aria-label={fill(t.playFrom, {
+                    time: fmt(c.start),
+                    title: t.chapters[i],
+                  })}
                   onClick={() => play(c.start)}
                 >
                   <span className="film-chapter-bar" aria-hidden />
@@ -590,7 +624,7 @@ export default function Film() {
                     <span>{fmt(c.start)}</span>
                   </span>
                   <span className="film-chapter-title" aria-hidden>
-                    {c.title}
+                    {t.chapters[i]}
                   </span>
                 </button>
               </li>

@@ -8,6 +8,7 @@ import {
   type FormEvent,
 } from 'react';
 import { trackWaitlistSubmit } from '@/lib/analytics';
+import type { Dictionary } from '@/lib/i18n';
 
 type Source = 'hero' | 'download' | 'footer' | 'sticky' | 'inline';
 type Variant = 'dark' | 'paper';
@@ -24,11 +25,13 @@ type Props = {
   /** Where on the page this form lives — sent as a hidden field so Google
    *  Form responses can be segmented by placement. */
   source: Source;
+  /** The form's text, in the page's language. */
+  t: Dictionary['download']['waitlist'];
   /** Auto-derive from nearest data-palette ancestor by default. Pass to override. */
   variant?: Variant;
-  /** Optional override for the submit button label. */
+  /** Optional override for the submit button label (defaults to t.cta). */
   cta?: string;
-  /** Optional override for the success message. */
+  /** Optional override for the success message (defaults to t.success). */
   successMessage?: string;
   /** Optional className passthrough on the <form> root. */
   className?: string;
@@ -55,9 +58,10 @@ type Props = {
  */
 export default function WaitlistForm({
   source,
+  t,
   variant,
-  cta = 'Join the waitlist',
-  successMessage = "You're on the list. We'll email you when doors open.",
+  cta = t.cta,
+  successMessage = t.success,
   className,
 }: Props) {
   const [email, setEmail] = useState('');
@@ -210,9 +214,9 @@ export default function WaitlistForm({
 
   const errorMessage =
     state === 'invalid'
-      ? "That doesn't look like an email."
+      ? t.invalid
       : state === 'error'
-      ? 'Something went wrong. Try again?'
+      ? t.error
       : null;
 
   return (
@@ -239,14 +243,14 @@ export default function WaitlistForm({
             border: 0,
           }}
         >
-          Your email
+          {t.label}
         </label>
         <input
           id={`waitlist-${source}`}
           type="email"
           required
           autoComplete="email"
-          placeholder="your@email.com"
+          placeholder={t.placeholder}
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
@@ -260,7 +264,7 @@ export default function WaitlistForm({
           }}
         />
         <button type="submit" disabled={state === 'loading'} style={buttonStyle}>
-          {state === 'loading' ? 'Submitting…' : cta}
+          {state === 'loading' ? t.submitting : cta}
         </button>
       </div>
       {errorMessage && (

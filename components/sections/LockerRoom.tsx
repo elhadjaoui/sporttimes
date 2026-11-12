@@ -12,6 +12,8 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
+import type { Dictionary } from '@/lib/i18n';
+import { fill } from '@/lib/i18n/fill';
 
 // The 3D pitch from Hero, repurposed as a backdrop. Loaded client-side only
 // because Three.js doesn't run during SSR.
@@ -21,6 +23,7 @@ const RoadmapPitch = dynamic(() => import('@/components/three/RoadmapPitch'), {
 
 // ===================================================================
 //  Data — 3 features × 4 bullets, then one "Later" line for the rest.
+//  The text lives in lib/i18n/en/roadmap.ts, keyed by feature id.
 //
 //  More sports (coming soon) · Tournaments (planned) · Match chat (planned)
 //  Later: AI Match Builder · AI Captain · SPORTTIMES Store · Venue booking
@@ -31,14 +34,13 @@ const RoadmapPitch = dynamic(() => import('@/components/three/RoadmapPitch'), {
 //  Magnets are connected by a single chalk thread in list order.
 // ===================================================================
 
+type RoadmapText = Dictionary['roadmap'];
+
 type Feature = {
-  id: string;
+  // Joins to the feature's name, status, summary, bullets and status note
+  // in t.features.
+  id: keyof RoadmapText['features'];
   seq: string;
-  name: string;
-  status: string;
-  summary: string;
-  bullets: string[];
-  statusNote: string;
   pos: { x: number; y: number };
 };
 
@@ -47,45 +49,10 @@ type Feature = {
 // connecting curve reads as a wave.
 
 const FEATURES: Feature[] = [
-  {
-    id: 'more-sports', seq: '01', name: 'More sports', status: 'Coming soon',
-    pos: { x: 18, y: 38 },
-    summary: 'The catalog keeps growing with the community.',
-    bullets: [
-      'Football is live today',
-      'Six more sports listed as coming soon',
-      'Basketball, Volleyball, Handball, Padel, Futsal, Rugby',
-      'Same lineup engine, any format',
-    ],
-    statusNote: 'No dates yet.',
-  },
-  {
-    id: 'tournaments', seq: '02', name: 'Tournaments', status: 'Planned',
-    pos: { x: 50, y: 22 },
-    summary: 'Run complete tournament brackets inside your community — no spreadsheets.',
-    bullets: [
-      'Single-elim, double-elim, round-robin',
-      'Auto-seeding from match history',
-      'Live bracket everyone can watch',
-      'Shareable finals poster',
-    ],
-    statusNote: 'No date yet.',
-  },
-  {
-    id: 'match-chat', seq: '03', name: 'Match chat', status: 'Planned',
-    pos: { x: 82, y: 40 },
-    summary: 'A chat thread scoped to one match — goes quiet when the whistle blows.',
-    bullets: [
-      'Auto-opens when a match is set',
-      'Auto-archives after full-time',
-      'Drop-outs + confirmations live inline',
-      'No group-chat bleed into your life',
-    ],
-    statusNote: 'No date yet.',
-  },
+  { id: 'more-sports', seq: '01', pos: { x: 18, y: 38 } },
+  { id: 'tournaments', seq: '02', pos: { x: 50, y: 22 } },
+  { id: 'match-chat', seq: '03', pos: { x: 82, y: 40 } },
 ];
-
-const LATER = ['AI Match Builder', 'AI Captain', 'SPORTTIMES Store', 'Venue booking'];
 
 // Build a SMOOTH curve through the magnets in build order using
 // Catmull-Rom-style cubic Bezier interpolation. Tension 0.5 gives a
@@ -120,12 +87,12 @@ const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v
 //  Section
 // ===================================================================
 
-export default function LockerRoom() {
+export default function LockerRoom({ t }: { t: RoadmapText }) {
   return (
     <section
       id="roadmap-features"
       data-progress-section
-      data-progress-label="Roadmap"
+      data-progress-label={t.progressLabel}
       data-palette="hero"
       className="relative"
       style={{
@@ -147,7 +114,7 @@ export default function LockerRoom() {
             className="mono-eyebrow"
             style={{ marginBottom: 24 }}
           >
-            Roadmap
+            {t.eyebrow}
           </div>
           <h2
             className="headline-display"
@@ -161,13 +128,15 @@ export default function LockerRoom() {
               maxWidth: '22ch',
             }}
           >
-            <span style={{ color: 'var(--lime)' }}>Next</span> on the pitch.
+            {t.headline.before}
+            <span style={{ color: 'var(--lime)' }}>{t.headline.accent}</span>
+            {t.headline.after}
           </h2>
         </div>
       </div>
 
-      <DesktopBoard />
-      <MobileList />
+      <DesktopBoard t={t} />
+      <MobileList t={t} />
 
       <div className="grid-12" data-reveal>
         <p
@@ -184,8 +153,8 @@ export default function LockerRoom() {
             color: 'var(--muted)',
           }}
         >
-          <span style={{ color: 'var(--ink)' }}>Later</span>
-          {LATER.map((name) => (
+          <span style={{ color: 'var(--ink)' }}>{t.laterLabel}</span>
+          {t.later.map((name) => (
             <span key={name}>
               {' · '}
               <span style={{ whiteSpace: 'nowrap' }}>{name}</span>
@@ -202,7 +171,7 @@ export default function LockerRoom() {
 //  thread, slide-in detail panel. Hidden < 768px (mobile uses the list).
 // ===================================================================
 
-function DesktopBoard() {
+function DesktopBoard({ t }: { t: RoadmapText }) {
   const boardRef = useRef<HTMLDivElement>(null);
   const threadRef = useRef<SVGPathElement>(null);
   const positionerRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -432,6 +401,7 @@ function DesktopBoard() {
           >
             <div data-floater style={{ willChange: 'transform' }}>
               <Magnet
+                t={t}
                 feature={f}
                 onHover={() => setHoveredId(f.id)}
                 onUnhover={() => setHoveredId((cur) => (cur === f.id ? null : cur))}
@@ -442,6 +412,7 @@ function DesktopBoard() {
 
         {/* Hover/tap tooltip — positioned next to the hovered magnet */}
         <HoverTooltip
+          t={t}
           feature={hovered ?? null}
           position={hovered ? positions[hovered.id] : null}
           boardSize={boardSize}
@@ -469,19 +440,22 @@ function DesktopBoard() {
 // ===================================================================
 
 function Magnet({
+  t,
   feature,
   onHover,
   onUnhover,
 }: {
+  t: RoadmapText;
   feature: Feature;
   onHover: () => void;
   onUnhover: () => void;
 }) {
+  const text = t.features[feature.id];
   return (
     <div
       role="button"
       tabIndex={0}
-      aria-label={`${feature.name} details`}
+      aria-label={fill(t.magnetLabel, { name: text.name })}
       onPointerEnter={onHover}
       onPointerLeave={onUnhover}
       onFocus={onHover}
@@ -530,7 +504,7 @@ function Magnet({
           color: 'var(--lime)',
         }}
       >
-        {feature.status}
+        {text.status}
       </span>
 
       {/* Feature name */}
@@ -545,7 +519,7 @@ function Magnet({
           color: 'var(--ink)',
         }}
       >
-        {feature.name}
+        {text.name}
       </span>
 
       <style jsx>{`
@@ -574,10 +548,12 @@ function Magnet({
 // ===================================================================
 
 function HoverTooltip({
+  t,
   feature,
   position,
   boardSize,
 }: {
+  t: RoadmapText;
   feature: Feature | null;
   position: { x: number; y: number } | null;
   boardSize: { w: number; h: number };
@@ -585,6 +561,7 @@ function HoverTooltip({
   onClose?: () => void;
 }) {
   if (!feature || !position || boardSize.w === 0) return null;
+  const text = t.features[feature.id];
 
   // Convert viewBox-space position to pixels in the board (100 wide × 60 tall)
   const xPx = (position.x / 100) * boardSize.w;
@@ -628,7 +605,7 @@ function HoverTooltip({
           marginBottom: 8,
         }}
       >
-        {feature.seq} · {feature.status}
+        {fill(t.tooltipMeta, { seq: feature.seq, status: text.status })}
       </div>
       <h3
         className="headline-display"
@@ -641,7 +618,7 @@ function HoverTooltip({
           marginBottom: 10,
         }}
       >
-        {feature.name}
+        {text.name}
       </h3>
       <p
         style={{
@@ -652,7 +629,7 @@ function HoverTooltip({
           marginBottom: 14,
         }}
       >
-        {feature.summary}
+        {text.summary}
       </p>
       <ul
         style={{
@@ -665,7 +642,7 @@ function HoverTooltip({
           marginBottom: 14,
         }}
       >
-        {feature.bullets.map((b) => (
+        {text.bullets.map((b) => (
           <li
             key={b}
             style={{
@@ -704,7 +681,7 @@ function HoverTooltip({
           color: 'rgba(245, 245, 240, 0.55)',
         }}
       >
-        {feature.statusNote}
+        {text.statusNote}
       </div>
     </div>
   );
@@ -715,7 +692,7 @@ function HoverTooltip({
 //  Shown only < 768px. Tap a card → inline expand its bullets.
 // ===================================================================
 
-function MobileList() {
+function MobileList({ t }: { t: RoadmapText }) {
   const [openId, setOpenId] = useState<string | null>(null);
   return (
     <div
@@ -731,6 +708,7 @@ function MobileList() {
         {FEATURES.map((f) => (
           <MobileCard
             key={f.id}
+            t={t}
             feature={f}
             open={openId === f.id}
             onToggle={() => setOpenId(openId === f.id ? null : f.id)}
@@ -748,14 +726,17 @@ function MobileList() {
 }
 
 function MobileCard({
+  t,
   feature,
   open,
   onToggle,
 }: {
+  t: RoadmapText;
   feature: Feature;
   open: boolean;
   onToggle: () => void;
 }) {
+  const text = t.features[feature.id];
   const detailId = `mobile-${feature.id}`;
   const headingId = `mobile-${feature.id}-heading`;
   return (
@@ -795,7 +776,9 @@ function MobileCard({
               color: 'var(--muted)',
             }}
           >
-            {feature.seq} · <span style={{ color: 'var(--lime)' }}>{feature.status}</span>
+            {fill(t.cardMeta.before, { seq: feature.seq })}
+            <span style={{ color: 'var(--lime)' }}>{text.status}</span>
+            {fill(t.cardMeta.after, { seq: feature.seq })}
           </span>
           <span
             aria-hidden
@@ -822,7 +805,7 @@ function MobileCard({
             textTransform: 'none',
           }}
         >
-          {feature.name}
+          {text.name}
         </h3>
         <p
           style={{
@@ -833,7 +816,7 @@ function MobileCard({
             margin: 0,
           }}
         >
-          {feature.summary}
+          {text.summary}
         </p>
       </button>
 
@@ -859,7 +842,7 @@ function MobileCard({
               gap: 8,
             }}
           >
-            {feature.bullets.map((b) => (
+            {text.bullets.map((b) => (
               <li
                 key={b}
                 style={{
@@ -890,7 +873,7 @@ function MobileCard({
               color: 'var(--muted)',
             }}
           >
-            {feature.statusNote}
+            {text.statusNote}
           </div>
         </div>
       </div>

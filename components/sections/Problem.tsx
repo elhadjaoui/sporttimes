@@ -12,6 +12,8 @@ import {
 import Image from 'next/image';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import type { Dictionary } from '@/lib/i18n';
+import { fill } from '@/lib/i18n/fill';
 
 // ===================================================================
 //  Problem — group-chat chaos vs confirmed lineup, controlled by drag.
@@ -35,37 +37,39 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // ===================================================================
 
 type Msg = {
-  sender: string;
+  // null = not in contacts, shown as a phone number (t.chaos.unknownSender)
+  sender: string | null;
   color: string; // sender name accent (WhatsApp-style per-name colors)
-  text: string;
   time: string;
 };
 
 // Chaotic group chat — multiple voices, contradictions, no answer.
+// Message text is t.chaos.messages, joined by index: keep the order the same.
 const MESSAGES: Msg[] = [
-  { sender: 'Karim',   color: '#06CF9C', text: "who's in tonight??",              time: '18:42' },
-  { sender: 'Yassine', color: '#7DD7FA', text: 'thought it was Friday now',       time: '18:44' },
-  { sender: 'Said',    color: '#FFB86C', text: "can't make it sorry 🙏",          time: '18:51' },
-  { sender: '+212 6…', color: '#E48EFF', text: 'cancelled?',                      time: '19:02' },
-  { sender: 'Mehdi',   color: '#FF8E8E', text: '+3?',                             time: '19:08' },
-  { sender: 'Reda',    color: '#06CF9C', text: '🤷',                              time: '19:14' },
-  { sender: 'Hicham',  color: '#FFB86C', text: 'who is captain again',            time: '19:23' },
-  { sender: 'Karim',   color: '#06CF9C', text: 'still need 2 ppl ⚠️',             time: '19:31' },
-  { sender: 'Anas',    color: '#7DD7FA', text: 'east field or south?',            time: '19:42' },
-  { sender: 'Yassine', color: '#7DD7FA', text: 'wait — is it on?',                time: '20:01' },
+  { sender: 'Karim',   color: '#06CF9C', time: '18:42' },
+  { sender: 'Yassine', color: '#7DD7FA', time: '18:44' },
+  { sender: 'Said',    color: '#FFB86C', time: '18:51' },
+  { sender: null,      color: '#E48EFF', time: '19:02' },
+  { sender: 'Mehdi',   color: '#FF8E8E', time: '19:08' },
+  { sender: 'Reda',    color: '#06CF9C', time: '19:14' },
+  { sender: 'Hicham',  color: '#FFB86C', time: '19:23' },
+  { sender: 'Karim',   color: '#06CF9C', time: '19:31' },
+  { sender: 'Anas',    color: '#7DD7FA', time: '19:42' },
+  { sender: 'Yassine', color: '#7DD7FA', time: '20:01' },
 ];
 
-const STATS = [
-  { label: 'Messages',   before: '47 unread', after: '0' },
-  { label: 'Lineup',     before: 'unknown',   after: '11 / 11' },
-  { label: 'Organizers', before: 'exhausted', after: 'hands-free' },
-];
+// Unread count shown in the chaos banner, the avatar badge, the chat
+// header and the Messages stat ({count} in the dictionary).
+const UNREAD_COUNT = 47;
+
+// Stat order; text is t.stats[id].
+const STAT_IDS = ['messages', 'lineup', 'organizers'] as const;
 
 // ===================================================================
 //  Component
 // ===================================================================
 
-export default function Problem() {
+export default function Problem({ t }: { t: Dictionary['problem'] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -245,7 +249,7 @@ export default function Problem() {
       ref={sectionRef}
       id="problem"
       data-progress-section
-      data-progress-label="The Problem"
+      data-progress-label={t.progressLabel}
       data-palette="problem"
       className="relative"
       style={{
@@ -255,15 +259,14 @@ export default function Problem() {
       }}
     >
       <div className="problem-grid">
-        <div className="problem-eyebrow" data-reveal>the problem</div>
+        <div className="problem-eyebrow" data-reveal>{t.eyebrow}</div>
         <h2 className="problem-headline" data-reveal>
-          Matches die in the{' '}
-          <span style={{ color: 'var(--lime)' }}>chat</span>, not on the
-          pitch.
+          {t.headline.before}
+          <span style={{ color: 'var(--lime)' }}>{t.headline.accent}</span>
+          {t.headline.after}
         </h2>
         <p className="problem-sub" data-reveal>
-          Group chats weren&apos;t built for this. Drag to see what should
-          have been there.
+          {t.sub}
         </p>
 
         {/* SLIDER PANEL */}
@@ -286,13 +289,13 @@ export default function Problem() {
             <div className="side-banner side-banner-calm">
               <div className="side-banner-eyebrow">
                 <span className="side-banner-dot side-banner-dot-lime" />
-                the sporttimes way
+                {t.calm.eyebrow}
               </div>
               <div className="side-banner-title">
-                11/11 in seconds.
+                {t.calm.title}
               </div>
               <div className="side-banner-sub">
-                See who&apos;s playing. See the lineup fill. Show up.
+                {t.calm.sub}
               </div>
             </div>
 
@@ -300,28 +303,28 @@ export default function Problem() {
               <div className="calm-info">
                 <div className="calm-info-eyebrow">
                   <span className="calm-info-check" aria-hidden>✓</span>
-                  match confirmed
+                  {t.calm.confirmed}
                 </div>
-                <div className="calm-info-big">11/11</div>
+                <div className="calm-info-big">{t.calm.count}</div>
                 <ul className="calm-info-list">
                   <li>
-                    <span className="calm-info-key">when</span>
-                    <span className="calm-info-val">Sunday · 18:30</span>
+                    <span className="calm-info-key">{t.calm.details.when.label}</span>
+                    <span className="calm-info-val">{t.calm.details.when.value}</span>
                   </li>
                   <li>
-                    <span className="calm-info-key">where</span>
-                    <span className="calm-info-val">East Field</span>
+                    <span className="calm-info-key">{t.calm.details.where.label}</span>
+                    <span className="calm-info-val">{t.calm.details.where.value}</span>
                   </li>
                   <li>
-                    <span className="calm-info-key">format</span>
-                    <span className="calm-info-val">4-3-3 · 11v11</span>
+                    <span className="calm-info-key">{t.calm.details.format.label}</span>
+                    <span className="calm-info-val">{t.calm.details.format.value}</span>
                   </li>
                 </ul>
               </div>
               <div className="calm-phone">
                 <Image
                   src="/screens/problem-lineup.png"
-                  alt="A SPORTTIMES match screen showing the host, kick-off details and a lineup with 19 of 22 players."
+                  alt={t.calm.screenshotAlt}
                   fill
                   sizes="(max-width: 880px) 220px, 360px"
                   quality={80}
@@ -338,26 +341,26 @@ export default function Problem() {
             <div className="side-banner side-banner-chaos">
               <div className="side-banner-eyebrow">
                 <span className="side-banner-dot side-banner-dot-red" />
-                the group chat way
+                {t.chaos.eyebrow}
               </div>
               <div className="side-banner-title">
-                47 messages. No lineup.
+                {fill(t.chaos.title, { count: UNREAD_COUNT })}
               </div>
               <div className="side-banner-sub">
-                Plans live inside threads nobody can actually read.
+                {t.chaos.sub}
               </div>
             </div>
 
             {/* Chat header */}
             <div className="wa-header">
               <div className="wa-header-avatar">
-                UG
-                <span className="wa-header-badge" aria-hidden>47</span>
+                {t.chaos.groupInitials}
+                <span className="wa-header-badge" aria-hidden>{UNREAD_COUNT}</span>
               </div>
               <div className="wa-header-meta">
-                <div className="wa-header-name">United Group</div>
+                <div className="wa-header-name">{t.chaos.groupName}</div>
                 <div className="wa-header-sub wa-header-sub-alert">
-                  47 unread · still no lineup
+                  {fill(t.chaos.groupStatus, { count: UNREAD_COUNT })}
                 </div>
               </div>
               <div className="wa-header-icons">
@@ -369,7 +372,7 @@ export default function Problem() {
             <div className="wa-body">
               {/* Date divider */}
               <div className="wa-divider">
-                <span>TODAY</span>
+                <span>{t.chaos.today}</span>
               </div>
 
               {MESSAGES.map((m, i) => (
@@ -380,9 +383,9 @@ export default function Problem() {
                 >
                   <div className="wa-msg-bubble">
                     <div className="wa-msg-sender" style={{ color: m.color }}>
-                      {m.sender}
+                      {m.sender ?? t.chaos.unknownSender}
                     </div>
-                    <div className="wa-msg-text">{m.text}</div>
+                    <div className="wa-msg-text">{t.chaos.messages[i]}</div>
                     <div className="wa-msg-time">{m.time}</div>
                   </div>
                 </div>
@@ -396,7 +399,7 @@ export default function Problem() {
 
             {/* Composer (visual only) */}
             <div className="wa-composer" aria-hidden>
-              <div className="wa-composer-input">Type a message…</div>
+              <div className="wa-composer-input">{t.chaos.composer}</div>
               <div className="wa-composer-send">→</div>
             </div>
 
@@ -417,7 +420,7 @@ export default function Problem() {
               type="button"
               className="problem-handle"
               role="slider"
-              aria-label="Reveal the calm by dragging the handle"
+              aria-label={t.sliderLabel}
               aria-valuemin={4}
               aria-valuemax={96}
               aria-valuenow={54}
@@ -433,24 +436,27 @@ export default function Problem() {
         </div>
 
         {/* STATS — cross-fade with --x */}
-        <div className="problem-stats" role="group" aria-label="Before vs after at a glance">
-          {STATS.map((s, i) => (
-            <div
-              key={s.label}
-              ref={(el) => { statRefs.current[i] = el; }}
-              className="problem-stat"
-            >
-              <div className="problem-stat-label">{s.label}</div>
-              <div className="problem-stat-values">
-                <span data-state="before" className="problem-stat-before">
-                  {s.before}
-                </span>
-                <span data-state="after" className="problem-stat-after">
-                  {s.after}
-                </span>
+        <div className="problem-stats" role="group" aria-label={t.statsLabel}>
+          {STAT_IDS.map((id, i) => {
+            const s = t.stats[id];
+            return (
+              <div
+                key={id}
+                ref={(el) => { statRefs.current[i] = el; }}
+                className="problem-stat"
+              >
+                <div className="problem-stat-label">{s.label}</div>
+                <div className="problem-stat-values">
+                  <span data-state="before" className="problem-stat-before">
+                    {fill(s.before, { count: UNREAD_COUNT })}
+                  </span>
+                  <span data-state="after" className="problem-stat-after">
+                    {s.after}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

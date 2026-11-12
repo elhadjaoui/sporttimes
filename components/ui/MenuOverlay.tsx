@@ -5,14 +5,19 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CHAPTERS, APP_NAME_DISPLAY } from '@/lib/constants';
 import { getLenis } from '@/hooks/useLenis';
-import { LAUNCH_LABEL } from '@/lib/site';
+import type { Dictionary } from '@/lib/i18n';
+import { fill } from '@/lib/i18n/fill';
 
 export default function MenuOverlay({
   open,
   onClose,
+  t,
+  homePath,
 }: {
   open: boolean;
   onClose: () => void;
+  t: Dictionary['chrome'];
+  homePath: string;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
 
@@ -31,7 +36,7 @@ export default function MenuOverlay({
     onClose();
     // If we're on a route that doesn't have this section, navigate home.
     if (!el) {
-      window.location.href = `/#${anchor}`;
+      window.location.href = `${homePath}#${anchor}`;
       return;
     }
     requestAnimationFrame(() => {
@@ -41,8 +46,11 @@ export default function MenuOverlay({
     });
   };
 
+  const chapterCount = CHAPTERS.length.toString().padStart(2, '0');
   const activeTagline =
-    hovered != null ? CHAPTERS[hovered].tagline : 'Pick a chapter to jump to.';
+    hovered != null
+      ? t.chapters[CHAPTERS[hovered].anchor].tagline
+      : t.defaultTagline;
 
   return (
     <AnimatePresence>
@@ -81,7 +89,7 @@ export default function MenuOverlay({
               </span>
               <span className="hidden md:inline-block w-8 h-px bg-lime/50" />
               <span className="hidden md:inline-block font-mono text-[10px] tracking-[0.25em] uppercase text-ink/50">
-                Navigation · {CHAPTERS.length.toString().padStart(2, '0')} chapters
+                {fill(t.navigation, { count: chapterCount })}
               </span>
             </div>
             <button
@@ -90,7 +98,7 @@ export default function MenuOverlay({
 
               className="group flex items-center gap-3 font-mono text-[11px] tracking-[0.2em] uppercase text-ink/80 hover:text-lime transition-colors"
             >
-              <span>Close</span>
+              <span>{t.close}</span>
               <span className="block h-px w-8 bg-current" />
               <span>✕</span>
             </button>
@@ -134,7 +142,7 @@ export default function MenuOverlay({
                         className="font-display uppercase leading-none tracking-tight text-[clamp(2rem,6.5vw,5rem)] transition-all duration-500 group-hover:translate-x-3 group-hover:text-lime"
                         style={{ letterSpacing: '-0.025em' }}
                       >
-                        {c.name}
+                        {t.chapters[c.anchor].name}
                       </span>
                       <span
                         className="ml-auto font-mono text-xs text-ink/30 transition-all duration-500 group-hover:text-lime group-hover:translate-x-2"
@@ -152,7 +160,7 @@ export default function MenuOverlay({
             <aside className="hidden md:flex md:col-span-4 flex-col justify-between min-h-[360px] pt-2">
               <div>
                 <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-ink/55 mb-3">
-                  Now showing
+                  {t.nowShowing}
                 </div>
                 <motion.p
                   key={hovered ?? 'default'}
@@ -168,8 +176,8 @@ export default function MenuOverlay({
               <div className="space-y-3">
                 <div className="h-px w-full bg-ink/10" />
                 <div className="flex items-baseline justify-between font-mono text-[10px] tracking-[0.2em] uppercase text-ink/55">
-                  <span>Made in Ben Guerir</span>
-                  <span className="text-lime/70">Public launch {LAUNCH_LABEL} · iOS beta open</span>
+                  <span>{t.madeIn}</span>
+                  <span className="text-lime/70">{t.launchStatus}</span>
                 </div>
               </div>
             </aside>
@@ -177,11 +185,11 @@ export default function MenuOverlay({
 
           {/* Footer hint */}
           <div className="absolute z-10 bottom-6 left-6 md:left-10 right-6 md:right-10 flex items-center justify-between font-mono text-[10px] tracking-[0.25em] uppercase text-ink/55">
-            <span>
-              Chapters · 01 — {CHAPTERS.length.toString().padStart(2, '0')}
-            </span>
+            <span>{fill(t.chapterRange, { count: chapterCount })}</span>
             <span className="hidden md:inline">
-              Press <span className="text-lime/80">Esc</span> to close
+              {t.pressEsc.before}
+              <span className="text-lime/80">{t.pressEsc.key}</span>
+              {t.pressEsc.after}
             </span>
           </div>
         </motion.div>

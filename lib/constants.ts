@@ -15,35 +15,12 @@ export const COLORS = {
   navy: '#050A1F',
 } as const;
 
+// Menu chapters; their names and taglines live in the dictionary
+// (lib/i18n/en/chrome.ts), keyed by anchor.
 export const CHAPTERS = [
-  {
-    num: '01',
-    name: 'THE PROBLEM',
-    anchor: 'problem',
-    tagline: 'It’s not the players. It’s the chat.',
-  },
-  {
-    num: '02',
-    name: 'HOW IT WORKS',
-    anchor: 'how-it-works',
-    tagline: 'Open. See. Confirmed.',
-  },
-  {
-    num: '03',
-    name: 'THE SPORTS',
-    anchor: 'sports',
-    tagline: 'One engine, every team sport.',
-  },
-  {
-    num: '04',
-    name: 'ROADMAP',
-    anchor: 'roadmap-features',
-    tagline: 'Next on the pitch.',
-  },
-  {
-    num: '05',
-    name: 'WAITLIST',
-    anchor: 'download',
-    tagline: 'Be first on the pitch.',
-  },
+  { num: '01', anchor: 'problem' },
+  { num: '02', anchor: 'how-it-works' },
+  { num: '03', anchor: 'sports' },
+  { num: '04', anchor: 'roadmap-features' },
+  { num: '05', anchor: 'download' },
 ] as const;
