@@ -13,6 +13,8 @@ const chrome = {
   launchStatus: `Public launch ${LAUNCH_LABEL} · iOS beta open`,
   chapterRange: 'Chapters · 01 — {count}',
   pressEsc: { before: 'Press ', key: 'Esc', after: ' to close' },
+  // The link to the French homepage, written in French.
+  languageSwitch: { short: 'FR', label: 'Version française' },
   // Keyed by section id (CHAPTERS in lib/constants.ts).
   chapters: {
     problem: {

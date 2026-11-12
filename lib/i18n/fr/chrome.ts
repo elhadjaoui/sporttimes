@@ -14,6 +14,8 @@ const chrome: Dictionary['chrome'] = {
   launchStatus: `Lancement public ${LAUNCH_LABEL_FR} · bêta iOS ouverte`,
   chapterRange: 'Chapitres · 01 — {count}',
   pressEsc: { before: 'Appuie sur ', key: 'Échap', after: ' pour fermer' },
+  // The link to the English homepage, written in English.
+  languageSwitch: { short: 'EN', label: 'English version' },
   chapters: {
     problem: {
       name: 'LE PROBLÈME',

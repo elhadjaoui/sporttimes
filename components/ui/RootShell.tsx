@@ -9,6 +9,8 @@ import AmbientLayer from '@/components/ui/AmbientLayer';
 import RevealObserver from '@/components/ui/RevealObserver';
 import { getDictionary, HOME_PATH, type Locale } from '@/lib/i18n';
 
+const OTHER_LOCALE: Record<Locale, Locale> = { en: 'fr', fr: 'en' };
+
 // The <html> and <body> every page shares. A nested layout can't change
 // <html lang>, so each layout renders this itself with its own language.
 export default function RootShell({
@@ -26,7 +28,14 @@ export default function RootShell({
       <body className="bg-bg text-ink antialiased">
         <AmbientLayer />
         <LenisProvider>
-          <Nav t={getDictionary(locale).chrome} homePath={HOME_PATH[locale]} />
+          <Nav
+            t={getDictionary(locale).chrome}
+            homePath={HOME_PATH[locale]}
+            otherHome={{
+              href: HOME_PATH[OTHER_LOCALE[locale]],
+              lang: OTHER_LOCALE[locale],
+            }}
+          />
           <ProgressScrubber />
           {children}
         </LenisProvider>

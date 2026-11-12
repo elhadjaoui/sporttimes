@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { APP_NAME_DISPLAY } from '@/lib/constants';
 import type { Dictionary } from '@/lib/i18n';
 import MenuOverlay from './MenuOverlay';
@@ -10,11 +11,17 @@ import MenuOverlay from './MenuOverlay';
 export default function Nav({
   t,
   homePath,
+  otherHome,
 }: {
   t: Dictionary['chrome'];
   homePath: string;
+  // The homepage in the other language, for the language switch.
+  otherHome: { href: string; lang: string };
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  // Only the homepage exists in both languages, so the switch only shows
+  // there; elsewhere it would lead away from the page being read.
+  const onHome = usePathname() === homePath;
 
   return (
     <>
@@ -39,15 +46,31 @@ export default function Nav({
             </span>
           </Link>
 
-          {/* Menu */}
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            className="tap-target group font-mono text-[11px] tracking-[0.2em] uppercase text-ink/80 hover:text-lime transition-colors"
-          >
-            {t.menu}
-            <span className="absolute left-0 -bottom-1 h-px w-full bg-lime origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
-          </button>
+          <div className="flex items-center gap-6 md:gap-8">
+            {/* Language switch — a full page load, since each language has its own layout */}
+            {onHome && (
+              <a
+                href={otherHome.href}
+                hrefLang={otherHome.lang}
+                lang={otherHome.lang}
+                aria-label={t.languageSwitch.label}
+                className="tap-target group font-mono text-[11px] tracking-[0.2em] uppercase text-ink/80 hover:text-lime transition-colors"
+              >
+                {t.languageSwitch.short}
+                <span className="absolute left-0 -bottom-1 h-px w-full bg-lime origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+              </a>
+            )}
+
+            {/* Menu */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="tap-target group font-mono text-[11px] tracking-[0.2em] uppercase text-ink/80 hover:text-lime transition-colors"
+            >
+              {t.menu}
+              <span className="absolute left-0 -bottom-1 h-px w-full bg-lime origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
+            </button>
+          </div>
         </div>
       </header>
 
