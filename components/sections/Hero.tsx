@@ -30,8 +30,14 @@ function heroAlreadyRead(): boolean {
   const firstMount = !heroMountedBefore;
   heroMountedBefore = true;
   // After an in-app navigation the hero is new on screen, so animate it.
+  // (The page was loaded elsewhere if the load's path isn't this one.)
   const nav = performance.getEntriesByType('navigation')[0];
-  if (!firstMount || !nav || new URL(nav.name).pathname !== '/') return false;
+  if (
+    !firstMount ||
+    !nav ||
+    new URL(nav.name).pathname !== window.location.pathname
+  )
+    return false;
   const fcp = performance.getEntriesByName('first-contentful-paint')[0];
   return !!fcp && performance.now() - fcp.startTime > ENTRANCE_GRACE_MS;
 }

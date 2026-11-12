@@ -13,6 +13,11 @@ export const HOME_TITLE =
 export const HOME_DESCRIPTION =
   "See who's playing before you commit. SPORTTIMES shows live lineups for football matches in your campus, city or club. iOS beta open now.";
 
+// [REVIEW] Draft French copy: the founder reviews it before it ships.
+export const HOME_TITLE_FR = 'SPORTTIMES — Trouve un match de foot près de chez toi';
+export const HOME_DESCRIPTION_FR =
+  'Vois qui joue avant de t’engager. SPORTTIMES affiche les compos en direct des matchs de foot de ton campus, ta ville ou ton club. Bêta iOS ouverte.';
+
 export const HOME_STRUCTURED_DATA = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -39,10 +44,12 @@ export function pageMetadata({
   path,
   title,
   description,
+  image = OG_IMAGE_PATH,
 }: {
   path: string;
   title: string;
   description: string;
+  image?: string;
 }): Metadata {
   return {
     title,
@@ -54,13 +61,13 @@ export function pageMetadata({
       url: path,
       type: 'website',
       siteName: 'SPORTTIMES',
-      images: [OG_IMAGE_PATH],
+      images: [image],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [OG_IMAGE_PATH],
+      images: [image],
     },
   };
 }

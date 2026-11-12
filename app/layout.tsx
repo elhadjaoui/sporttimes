@@ -15,8 +15,9 @@ export const metadata: Metadata = {
 };
 
 // Renders no <html> of its own: each layout below it renders RootShell
-// with its own lang (app/(en)/layout.tsx for the English pages), and so
-// does app/not-found.tsx, which sits outside them.
+// with its own lang (app/(en)/layout.tsx for the English pages,
+// app/fr/layout.tsx for the French homepage), and so does
+// app/not-found.tsx, which sits outside them.
 export default function RootLayout({
   children,
 }: {
