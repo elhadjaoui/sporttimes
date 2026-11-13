@@ -3,9 +3,10 @@ const film = {
   progressLabel: 'The Film',
   eyebrow: 'the launch film',
   // first and accent never wrap; accent is lime. The component renders a
-  // space between middle and accent.
+  // space between middle and accent. 30 seconds is how long it takes to
+  // organise a match in the app, not the film's length.
   headline: {
-    first: 'Ninety-three',
+    first: '30',
     middle: ' seconds to',
     accent: 'kick-off.',
   },

@@ -3,10 +3,10 @@ import type { Dictionary } from '@/lib/i18n';
 const film: Dictionary['film'] = {
   progressLabel: 'Le film',
   eyebrow: 'le film de lancement',
-  // Digits, not "Quatre-vingt-treize": the first part never wraps and the
-  // spelled-out number is too wide for the column.
+  // 30 secondes: the time it takes to organise a match in the app, not
+  // the film's length.
   headline: {
-    first: '93',
+    first: '30',
     middle: ' secondes avant le',
     accent: 'coup d’envoi.',
   },
