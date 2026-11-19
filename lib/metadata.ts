@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { HOME_PATH } from '@/lib/i18n';
+import { HOME_PATH, type Locale } from '@/lib/i18n';
 import {
   CONTACT_EMAIL,
   INSTAGRAM_URL,
@@ -19,25 +19,52 @@ export const HOME_TITLE_FR = 'SPORTTIMES — Trouve un match de foot près de ch
 export const HOME_DESCRIPTION_FR =
   'Vois qui joue avant de t’engager. SPORTTIMES affiche les compos en direct des matchs de foot de ton campus, ta ville ou ton club. Bêta iOS ouverte.';
 
-export const HOME_STRUCTURED_DATA = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Organization',
-      name: 'SPORTTIMES',
-      url: SITE_URL,
-      logo: `${SITE_URL}/screens/logo.png`,
-      email: CONTACT_EMAIL,
-      sameAs: [INSTAGRAM_URL, TIKTOK_URL],
-    },
-    {
-      '@type': 'SoftwareApplication',
-      name: 'SPORTTIMES',
-      applicationCategory: 'SportsApplication',
-      operatingSystem: 'iOS',
-    },
-  ],
+const HOME_DESCRIPTIONS: Record<Locale, string> = {
+  en: HOME_DESCRIPTION,
+  fr: HOME_DESCRIPTION_FR,
 };
+
+const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+
+// Tells search engines what SPORTTIMES is: the site and the ways people
+// spell its name, the company and its profiles, and the iOS app. Both
+// homepages carry it, each with its own description. No prices, ratings
+// or reviews: the app has none to show yet.
+export function homeStructuredData(locale: Locale) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_URL}/#website`,
+        name: 'SPORTTIMES',
+        alternateName: ['SportTimes', 'Sport Times'],
+        url: SITE_URL,
+        inLanguage: ['en', 'fr'],
+        publisher: { '@id': ORGANIZATION_ID },
+      },
+      {
+        '@type': 'Organization',
+        '@id': ORGANIZATION_ID,
+        name: 'SPORTTIMES',
+        url: SITE_URL,
+        logo: `${SITE_URL}/screens/logo.png`,
+        email: CONTACT_EMAIL,
+        sameAs: [INSTAGRAM_URL, TIKTOK_URL],
+      },
+      {
+        '@type': 'MobileApplication',
+        '@id': `${SITE_URL}/#app`,
+        name: 'SPORTTIMES',
+        url: SITE_URL,
+        description: HOME_DESCRIPTIONS[locale],
+        applicationCategory: 'SportsApplication',
+        operatingSystem: 'iOS',
+        publisher: { '@id': ORGANIZATION_ID },
+      },
+    ],
+  };
+}
 
 // The homepage exists in both languages; each version lists both, and
 // English is the default for every other language.

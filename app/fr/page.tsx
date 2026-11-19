@@ -5,6 +5,7 @@ import {
   HOME_DESCRIPTION_FR,
   HOME_LANGUAGES,
   HOME_TITLE_FR,
+  homeStructuredData,
   pageMetadata,
 } from '@/lib/metadata';
 
@@ -16,7 +17,11 @@ export const metadata: Metadata = pageMetadata({
   languages: HOME_LANGUAGES,
 });
 
-// The structured data stays on the English homepage only.
 export default function Page() {
-  return <HomePage dict={getDictionary('fr')} />;
+  return (
+    <HomePage
+      dict={getDictionary('fr')}
+      structuredData={homeStructuredData('fr')}
+    />
+  );
 }

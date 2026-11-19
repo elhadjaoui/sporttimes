@@ -4,8 +4,8 @@ import { getDictionary } from '@/lib/i18n';
 import {
   HOME_DESCRIPTION,
   HOME_LANGUAGES,
-  HOME_STRUCTURED_DATA,
   HOME_TITLE,
+  homeStructuredData,
   pageMetadata,
 } from '@/lib/metadata';
 
@@ -20,7 +20,7 @@ export default function Page() {
   return (
     <HomePage
       dict={getDictionary('en')}
-      structuredData={HOME_STRUCTURED_DATA}
+      structuredData={homeStructuredData('en')}
     />
   );
 }
