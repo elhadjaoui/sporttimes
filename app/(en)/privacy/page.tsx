@@ -7,7 +7,7 @@ export const metadata: Metadata = pageMetadata({
   path: '/privacy',
   title: 'Privacy Policy — SPORTTIMES',
   description:
-    'How SPORTTIMES handles your data — communities, matches, and lineups.',
+    'How SPORTTIMES collects, uses and protects your data — communities, matches, and lineups.',
 });
 
 export default function PrivacyPage() {
