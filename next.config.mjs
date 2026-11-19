@@ -7,6 +7,17 @@ const nextConfig = {
   },
   async headers() {
     return [
+      // Background textures never change in place: a new version gets a
+      // new file name, so browsers can keep them for a year.
+      {
+        source: '/textures/:file*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         source: '/apple-app-site-association',
         headers: [
