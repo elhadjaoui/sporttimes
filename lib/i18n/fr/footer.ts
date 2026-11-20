@@ -23,6 +23,7 @@ const footer: Dictionary['footer'] = {
   copyright: '© {year} SPORTTIMES',
   // Both pages exist in English only.
   links: {
+    blog: 'Blog',
     privacy: 'Confidentialité',
     terms: 'Conditions',
   },

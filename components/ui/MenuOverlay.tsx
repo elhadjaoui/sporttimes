@@ -13,11 +13,13 @@ export default function MenuOverlay({
   onClose,
   t,
   homePath,
+  blogPath,
 }: {
   open: boolean;
   onClose: () => void;
   t: Dictionary['chrome'];
   homePath: string;
+  blogPath?: string;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
 
@@ -46,11 +48,28 @@ export default function MenuOverlay({
     });
   };
 
-  const chapterCount = CHAPTERS.length.toString().padStart(2, '0');
+  // The blog, when it has articles, follows the chapters as one more item.
+  const itemCount = CHAPTERS.length + (blogPath ? 1 : 0);
+  const chapterCount = itemCount.toString().padStart(2, '0');
+  const items: {
+    num: string;
+    name: string;
+    onClick?: () => void;
+    href?: string;
+  }[] = [
+    ...CHAPTERS.map((c) => ({
+      num: c.num,
+      name: t.chapters[c.anchor].name,
+      onClick: () => handleJump(c.anchor),
+    })),
+    ...(blogPath ? [{ num: chapterCount, name: t.blog.name, href: blogPath }] : []),
+  ];
   const activeTagline =
-    hovered != null
-      ? t.chapters[CHAPTERS[hovered].anchor].tagline
-      : t.defaultTagline;
+    hovered == null
+      ? t.defaultTagline
+      : hovered < CHAPTERS.length
+        ? t.chapters[CHAPTERS[hovered].anchor].tagline
+        : t.blog.tagline;
 
   return (
     <AnimatePresence>
@@ -110,12 +129,37 @@ export default function MenuOverlay({
               className="col-span-12 md:col-span-8"
               onMouseLeave={() => setHovered(null)}
             >
-              {CHAPTERS.map((c, i) => {
+              {items.map((item, i) => {
                 const isHovered = hovered === i;
                 const isAnyHovered = hovered != null;
+                const row = {
+                  onMouseEnter: () => setHovered(i),
+                  className:
+                    'group flex items-baseline gap-6 md:gap-12 w-full text-left py-4 md:py-5 transition-opacity duration-300',
+                  style: { opacity: isAnyHovered && !isHovered ? 0.32 : 1 },
+                };
+                const content = (
+                  <>
+                    <span className="font-mono text-[11px] md:text-xs text-lime min-w-[3ch] transition-all duration-500 group-hover:-translate-x-1">
+                      {item.num}
+                    </span>
+                    <span
+                      className="font-display uppercase leading-none tracking-tight text-[clamp(2rem,6.5vw,5rem)] transition-all duration-500 group-hover:translate-x-3 group-hover:text-lime"
+                      style={{ letterSpacing: '-0.025em' }}
+                    >
+                      {item.name}
+                    </span>
+                    <span
+                      className="ml-auto font-mono text-xs text-ink/30 transition-all duration-500 group-hover:text-lime group-hover:translate-x-2"
+                      aria-hidden
+                    >
+                      →
+                    </span>
+                  </>
+                );
                 return (
                   <motion.li
-                    key={c.num}
+                    key={item.num}
                     initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{
@@ -125,32 +169,15 @@ export default function MenuOverlay({
                     }}
                     className="border-b border-ink/8"
                   >
-                    <button
-                      type="button"
-                      onClick={() => handleJump(c.anchor)}
-                      onMouseEnter={() => setHovered(i)}
-
-                      className="group flex items-baseline gap-6 md:gap-12 w-full text-left py-4 md:py-5 transition-opacity duration-300"
-                      style={{
-                        opacity: isAnyHovered && !isHovered ? 0.32 : 1,
-                      }}
-                    >
-                      <span className="font-mono text-[11px] md:text-xs text-lime min-w-[3ch] transition-all duration-500 group-hover:-translate-x-1">
-                        {c.num}
-                      </span>
-                      <span
-                        className="font-display uppercase leading-none tracking-tight text-[clamp(2rem,6.5vw,5rem)] transition-all duration-500 group-hover:translate-x-3 group-hover:text-lime"
-                        style={{ letterSpacing: '-0.025em' }}
-                      >
-                        {t.chapters[c.anchor].name}
-                      </span>
-                      <span
-                        className="ml-auto font-mono text-xs text-ink/30 transition-all duration-500 group-hover:text-lime group-hover:translate-x-2"
-                        aria-hidden
-                      >
-                        →
-                      </span>
-                    </button>
+                    {item.href ? (
+                      <a href={item.href} {...row}>
+                        {content}
+                      </a>
+                    ) : (
+                      <button type="button" onClick={item.onClick} {...row}>
+                        {content}
+                      </button>
+                    )}
                   </motion.li>
                 );
               })}

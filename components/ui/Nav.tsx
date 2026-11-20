@@ -16,10 +16,13 @@ const MENU_PRELOAD_MS = 1500;
 export default function Nav({
   t,
   homePath,
+  blogPath,
   otherHome,
 }: {
   t: Dictionary['chrome'];
   homePath: string;
+  // Set once the blog has articles in this language.
+  blogPath?: string;
   // The homepage in the other language, for the language switch.
   otherHome: { href: string; lang: string };
 }) {
@@ -105,6 +108,7 @@ export default function Nav({
           onClose={() => setMenuOpen(false)}
           t={t}
           homePath={homePath}
+          blogPath={blogPath}
         />
       )}
     </>

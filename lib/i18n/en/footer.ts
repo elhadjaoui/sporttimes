@@ -26,6 +26,8 @@ const footer = {
   joinBeta: 'Join the beta ↗',
   copyright: '© {year} SPORTTIMES',
   links: {
+    // Shown once the blog has articles.
+    blog: 'Blog',
     privacy: 'Privacy',
     terms: 'Terms',
   },

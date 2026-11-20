@@ -49,9 +49,11 @@ function SectionFallback({ minH }: { minH: string }) {
 export default function HomePage({
   dict,
   structuredData,
+  blogPath,
 }: {
   dict: Dictionary;
   structuredData?: object;
+  blogPath?: string;
 }) {
   return (
     <main className="relative">
@@ -71,7 +73,7 @@ export default function HomePage({
       <LockerRoom t={dict.roadmap} />
       <FAQ t={dict.faq} />
       <Download t={dict.download} />
-      <Footer t={dict.footer} />
+      <Footer t={dict.footer} blogPath={blogPath} />
     </main>
   );
 }

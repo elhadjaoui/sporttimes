@@ -124,7 +124,14 @@ function SocialIcon({ name }: { name: 'Instagram' | 'TikTok' | 'YouTube' }) {
 //  Footer
 // ===================================================================
 
-export default function Footer({ t }: { t: Dictionary['footer'] }) {
+export default function Footer({
+  t,
+  blogPath,
+}: {
+  t: Dictionary['footer'];
+  // Set once the blog has articles in this language.
+  blogPath?: string;
+}) {
   const year = useCurrentYear();
   const rootRef = useRef<HTMLElement>(null);
   const playMoreRef = useRef<HTMLDivElement>(null);
@@ -472,6 +479,7 @@ export default function Footer({ t }: { t: Dictionary['footer'] }) {
             }}
           >
             {[
+              ...(blogPath ? [{ label: t.links.blog, href: blogPath }] : []),
               { label: t.links.privacy, href: '/privacy' },
               { label: t.links.terms, href: '/terms' },
             ].map((l) => (

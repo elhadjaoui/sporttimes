@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import HomePage from '@/components/HomePage';
+import { blogHome } from '@/lib/blog';
 import { getDictionary } from '@/lib/i18n';
 import {
   HOME_DESCRIPTION,
@@ -21,6 +22,7 @@ export default function Page() {
     <HomePage
       dict={getDictionary('en')}
       structuredData={homeStructuredData('en')}
+      blogPath={blogHome('en')}
     />
   );
 }

@@ -15,6 +15,8 @@ const chrome: Dictionary['chrome'] = {
   pressEsc: { before: 'Appuie sur ', key: 'Échap', after: ' pour fermer' },
   // The link to the English homepage, written in English.
   languageSwitch: { short: 'EN', label: 'English version' },
+  // [REVIEW] New: shows once the French blog has articles.
+  blog: { name: 'BLOG', tagline: 'Des guides pour joueurs et organisateurs.' },
   chapters: {
     problem: {
       name: 'LE PROBLÈME',

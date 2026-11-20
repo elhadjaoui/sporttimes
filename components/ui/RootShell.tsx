@@ -7,6 +7,7 @@ import Nav from '@/components/ui/Nav';
 import ProgressScrubber from '@/components/ui/ProgressScrubber';
 import AmbientLayer from '@/components/ui/AmbientLayer';
 import RevealObserver from '@/components/ui/RevealObserver';
+import { blogHome } from '@/lib/blog';
 import { getDictionary, HOME_PATH, type Locale } from '@/lib/i18n';
 
 const OTHER_LOCALE: Record<Locale, Locale> = { en: 'fr', fr: 'en' };
@@ -31,6 +32,7 @@ export default function RootShell({
           <Nav
             t={getDictionary(locale).chrome}
             homePath={HOME_PATH[locale]}
+            blogPath={blogHome(locale)}
             otherHome={{
               href: HOME_PATH[OTHER_LOCALE[locale]],
               lang: OTHER_LOCALE[locale],

@@ -15,6 +15,8 @@ const chrome = {
   pressEsc: { before: 'Press ', key: 'Esc', after: ' to close' },
   // The link to the French homepage, written in French.
   languageSwitch: { short: 'FR', label: 'Version française' },
+  // The menu item after the chapters, shown once the blog has articles.
+  blog: { name: 'BLOG', tagline: 'Guides for players and organisers.' },
   // Keyed by section id (CHAPTERS in lib/constants.ts).
   chapters: {
     problem: {
