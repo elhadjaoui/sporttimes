@@ -1,4 +1,10 @@
 import type { Metadata } from 'next';
+import {
+  type Article,
+  articleImagePath,
+  articlePath,
+  BLOG_PATH,
+} from '@/lib/blog';
 import { HOME_PATH, type Locale } from '@/lib/i18n';
 import {
   CONTACT_EMAIL,
@@ -25,6 +31,15 @@ const HOME_DESCRIPTIONS: Record<Locale, string> = {
 };
 
 const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+const ORGANIZATION = {
+  '@type': 'Organization',
+  '@id': ORGANIZATION_ID,
+  name: 'SPORTTIMES',
+  url: SITE_URL,
+  logo: `${SITE_URL}/screens/logo.png`,
+  email: CONTACT_EMAIL,
+  sameAs: [INSTAGRAM_URL, TIKTOK_URL],
+};
 
 // Tells search engines what SPORTTIMES is: the site and the ways people
 // spell its name, the company and its profiles, and the iOS app. Both
@@ -43,15 +58,7 @@ export function homeStructuredData(locale: Locale) {
         inLanguage: ['en', 'fr'],
         publisher: { '@id': ORGANIZATION_ID },
       },
-      {
-        '@type': 'Organization',
-        '@id': ORGANIZATION_ID,
-        name: 'SPORTTIMES',
-        url: SITE_URL,
-        logo: `${SITE_URL}/screens/logo.png`,
-        email: CONTACT_EMAIL,
-        sameAs: [INSTAGRAM_URL, TIKTOK_URL],
-      },
+      ORGANIZATION,
       {
         '@type': 'MobileApplication',
         '@id': `${SITE_URL}/#app`,
@@ -62,6 +69,45 @@ export function homeStructuredData(locale: Locale) {
         operatingSystem: 'iOS',
         publisher: { '@id': ORGANIZATION_ID },
       },
+    ],
+  };
+}
+
+// An article and where it sits: Home › Blog › the article. The company
+// is both author and publisher.
+export function articleStructuredData(article: Article, breadcrumbHome: string) {
+  const url = `${SITE_URL}${articlePath(article.locale, article.slug)}`;
+  const home = `${SITE_URL}${article.locale === 'en' ? '' : HOME_PATH[article.locale]}`;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: article.heading,
+        description: article.description,
+        inLanguage: article.locale,
+        datePublished: article.published,
+        dateModified: article.updated,
+        url,
+        mainEntityOfPage: url,
+        image: `${SITE_URL}${articleImagePath(article.locale, article.slug)}`,
+        author: { '@id': ORGANIZATION_ID },
+        publisher: { '@id': ORGANIZATION_ID },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: breadcrumbHome, item: home },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Blog',
+            item: `${SITE_URL}${BLOG_PATH[article.locale]}`,
+          },
+          { '@type': 'ListItem', position: 3, name: article.heading, item: url },
+        ],
+      },
+      ORGANIZATION,
     ],
   };
 }
@@ -82,24 +128,42 @@ export function pageMetadata({
   description,
   image = OG_IMAGE_PATH,
   languages,
+  feed,
+  article,
 }: {
   path: string;
   title: string;
   description: string;
   image?: string;
   languages?: Record<string, string>;
+  // An RSS feed for this page's content.
+  feed?: { title: string; url: string };
+  // Publish and update dates (YYYY-MM-DD) for an article page.
+  article?: { published: string; updated: string };
 }): Metadata {
   return {
     title,
     description,
-    alternates: { canonical: path, languages },
+    alternates: {
+      canonical: path,
+      languages,
+      types: feed && {
+        'application/rss+xml': [{ title: feed.title, url: feed.url }],
+      },
+    },
     openGraph: {
       title,
       description,
       url: path,
-      type: 'website',
       siteName: 'SPORTTIMES',
       images: [image],
+      ...(article
+        ? {
+            type: 'article',
+            publishedTime: article.published,
+            modifiedTime: article.updated,
+          }
+        : { type: 'website' }),
     },
     twitter: {
       card: 'summary_large_image',

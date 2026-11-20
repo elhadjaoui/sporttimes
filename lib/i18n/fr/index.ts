@@ -1,4 +1,5 @@
 import type { Dictionary } from '@/lib/i18n';
+import blog from './blog';
 import chrome from './chrome';
 import download from './download';
 import faq from './faq';
@@ -21,6 +22,7 @@ const fr: Dictionary = {
   faq,
   download,
   footer,
+  blog,
 };
 
 export default fr;

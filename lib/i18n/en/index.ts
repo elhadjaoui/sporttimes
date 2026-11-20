@@ -1,3 +1,4 @@
+import blog from './blog';
 import chrome from './chrome';
 import download from './download';
 import faq from './faq';
@@ -20,6 +21,7 @@ const en = {
   faq,
   download,
   footer,
+  blog,
 } as const;
 
 export default en;

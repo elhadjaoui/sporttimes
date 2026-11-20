@@ -5,8 +5,12 @@ import { ImageResponse } from 'next/og';
 export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 };
 
 // The 1200x630 link preview: wordmark, a two-line tagline (the second in
-// lime) and the lineup screenshot.
-export async function shareImage(tagline: readonly [string, string]) {
+// lime) and the lineup screenshot. Longer taglines, like article headings,
+// take a smaller font size and a text width that leaves the screenshot room.
+export async function shareImage(
+  tagline: readonly [string, string],
+  { fontSize = 76, textWidth }: { fontSize?: number; textWidth?: number } = {}
+) {
   const screenshot = await readFile(
     join(process.cwd(), 'public/screens/howitworks-lineup.png')
   );
@@ -32,6 +36,7 @@ export async function shareImage(tagline: readonly [string, string]) {
             flexDirection: 'column',
             justifyContent: 'center',
             height: '100%',
+            ...(textWidth && { width: textWidth }),
           }}
         >
           <div style={{ fontSize: 26, letterSpacing: 8, color: '#D4FF3A' }}>
@@ -42,7 +47,7 @@ export async function shareImage(tagline: readonly [string, string]) {
               display: 'flex',
               flexDirection: 'column',
               marginTop: 28,
-              fontSize: 76,
+              fontSize,
               lineHeight: 1.08,
               letterSpacing: -2,
             }}
