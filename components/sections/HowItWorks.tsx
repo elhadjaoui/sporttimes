@@ -596,6 +596,9 @@ export default function HowItWorks({ t }: { t: HowItWorksText }) {
           height: 100vh;
           width: 100%;
           overflow: visible;
+          /* The aurora still bleeds up and down into the bridges, but not
+             past the sides, where it would widen the page. */
+          overflow-x: clip;
           color: #F5F5F0;
           isolation: isolate;
         }
