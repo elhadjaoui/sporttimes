@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { APP_NAME_DISPLAY } from '@/lib/constants';
 import type { Dictionary } from '@/lib/i18n';
-import MenuOverlay from './MenuOverlay';
+
+// The overlay and its animation library stay out of the first load: they
+// load once the page has settled, or as soon as someone reaches for Menu.
+const MenuOverlay = dynamic(() => import('./MenuOverlay'), { ssr: false });
+const MENU_PRELOAD_MS = 1500;
 
 export default function Nav({
   t,
@@ -19,6 +24,21 @@ export default function Nav({
   otherHome: { href: string; lang: string };
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuLoaded, setMenuLoaded] = useState(false);
+  const loadMenu = () => setMenuLoaded(true);
+
+  useEffect(() => {
+    let timer: number | undefined;
+    const preload = () => {
+      timer = window.setTimeout(() => setMenuLoaded(true), MENU_PRELOAD_MS);
+    };
+    if (document.readyState === 'complete') preload();
+    else window.addEventListener('load', preload, { once: true });
+    return () => {
+      window.removeEventListener('load', preload);
+      window.clearTimeout(timer);
+    };
+  }, []);
   // Only the homepage exists in both languages, so the switch only shows
   // there; elsewhere it would lead away from the page being read.
   const onHome = usePathname() === homePath;
@@ -64,7 +84,12 @@ export default function Nav({
             {/* Menu */}
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
+              onPointerEnter={loadMenu}
+              onFocus={loadMenu}
+              onClick={() => {
+                loadMenu();
+                setMenuOpen(true);
+              }}
               className="tap-target group font-mono text-[11px] tracking-[0.2em] uppercase text-ink/80 hover:text-lime transition-colors"
             >
               {t.menu}
@@ -74,12 +99,14 @@ export default function Nav({
         </div>
       </header>
 
-      <MenuOverlay
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        t={t}
-        homePath={homePath}
-      />
+      {menuLoaded && (
+        <MenuOverlay
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          t={t}
+          homePath={homePath}
+        />
+      )}
     </>
   );
 }

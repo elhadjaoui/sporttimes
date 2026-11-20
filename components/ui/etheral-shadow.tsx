@@ -7,18 +7,13 @@ import React, {
   useState,
   type CSSProperties,
 } from 'react';
-import {
-  animate,
-  useMotionValue,
-  type AnimationPlaybackControls,
-} from 'framer-motion';
 
 // ===================================================================
 //  Etheral Shadow — drifting masked blob with animated displacement.
 //
 //  An organic shape (via mask-image) is distorted in real time by an
 //  SVG filter chain (turbulence → hue rotate → matrix → displacement).
-//  The hue-rotate value is animated by framer-motion. The result reads
+//  The hue-rotate value loops from 0 to 360. The result reads
 //  as a slow-morphing watercolor-style stain.
 //
 //  Use this as a section background — wrap it in an absolutely-positioned
@@ -88,8 +83,6 @@ export function Component({
   const [near, setNear] = useState(false);
   const animationEnabled = animation && animation.scale > 0;
   const feColorMatrixRef = useRef<SVGFEColorMatrixElement>(null);
-  const hueRotateMotionValue = useMotionValue(180);
-  const hueRotateAnimation = useRef<AnimationPlaybackControls | null>(null);
 
   const displacementScale = animation
     ? mapRange(animation.scale, 1, 100, 20, 100)
@@ -117,30 +110,29 @@ export function Component({
   useEffect(() => {
     const root = rootRef.current;
     if (near && feColorMatrixRef.current && animationEnabled && root) {
-      if (hueRotateAnimation.current) {
-        hueRotateAnimation.current.stop();
-      }
-      hueRotateMotionValue.set(0);
-      let lastHue: number | undefined;
-      const controls = animate(hueRotateMotionValue, 360, {
-        duration: animationDuration / 25,
-        repeat: Infinity,
-        repeatType: 'loop',
-        repeatDelay: 0,
-        ease: 'linear',
-        delay: 0,
-        // A paused animation still calls this every frame, and rewriting
-        // even the same value makes the browser re-render the filter.
-        onUpdate: (value: number) => {
-          if (value === lastHue) return;
-          lastHue = value;
-          if (feColorMatrixRef.current) {
-            feColorMatrixRef.current.setAttribute('values', String(value));
-          }
+      // A linear 0 to 360 loop that pauses and resumes where it stopped.
+      const periodMs = (animationDuration / 25) * 1000;
+      let elapsed = 0;
+      let last = 0;
+      let frame = 0;
+      const tick = (now: number) => {
+        elapsed += now - last;
+        last = now;
+        const hue = ((elapsed % periodMs) / periodMs) * 360;
+        feColorMatrixRef.current?.setAttribute('values', String(hue));
+        frame = requestAnimationFrame(tick);
+      };
+      const controls = {
+        play() {
+          if (frame) return;
+          last = performance.now();
+          frame = requestAnimationFrame(tick);
         },
-      });
-      hueRotateAnimation.current = controls;
-      controls.pause();
+        pause() {
+          cancelAnimationFrame(frame);
+          frame = 0;
+        },
+      };
 
       // Every hue change re-renders the whole filter chain, so only animate
       // while the section is on screen and the page is at rest.
@@ -173,10 +165,10 @@ export function Component({
         observer.disconnect();
         window.removeEventListener('scroll', onScroll);
         window.clearTimeout(resumeTimer);
-        controls.stop();
+        controls.pause();
       };
     }
-  }, [near, animationEnabled, animationDuration, hueRotateMotionValue]);
+  }, [near, animationEnabled, animationDuration]);
 
   return (
     <div
