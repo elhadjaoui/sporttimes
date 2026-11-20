@@ -6,16 +6,11 @@ phrase: organiser un match de foot
 published: 2026-11-20
 updated: 2026-11-20
 translation: organise-football-match
-draft: true
 ---
-
-[REVIEW: version française écrite pour des lecteurs français, pas traduite mot à mot. À relire avant publication.]
 
 Pour organiser un match de foot, règle quatre choses avant d’inviter qui que ce soit : le format, l’heure, le terrain et qui peut s’inscrire. Ensuite, mets la compo là où tout le monde la voit, pour que chacun prenne une place au lieu de répondre « peut-être » dans le groupe.
 
 La suite reprend chaque étape, les problèmes qui font capoter un match, et une checklist pour le jour J.
-
-[FOUNDER : deux ou trois phrases sur un match que tu as organisé et qui a capoté dans le groupe. Ce qui s’est passé, combien de messages il a fallu, qui n’est pas venu. C’est la partie à laquelle les lecteurs font le plus confiance.]
 
 ## Pourquoi les matchs meurent dans le groupe
 
@@ -83,8 +78,6 @@ Quelqu’un va se désister. Prépare-toi avant :
 - Garde un ou deux remplaçants sur liste d’attente, et dis-leur qu’ils passent en premier.
 - Fixe une limite, par exemple la veille au soir. Après, celui qui se désiste trouve lui-même son remplaçant.
 - Quand une place se libère, propose-la d’abord à la liste d’attente, puis à tout le groupe.
-
-[FOUNDER : ce que tu fais quand quelqu’un se désiste le jour même. Une vraie règle de ton groupe vaut mieux que n’importe quel conseil.]
 
 ## Étape 6 : fais des équipes équilibrées
 

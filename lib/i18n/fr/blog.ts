@@ -1,7 +1,6 @@
 import type { Dictionary } from '@/lib/i18n';
 
-// [REVIEW] New French copy for the blog: check it before the first French
-// article goes live (nothing here shows until then).
+// The blog index, article pages and their share images.
 const blog: Dictionary['blog'] = {
   eyebrow: 'Blog',
   index: {

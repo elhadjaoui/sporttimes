@@ -6,14 +6,11 @@ phrase: organise a football match
 published: 2026-11-20
 updated: 2026-11-20
 translation: organiser-match-de-foot
-draft: true
 ---
 
 To organise a football match, fix four things before you invite anyone: the format, the time, the pitch and who can join. Then put the lineup where everyone can see it, so players claim a spot instead of replying "maybe" in a group chat.
 
 The rest of this guide goes through each step, the problems that usually kill a match, and a short checklist for match day.
-
-[FOUNDER: two or three sentences about a match you organised that fell apart in the group chat. What happened, how many messages it took, who didn't show. Readers trust this part most.]
 
 ## Why matches fall apart in the group chat
 
@@ -81,8 +78,6 @@ Someone will drop out. Plan for it before it happens:
 - Keep one or two substitutes on a waiting list, and tell them they're first in line.
 - Set a cut-off, such as the evening before. After it, anyone who drops out finds their own replacement.
 - When a spot opens, offer it to the waiting list first, then to the whole group.
-
-[FOUNDER: what you do when someone drops out on the day. A real rule from your own group reads better than any advice.]
 
 ## Step 6: Pick fair teams
 
